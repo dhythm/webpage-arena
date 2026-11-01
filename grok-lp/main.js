@@ -1,7 +1,7 @@
 (function () {
   var root = document.documentElement;
-  if (root.dataset.ready === "1") return;
-  root.dataset.ready = "1";
+  if (root.dataset.kanroReady === "1") return;
+  root.dataset.kanroReady = "1";
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   if (!("IntersectionObserver" in window)) return;
   var nodes = document.querySelectorAll("[data-rise]");

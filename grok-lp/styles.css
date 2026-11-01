@@ -9,6 +9,7 @@
   --soot: #241c17;
   --cream: #f6f0e6;
   --seal: #6e261c;
+  --header-h: 72px;
   --display: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif CJK JP", "MS PMincho", serif;
   --text: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", "Yu Gothic", "YuGothic", "Meiryo", sans-serif;
 }
@@ -21,6 +22,7 @@
 
 html {
   background: var(--paper);
+  scroll-padding-top: var(--header-h);
 }
 
 body {
@@ -141,7 +143,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 72px;
+  min-height: var(--header-h);
 }
 
 .brand {
@@ -464,9 +466,9 @@ figcaption {
   display: none;
 }
 
-.faqs summary h3,
-.sample summary h3 {
-  margin: 0;
+.faqs summary,
+.sample summary {
+  font-family: var(--display);
   font-size: 1.12rem;
 }
 
@@ -557,10 +559,6 @@ address {
 
 .footer-bar a {
   color: var(--ink);
-}
-
-[id] {
-  scroll-margin-top: 84px;
 }
 
 @media (min-width: 700px) {
