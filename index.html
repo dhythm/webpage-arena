@@ -3,61 +3,108 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Fictional worlds — Webpage Arena design studies</title>
+    <title>webpage-arena</title>
     <style>
       body {
         margin: 0;
-        background: #ece9df;
-        color: #222;
-        font-family: system-ui, sans-serif;
-        padding: 8vw;
+        padding: clamp(24px, 6vw, 72px) clamp(16px, 6vw, 72px);
+        background: #f4f3ef;
+        color: #1d1d1b;
+        font-family: system-ui, "Hiragino Sans", "Noto Sans JP", sans-serif;
+        line-height: 1.6;
       }
       h1 {
-        font-size: clamp(40px, 7vw, 96px);
-        font-weight: 400;
-        letter-spacing: -0.06em;
-        line-height: 1.1;
-        max-width: 900px;
+        margin: 0 0 32px;
+        font-size: 20px;
+        font-weight: 700;
+      }
+      table {
+        width: 100%;
+        max-width: 960px;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 14px 16px 14px 0;
+        border-bottom: 1px solid #d6d4cc;
+        text-align: left;
+        vertical-align: top;
+      }
+      thead th {
+        font-size: 13px;
+        font-weight: 500;
+        color: #6b6a63;
+        border-bottom: 1px solid #1d1d1b;
+      }
+      tbody th {
+        width: 7em;
+        font-weight: 700;
       }
       a {
-        display: block;
         color: inherit;
-        text-decoration: none;
-        padding: 32px 0;
-        border-top: 1px solid #888;
-        font-size: 24px;
+        text-underline-offset: 4px;
       }
-      a span {
-        float: right;
-      }
-      p {
-        max-width: 620px;
-        line-height: 1.9;
+      a:hover {
+        color: #173cda;
       }
       a:focus-visible {
-        outline: 3px solid #173cda;
-        outline-offset: 6px;
+        outline: 2px solid #173cda;
+        outline-offset: 3px;
+      }
+      small {
+        display: block;
+        color: #6b6a63;
+        font-size: 12px;
+      }
+      @media (max-width: 560px) {
+        tbody th {
+          width: auto;
+        }
       }
     </style>
   </head>
   <body>
-    <p>FICTIONAL WORLDS / DESIGN STUDIES 01—12</p>
-    <h1>ふたつの世界。<br />細部まで、つくる。</h1>
-    <p>
-      架空の商品と企業のための、日本語ウェブデザイン。写真、言葉、動き、それぞれのブランドにふさわしい体験を。
-    </p>
-    <a href="gpt-nagi/">01　NAGI — 音と余白のある暮らし<span>↗</span></a>
-    <a href="gpt-umi/">02　UMI — 海の可能性を、社会の次へ<span>↗</span></a>
-    <a href="grok-lp/">03　閑炉 — 火を、机の端に。<span>↗</span></a>
-    <a href="grok-corporate/">04　潮罫社 — 港の深さは、紙の上で決まる。<span>↗</span></a>
-    <a href="gemini-lp/">05　雨聲 AMENE — 空気が湿ると、雨の日の匂いがする。<span>↗</span></a>
-    <a href="gemini-corporate/">06　森羅木工構造 — 100年後の森を、都市に組む。<span>↗</span></a>
-    <a href="devin-meguru/">07　MEGURU — 覗くと、夜が咲く。<span>↗</span></a>
-    <a href="devin-tsumugiya/">08　つむぎや — たて糸は規律。よこ糸は、実験。<span>↗</span></a>
-    <a href="claude-lp/">09　TOKI — 朝は、三十分かけてやってくる。<span>↗</span></a>
-    <a href="claude-corporate/">10　KAISŌ Materials — 海から、建てる。<span>↗</span></a>
-    <a href="muse-halo-lp/">11　HALO — 指先から、からだの声を聞く。<span>↗</span></a>
-    <a href="muse-arcline-hp/">12　Arcline — 中堅・中小企業のクラウド移行とDX支援<span>↗</span></a>
-    <p>ローカルデモです。実在する商品・企業ではありません。</p>
+    <h1>webpage-arena</h1>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">モデル</th>
+          <th scope="col">LP（商品）</th>
+          <th scope="col">HP（企業）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">GPT</th>
+          <td><a href="gpt-nagi/">NAGI</a><small>gpt-nagi</small></td>
+          <td><a href="gpt-umi/">UMI</a><small>gpt-umi</small></td>
+        </tr>
+        <tr>
+          <th scope="row">Grok</th>
+          <td><a href="grok-lp/">閑炉</a><small>grok-lp</small></td>
+          <td><a href="grok-corporate/">潮罫社</a><small>grok-corporate</small></td>
+        </tr>
+        <tr>
+          <th scope="row">Gemini</th>
+          <td><a href="gemini-lp/">雨聲 AMENE</a><small>gemini-lp</small></td>
+          <td><a href="gemini-corporate/">森羅木工構造</a><small>gemini-corporate</small></td>
+        </tr>
+        <tr>
+          <th scope="row">Devin</th>
+          <td><a href="devin-meguru/">MEGURU</a><small>devin-meguru</small></td>
+          <td><a href="devin-tsumugiya/">つむぎや織物</a><small>devin-tsumugiya</small></td>
+        </tr>
+        <tr>
+          <th scope="row">Claude</th>
+          <td><a href="claude-lp/">TOKI</a><small>claude-lp</small></td>
+          <td><a href="claude-corporate/">KAISŌ Materials</a><small>claude-corporate</small></td>
+        </tr>
+        <tr>
+          <th scope="row">Muse</th>
+          <td><a href="muse-halo-lp/">HALO</a><small>muse-halo-lp</small></td>
+          <td><a href="muse-arcline-hp/">Arcline</a><small>muse-arcline-hp</small></td>
+        </tr>
+      </tbody>
+    </table>
   </body>
 </html>
