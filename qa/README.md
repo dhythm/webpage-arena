@@ -26,7 +26,7 @@ The browser selects 768px photographs at these DPR 1 sizes. DPR 2 desktop uses t
 
 ## Screenshots
 
-Review screenshots are in [screenshots/](screenshots/) as quality-90 WebP. Original PNG captures remain local and are gitignored. The full-page, desktop/mobile hero, project detail, and local form completion captures are linked from the repository README.
+QA screenshots are generated locally in `qa/screenshots/` as PNG, with optional quality-90 WebP copies. The entire screenshot directory is gitignored; screenshots are not included in the final tracked tree or embedded in the PR. The local captures cover full pages, desktop/mobile heroes, project detail, and local form completion. Actual website images remain separately tracked under each site's `assets/` directory.
 
 ## Reproduce
 

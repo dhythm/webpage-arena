@@ -40,21 +40,7 @@ npm run test:a11y
 
 `npm test` は320 / 390 / 768 / 1024 / 1440 / 1920pxのレイアウト、390 / 1440pxのDPR 2画像選択、主要操作、キーボード、reduced-motion、外部通信の不在を検査します。`npm run test:a11y` はaxe-coreのWCAG 2 A/AA・2.1 A/AA・2.2 AAルールを、両サイトのページとフォームダイアログ、390 / 1440pxで検査します。自動監査は完全なWCAG準拠を保証するものではありません。
 
-実行証跡: [ブラウザ検証結果](qa/report.json) / [アクセシビリティ監査](qa/accessibility.json)。画面キャプチャのPNGはローカル検証用としてgitignoreし、レビュー用にはWebPを保存しています。WebP変換の再現には `cwebp`（macOS: `brew install webp`）を入れ、`npm run screenshots:webp` を実行します。
-
-## プレビュー画像
-
-### NAGI
-
-![NAGI desktop](qa/screenshots/gpt-nagi-desktop-hero.webp)
-
-[ページ全体](qa/screenshots/gpt-nagi-desktop.webp) / [モバイル](qa/screenshots/gpt-nagi-mobile.webp) / [予約デモ](qa/screenshots/nagi-reservation-demo.webp)
-
-### UMI
-
-![UMI desktop](qa/screenshots/gpt-umi-desktop-hero.webp)
-
-[ページ全体](qa/screenshots/gpt-umi-desktop.webp) / [モバイル](qa/screenshots/gpt-umi-mobile.webp) / [プロジェクト詳細](qa/screenshots/umi-project-detail.webp) / [相談デモ](qa/screenshots/umi-contact-demo.webp)
+実行証跡: [ブラウザ検証結果](qa/report.json) / [アクセシビリティ監査](qa/accessibility.json)。QAスクリーンショットはローカルの `qa/screenshots/` に生成し、PNG・WebPともGit管理の対象外です。WebP変換の再現には `cwebp`（macOS: `brew install webp`）を入れ、`npm run screenshots:webp` を実行します。実サイトが使用する画像は各作品の `assets/` に保存しています。
 
 ## 実装について
 
