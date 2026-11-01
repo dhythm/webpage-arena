@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-01T07:04:14.955Z",
+  "generatedAt": "2026-11-01T07:34:18.405Z",
   "browser": "153.0.8010.12",
   "checks": [
     {
@@ -112,6 +112,70 @@
     },
     {
       "name": "gpt-umi reduced motion and focus indicator",
+      "passed": true
+    },
+    {
+      "name": "grok-lp 320px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-lp 390px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-lp 768px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-lp 1024px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-lp 1440px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-lp 1920px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-lp reduced motion",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate 320px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate 390px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate 768px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate 1024px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate 1440px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate 1920px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate reduced motion",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate mobile nav closes over the heading",
+      "passed": true
+    },
+    {
+      "name": "grok-corporate menu works without JavaScript",
       "passed": true
     },
     {
@@ -467,6 +531,552 @@
         "source": "http://127.0.0.1:4173/gpt-umi/assets/kelp-hero.webp",
         "loaded": true
       }
+    },
+    {
+      "site": "grok-lp",
+      "width": 320,
+      "scrollWidth": 320,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "scene-evening-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "scene-guest-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "scene-rain-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "box-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 279,
+          "source": "product-kurosabi-640.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 279,
+          "source": "product-shirasuzu-640.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-lp",
+      "width": 390,
+      "scrollWidth": 390,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "scene-evening-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "scene-guest-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "scene-rain-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "box-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "product-kurosabi-640.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "product-shirasuzu-640.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-lp",
+      "width": 768,
+      "scrollWidth": 768,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "scene-evening-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "scene-guest-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "scene-rain-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "box-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "product-kurosabi.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "product-shirasuzu.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-lp",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 520,
+          "source": "hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-evening-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-guest-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-rain-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "box-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 420,
+          "source": "product-kurosabi-640.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 420,
+          "source": "product-shirasuzu-640.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-lp",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 520,
+          "source": "hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-evening-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-guest-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-rain-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "box-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 420,
+          "source": "product-kurosabi-640.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 420,
+          "source": "product-shirasuzu-640.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-lp",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 520,
+          "source": "hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-evening-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-guest-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 320,
+          "source": "scene-rain-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "box-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 420,
+          "source": "product-kurosabi-640.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 420,
+          "source": "product-shirasuzu-640.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-corporate",
+      "width": 320,
+      "scrollWidth": 320,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "hero-800.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "work-boat-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "work-chart-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "work-tide-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "work-meeting-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 280,
+          "source": "office-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 279,
+          "source": "person-survey-576.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 279,
+          "source": "person-edit-576.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-corporate",
+      "width": 390,
+      "scrollWidth": 390,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 349,
+          "source": "hero-800.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "work-boat-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "work-chart-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "work-tide-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "work-meeting-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "office-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "person-survey-576.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 350,
+          "source": "person-edit-576.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-corporate",
+      "width": 768,
+      "scrollWidth": 768,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "hero-800.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "work-boat-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "work-chart-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "work-tide-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "work-meeting-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 728,
+          "source": "office-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 727,
+          "source": "person-survey.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 727,
+          "source": "person-edit.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-corporate",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 540,
+          "source": "hero-800.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-boat-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-chart-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-tide-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-meeting-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 560,
+          "source": "office-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 380,
+          "source": "person-survey-576.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 380,
+          "source": "person-edit-576.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-corporate",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 540,
+          "source": "hero-800.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-boat-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-chart-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-tide-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-meeting-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 560,
+          "source": "office-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 380,
+          "source": "person-survey-576.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 380,
+          "source": "person-edit-576.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "grok-corporate",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "images": [
+        {
+          "loaded": true,
+          "naturalWidth": 540,
+          "source": "hero-800.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-boat-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-chart-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-tide-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 460,
+          "source": "work-meeting-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 560,
+          "source": "office-768.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 380,
+          "source": "person-survey-576.webp"
+        },
+        {
+          "loaded": true,
+          "naturalWidth": 380,
+          "source": "person-edit-576.webp"
+        }
+      ],
+      "badAnchors": []
     }
   ],
   "pageWeights": [
@@ -546,12 +1156,12 @@
           "bytes": 35799
         },
         {
-          "file": "kelp-hero-768.webp",
-          "bytes": 93584
-        },
-        {
           "file": "app.js",
           "bytes": 9883
+        },
+        {
+          "file": "kelp-hero-768.webp",
+          "bytes": 93584
         },
         {
           "file": "space.woff2",
@@ -577,12 +1187,12 @@
           "bytes": 35799
         },
         {
-          "file": "kelp-hero-768.webp",
-          "bytes": 93584
-        },
-        {
           "file": "app.js",
           "bytes": 9883
+        },
+        {
+          "file": "kelp-hero-768.webp",
+          "bytes": 93584
         },
         {
           "file": "space.woff2",
