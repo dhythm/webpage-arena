@@ -9,6 +9,7 @@
   --sea: #163e5c;
   --footer: #102033;
   --cream: #f4f1ea;
+  --header-h: 68px;
   --display: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", "Yu Gothic", "YuGothic", "Meiryo", sans-serif;
   --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
 }
@@ -21,6 +22,7 @@
 
 html {
   background: var(--paper);
+  scroll-padding-top: var(--header-h);
 }
 
 body {
@@ -135,7 +137,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 8px 16px;
-  min-height: 68px;
+  min-height: var(--header-h);
 }
 
 .brand {
@@ -185,18 +187,33 @@ a {
   border: 1px solid var(--ink);
   background: transparent;
   color: var(--ink);
+  font: inherit;
   cursor: pointer;
+}
+
+.nav-js {
+  display: none;
+}
+
+.nav-ready .nav-fallback {
+  display: none;
+}
+
+.nav-ready .nav-js {
+  display: inline-flex;
 }
 
 .when-open {
   display: none;
 }
 
-.nav-toggle:checked + .nav-button .when-closed {
+.nav-toggle:checked + .nav-fallback .when-closed,
+.nav-toggle:checked ~ .nav-js .when-closed {
   display: none;
 }
 
-.nav-toggle:checked + .nav-button .when-open {
+.nav-toggle:checked + .nav-fallback .when-open,
+.nav-toggle:checked ~ .nav-js .when-open {
   display: inline;
 }
 
@@ -352,13 +369,6 @@ figcaption,
   order: -1;
 }
 
-.work-num {
-  margin: 0 0 6px;
-  font-family: var(--mono);
-  color: var(--sea);
-  letter-spacing: 0.08em;
-}
-
 .chart-figure svg {
   width: 100%;
   border: 1px solid var(--ink);
@@ -503,10 +513,6 @@ address {
   margin: 0;
 }
 
-[id] {
-  scroll-margin-top: 80px;
-}
-
 @media (min-width: 700px) {
   .wrap {
     padding-inline: 32px;
@@ -558,7 +564,9 @@ address {
 
 @media (min-width: 880px) {
   .nav-toggle,
-  .nav-button {
+  .nav-button,
+  .nav-ready .nav-js,
+  .nav-ready .nav-fallback {
     display: none;
   }
 

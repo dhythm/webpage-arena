@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>潮罫社 — 凪浦の海図と測量</title>
-  <meta name="description" content="架空の会社、潮罫社。凪浦湾の水深を測り、海図にします。">
+  <meta name="description" content="潮罫社。凪浦湾の水深を測り、海図にします。">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <script>
@@ -24,10 +24,14 @@
         <span>潮罫社</span>
       </a>
       <input class="nav-toggle" id="nav-toggle" type="checkbox">
-      <label class="nav-button" for="nav-toggle">
+      <label class="nav-button nav-fallback" for="nav-toggle">
         <span class="when-closed">メニューを開く</span>
         <span class="when-open">メニューを閉じる</span>
       </label>
+      <button type="button" class="nav-button nav-js" aria-expanded="false" aria-controls="site-nav">
+        <span class="when-closed">メニューを開く</span>
+        <span class="when-open">メニューを閉じる</span>
+      </button>
       <nav class="site-nav" id="site-nav" aria-label="主要">
         <ul>
           <li><a href="#work">事業</a></li>
@@ -35,7 +39,7 @@
           <li><a href="#company">会社</a></li>
           <li><a href="#news">お知らせ</a></li>
           <li><a href="#jobs">採用</a></li>
-          <li><a href="#contact">連絡</a></li>
+          <li><a href="#contact">連絡先</a></li>
         </ul>
       </nav>
     </div>
@@ -76,17 +80,17 @@
           <div>
             <dt>測量船</dt>
             <dd class="num">3隻</dd>
-            <dd>白磯、二白磯、片葉。船名は架空です。</dd>
+            <dd>白磯、二白磯、片葉。</dd>
           </div>
           <div>
             <dt>刊行中</dt>
             <dd class="num">18図</dd>
-            <dd>目録には主な4図を載せます。数は架空です。</dd>
+            <dd>目録には主な4図を載せます。</dd>
           </div>
           <div>
             <dt>社員</dt>
             <dd class="num">46人</dd>
-            <dd>2026年4月1日の架空の集計です。</dd>
+            <dd>2026年4月1日の集計です。</dd>
           </div>
         </dl>
       </div>
@@ -100,7 +104,6 @@
         <div class="work-list">
           <article class="work-item" data-rise>
             <div>
-              <p class="work-num">01</p>
               <h3>沿岸の測量</h3>
               <p>凪浦港の岸壁から、鳥渡岬の外側までを、日中に測ります。使うのは測量船「白磯」と「二白磯」、それに小舟「片葉」です。深さは錘と、音の跳ね返りを併用し、同じ線を往復して数字を合わせます。</p>
             </div>
@@ -118,7 +121,6 @@
           </article>
           <article class="work-item" data-rise>
             <div>
-              <p class="work-num">02</p>
               <h3>海図の編集と刊行</h3>
               <p>測った数字を、図番「潮-」の海図にします。岸の線、港の名前、水深、航路の目安を一枚に収めます。刊行は紙です。画面用のデータの販売はしていません。</p>
             </div>
@@ -136,9 +138,8 @@
           </article>
           <article class="work-item" data-rise>
             <div>
-              <p class="work-num">03</p>
               <h3>潮汐の記録</h3>
-              <p>凪浦港の検潮所で、朝と夕方に潮位を読み、社内の台帳へ残します。年に一度、冊子にして、港を使う船主の集まりへ一部を置きます。届け先も冊子も架空の設定です。</p>
+              <p>凪浦港の検潮所で、朝と夕方に潮位を読み、社内の台帳へ残します。年に一度、冊子にして、港を使う船主の集まりへ一部を置きます。</p>
             </div>
             <figure>
               <img
@@ -154,7 +155,6 @@
           </article>
           <article class="work-item" data-rise>
             <div>
-              <p class="work-num">04</p>
               <h3>図面の読み合わせ</h3>
               <p>港の工事の前に、頼んだ人、船主、当社の三者が同じ海図を見ます。浅い場所、杭の位置、船が回る範囲を、その場で指さして確認します。メモは当社が取り、翌週までに郵送します。</p>
             </div>
@@ -178,11 +178,11 @@
       <div class="wrap">
         <p class="index">02</p>
         <h2 id="charts-title">刊行中の海図</h2>
-        <p class="section-lead">下の図は潮-27、凪浦湾です。岸の名前も水深も架空で、航海には使えません。実在の海図の複製ではありません。</p>
+        <p class="section-lead">下の図は潮-27、凪浦湾です。航海には使えません。実在の海図の複製ではありません。</p>
         <figure class="chart-figure" id="chart-figure">
           <svg viewBox="0 0 920 640" role="img" aria-labelledby="chart-title chart-desc">
-            <title id="chart-title">架空海図 潮-27 凪浦湾</title>
-            <desc id="chart-desc">凪浦港、鳥渡岬、片葉島を描いた架空の水深図です。水深の数字は架空で、単位はメートルです。</desc>
+            <title id="chart-title">潮-27 凪浦湾</title>
+            <desc id="chart-desc">凪浦港、鳥渡岬、片葉島を描いた水深図です。水深の単位はメートルです。</desc>
             <rect width="920" height="640" fill="#d5e2ea"></rect>
             <g stroke="#8aa4b5" stroke-width="0.6">
               <path d="M0 80H920M0 160H920M0 240H920M0 320H920M0 400H920M0 480H920M0 560H920M80 0V640M160 0V640M240 0V640M320 0V640M400 0V640M480 0V640M560 0V640M640 0V640M720 0V640M800 0V640"></path>
@@ -199,7 +199,7 @@
               <text x="430" y="300">11</text>
               <text x="620" y="280">9</text>
               <text x="700" y="360">14</text>
-              <text x="760" y="470">16</text>
+              <text x="820" y="410">16</text>
               <text x="560" y="540">20</text>
               <text x="180" y="470">8</text>
             </g>
@@ -224,10 +224,10 @@
               <text x="16" y="36" fill="#142033" font-size="22" font-family="ui-monospace, Menlo, Consolas, monospace">潮-27</text>
               <text x="16" y="64" fill="#142033" font-size="16" font-family="Yu Gothic, YuGothic, sans-serif">凪浦湾</text>
               <text x="16" y="90" fill="#142033" font-size="13" font-family="Yu Gothic, YuGothic, sans-serif">縮尺 1:25,000</text>
-              <text x="16" y="112" fill="#142033" font-size="13" font-family="Yu Gothic, YuGothic, sans-serif">2026年改版・架空</text>
+              <text x="16" y="112" fill="#142033" font-size="13" font-family="Yu Gothic, YuGothic, sans-serif">2026年改版</text>
             </g>
           </svg>
-          <figcaption>潮-27 凪浦湾。水深の単位はメートルです。数字は架空です。</figcaption>
+          <figcaption>潮-27 凪浦湾。水深の単位はメートルです。</figcaption>
         </figure>
         <ul class="catalog">
           <li>
@@ -251,7 +251,7 @@
             <p>縮尺 1:8,000。2024年6月改版。</p>
           </li>
         </ul>
-        <p class="note">縮尺、水深、改版日はすべて架空です。この目録の4図以外に、社内では14図を刊行中という設定です。</p>
+        <p class="note">この目録の4図以外に、社内では14図を刊行中です。</p>
       </div>
     </section>
 
@@ -279,7 +279,7 @@
             </div>
             <div>
               <dt>所在地</dt>
-              <dd>凪浦市港町一丁目12番地（架空の住所）</dd>
+              <dd>凪浦市港町一丁目12番地</dd>
             </div>
             <div>
               <dt>設立</dt>
@@ -295,13 +295,13 @@
             </div>
             <div>
               <dt>資本金</dt>
-              <dd>2,000万円（架空）</dd>
+              <dd>2,000万円</dd>
             </div>
           </dl>
         </div>
 
         <div class="people" id="people">
-          <p class="people-lead">図面を扱う二人です。どちらも架空の社員です。</p>
+          <p class="people-lead">図面を扱う二人です。</p>
           <div class="people-grid">
             <article data-rise>
               <img
@@ -310,11 +310,11 @@
                 sizes="(max-width: 799px) calc(100vw - 40px), 380px"
                 width="864"
                 height="1152"
-                alt="架空の社員、磯部茜。無地の紺の上着で、港の船の上に立っている"
+                alt="磯部茜。無地の紺の上着で、港の船の上に立っている"
                 loading="lazy"
                 decoding="async">
               <h3>磯部 茜</h3>
-              <p>沿岸測量。白磯の甲板で、測深の縄を持つ係です。この人物は架空です。</p>
+              <p>沿岸測量。白磯の甲板で、測深の縄を持つ係です。</p>
             </article>
             <article data-rise>
               <img
@@ -323,11 +323,11 @@
                 sizes="(max-width: 799px) calc(100vw - 40px), 380px"
                 width="864"
                 height="1152"
-                alt="架空の社員、塩見汀。眼鏡をかけ、文字のない図面を見ている"
+                alt="塩見汀。眼鏡をかけ、文字のない図面を見ている"
                 loading="lazy"
                 decoding="async">
               <h3>塩見 汀</h3>
-              <p>海図編集。測深の数字を、図の上の位置へ落とす係です。この人物は架空です。</p>
+              <p>海図編集。測深の数字を、図の上の位置へ落とす係です。</p>
             </article>
           </div>
         </div>
@@ -345,7 +345,7 @@
           </li>
           <li>
             <time datetime="1986">1986年</time>
-            <p>測量船「白磯」が進水しました。船は架空です。</p>
+            <p>測量船「白磯」が進水しました。</p>
           </li>
           <li>
             <time datetime="2003">2003年</time>
@@ -374,7 +374,7 @@
           </li>
           <li>
             <time datetime="2026-07-02">2026年7月2日</time>
-            <p>夏季測量の説明を、凪浦港の倉庫で行いました。参加者は船主12人でした。人数は架空です。</p>
+            <p>夏季測量の説明を、凪浦港の倉庫で行いました。参加者は船主12人でした。</p>
           </li>
           <li>
             <time datetime="2026-04-18">2026年4月18日</time>
@@ -392,7 +392,7 @@
       <div class="wrap">
         <p class="index">06</p>
         <h2 id="jobs-title">採用</h2>
-        <p class="section-lead">2027年春の採用です。応募は郵送だけです。提示する金額は架空です。</p>
+        <p class="section-lead">2027年春の採用です。応募は郵送だけです。</p>
         <div class="jobs">
           <article>
             <h3>沿岸測量スタッフ</h3>
@@ -407,7 +407,7 @@
               </div>
               <div>
                 <dt>提示額</dt>
-                <dd>月給268,000円（架空）。賞与は年2回という設定です。</dd>
+                <dd>月給268,000円。賞与は年2回です。</dd>
               </div>
               <div>
                 <dt>休日</dt>
@@ -428,7 +428,7 @@
               </div>
               <div>
                 <dt>提示額</dt>
-                <dd>月給252,000円（架空）。賞与は年2回という設定です。</dd>
+                <dd>月給252,000円。賞与は年2回です。</dd>
               </div>
               <div>
                 <dt>休日</dt>
@@ -451,14 +451,14 @@
           電話 0000-00-0000<br>
           平日 9時から17時
         </address>
-        <p>測量で部屋を空ける日は、扉に戻り時間を掲示します。住所も電話番号も架空です。手紙は届かず、電話はつながりません。</p>
+        <p>測量で部屋を空ける日は、扉に戻り時間を掲示します。手紙は届かず、電話はつながりません。</p>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="wrap footer-bar">
-      <p>潮罫社（架空）。社名、地名、人物、船、数値、連絡先は実在しません。</p>
+      <p>潮罫社は架空の会社です。社名、地名、人物、船、海図、数値、価格、連絡先は実在しません。</p>
       <a href="#top">ページの先頭へ</a>
     </div>
   </footer>
