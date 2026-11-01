@@ -1,0 +1,599 @@
+{
+  "generatedAt": "2026-11-01T07:04:14.955Z",
+  "browser": "153.0.8010.12",
+  "checks": [
+    {
+      "name": "gpt-nagi 320px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi 390px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi mobile menu and anchor navigation",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi 768px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi 1024px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi 1440px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi 1920px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi 320px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi 390px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi mobile menu and anchor navigation",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi 768px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi 1024px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi 1440px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi 1920px layout/assets/anchors",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi 390px retina WebP selection",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi 1440px retina WebP selection",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi 390px retina WebP selection",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi 1440px retina WebP selection",
+      "passed": true
+    },
+    {
+      "name": "NAGI color selection updates accessible state and image",
+      "passed": true
+    },
+    {
+      "name": "NAGI WebAudio play, scene, volume, pause",
+      "passed": true
+    },
+    {
+      "name": "NAGI native FAQ keyboard expansion",
+      "passed": true
+    },
+    {
+      "name": "NAGI dialog focus trap, validation, demo completion and Escape",
+      "passed": true
+    },
+    {
+      "name": "UMI motion pause and resume",
+      "passed": true
+    },
+    {
+      "name": "UMI all project filters and reset",
+      "passed": true
+    },
+    {
+      "name": "UMI project detail, journal and keyboard return focus",
+      "passed": true
+    },
+    {
+      "name": "UMI contact form validation, focus trap, demo completion",
+      "passed": true
+    },
+    {
+      "name": "gpt-nagi reduced motion and focus indicator",
+      "passed": true
+    },
+    {
+      "name": "gpt-umi reduced motion and focus indicator",
+      "passed": true
+    },
+    {
+      "name": "No runtime errors, failed responses, external or submitted requests",
+      "passed": true
+    }
+  ],
+  "layouts": [
+    {
+      "site": "gpt-nagi",
+      "width": 320,
+      "scrollWidth": 320,
+      "fonts": [
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Zen",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-nagi",
+      "width": 390,
+      "scrollWidth": 390,
+      "fonts": [
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Zen",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-nagi",
+      "width": 768,
+      "scrollWidth": 768,
+      "fonts": [
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Zen",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-nagi",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "fonts": [
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Zen",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-nagi",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "fonts": [
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Zen",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "nagi-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-nagi",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "fonts": [
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Zen",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "nagi-hero.webp"
+        },
+        {
+          "loaded": true,
+          "source": "nagi-hero.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-umi",
+      "width": 320,
+      "scrollWidth": 320,
+      "fonts": [
+        {
+          "family": "Space",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-umi",
+      "width": 390,
+      "scrollWidth": 390,
+      "fonts": [
+        {
+          "family": "Space",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-umi",
+      "width": 768,
+      "scrollWidth": 768,
+      "fonts": [
+        {
+          "family": "Space",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-umi",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "fonts": [
+        {
+          "family": "Space",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-umi",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "fonts": [
+        {
+          "family": "Space",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        },
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-umi",
+      "width": 1920,
+      "scrollWidth": 1920,
+      "fonts": [
+        {
+          "family": "Space",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto",
+          "status": "loaded"
+        }
+      ],
+      "images": [
+        {
+          "loaded": true,
+          "source": "kelp-hero.webp"
+        },
+        {
+          "loaded": true,
+          "source": "kelp-hero-768.webp"
+        }
+      ],
+      "badAnchors": []
+    },
+    {
+      "site": "gpt-nagi",
+      "width": 390,
+      "deviceScaleFactor": 2,
+      "image": {
+        "source": "http://127.0.0.1:4173/gpt-nagi/assets/nagi-hero-768.webp",
+        "loaded": true
+      }
+    },
+    {
+      "site": "gpt-nagi",
+      "width": 1440,
+      "deviceScaleFactor": 2,
+      "image": {
+        "source": "http://127.0.0.1:4173/gpt-nagi/assets/nagi-hero.webp",
+        "loaded": true
+      }
+    },
+    {
+      "site": "gpt-umi",
+      "width": 390,
+      "deviceScaleFactor": 2,
+      "image": {
+        "source": "http://127.0.0.1:4173/gpt-umi/assets/kelp-hero-768.webp",
+        "loaded": true
+      }
+    },
+    {
+      "site": "gpt-umi",
+      "width": 1440,
+      "deviceScaleFactor": 2,
+      "image": {
+        "source": "http://127.0.0.1:4173/gpt-umi/assets/kelp-hero.webp",
+        "loaded": true
+      }
+    }
+  ],
+  "pageWeights": [
+    {
+      "site": "gpt-nagi",
+      "width": 390,
+      "documentBytes": 14588,
+      "resourceBytes": 179414,
+      "totalBytes": 194002,
+      "deviceScaleFactor": 1,
+      "external": [],
+      "resources": [
+        {
+          "file": "style.css",
+          "bytes": 23740
+        },
+        {
+          "file": "nagi-hero-768.webp",
+          "bytes": 55172
+        },
+        {
+          "file": "app.js",
+          "bytes": 7250
+        },
+        {
+          "file": "manrope.woff2",
+          "bytes": 17348
+        },
+        {
+          "file": "zen.woff2",
+          "bytes": 75904
+        }
+      ]
+    },
+    {
+      "site": "gpt-nagi",
+      "width": 1440,
+      "documentBytes": 14588,
+      "resourceBytes": 179414,
+      "totalBytes": 194002,
+      "deviceScaleFactor": 1,
+      "external": [],
+      "resources": [
+        {
+          "file": "style.css",
+          "bytes": 23740
+        },
+        {
+          "file": "nagi-hero-768.webp",
+          "bytes": 55172
+        },
+        {
+          "file": "app.js",
+          "bytes": 7250
+        },
+        {
+          "file": "manrope.woff2",
+          "bytes": 17348
+        },
+        {
+          "file": "zen.woff2",
+          "bytes": 75904
+        }
+      ]
+    },
+    {
+      "site": "gpt-umi",
+      "width": 390,
+      "documentBytes": 19328,
+      "resourceBytes": 316174,
+      "totalBytes": 335502,
+      "deviceScaleFactor": 1,
+      "external": [],
+      "resources": [
+        {
+          "file": "style.css",
+          "bytes": 35799
+        },
+        {
+          "file": "kelp-hero-768.webp",
+          "bytes": 93584
+        },
+        {
+          "file": "app.js",
+          "bytes": 9883
+        },
+        {
+          "file": "space.woff2",
+          "bytes": 15460
+        },
+        {
+          "file": "noto.woff2",
+          "bytes": 161448
+        }
+      ]
+    },
+    {
+      "site": "gpt-umi",
+      "width": 1440,
+      "documentBytes": 19328,
+      "resourceBytes": 316174,
+      "totalBytes": 335502,
+      "deviceScaleFactor": 1,
+      "external": [],
+      "resources": [
+        {
+          "file": "style.css",
+          "bytes": 35799
+        },
+        {
+          "file": "kelp-hero-768.webp",
+          "bytes": 93584
+        },
+        {
+          "file": "app.js",
+          "bytes": 9883
+        },
+        {
+          "file": "space.woff2",
+          "bytes": 15460
+        },
+        {
+          "file": "noto.woff2",
+          "bytes": 161448
+        }
+      ]
+    }
+  ],
+  "passed": true
+}

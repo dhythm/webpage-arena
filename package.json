@@ -1,0 +1,21 @@
+{
+  "name": "webpage-arena-gpt-studies",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/preview.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/preview.mjs --dist",
+    "test": "node scripts/verify.mjs",
+    "test:a11y": "node scripts/accessibility.mjs",
+    "screenshots:webp": "node scripts/optimize-screenshots.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "axe-core": "4.11.0",
+    "playwright": "1.63.0"
+  }
+}
