@@ -1,7 +1,7 @@
 import { cp, mkdir, rm, readFile, stat } from "node:fs/promises";
 import { resolve, join } from "node:path";
 const root = resolve(import.meta.dirname, "..");
-const sites = ["gpt-nagi", "gpt-umi"];
+const sites = ["gpt-nagi", "gpt-umi", "grok-lp", "grok-corporate"];
 await rm(join(root, "dist"), { recursive: true, force: true });
 await mkdir(join(root, "dist"), { recursive: true });
 for (const site of sites) {
