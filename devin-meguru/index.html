@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEGURU（めぐる）— 真鍮と硝子の万華鏡｜光座工房</title>
+<meta name="description" content="三枚の鏡と、オイルに浮かぶ欠片。覗くたびに景色が生まれる万華鏡 MEGURU のページ（架空の商品デモ）。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/antique.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/garamond.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+
+<header class="head">
+  <a class="brand" href="#top" aria-label="MEGURU トップへ">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M16 1.5v29M1.5 16h29M5.7 5.7l20.6 20.6M26.3 5.7L5.7 26.3" stroke="currentColor" stroke-width="0.8" opacity="0.55"/>
+      <circle cx="16" cy="16" r="4.2" fill="none" stroke="currentColor" stroke-width="1.1"/>
+    </svg>
+    <span class="brand-word">MEGURU<small>光座工房</small></span>
+  </a>
+  <nav class="head-nav" aria-label="ページ内の案内">
+    <a href="#nakami">中身</a>
+    <a href="#kumi">つくり</a>
+    <a href="#shiyo">仕様</a>
+    <a href="#faq">質問</a>
+  </nav>
+  <button class="btn-reserve" type="button" data-open-reserve>予約する</button>
+</header>
+
+<main id="main">
+
+  <!-- ============ hero ============ -->
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title" class="hero-title"><span>覗くと、</span><span>夜が咲く。</span></h1>
+      <p class="hero-lead">三枚の鏡と、オイルに浮かぶ硝子の欠片。筒をひとまわりするだけで、同じ景色には二度と出会えません。横浜の光座工房が、一本ずつ組み立てる万華鏡です。</p>
+      <p class="hero-price">¥46,000（税込）<span>・</span>月に20本の制作</p>
+    </div>
+
+    <figure class="scope">
+      <div class="scope-frame">
+        <canvas id="scope" width="640" height="640" aria-label="動く万華鏡。鏡に映った欠片が円い幾何学模様になって、ゆっくり回転しています。"></canvas>
+      </div>
+      <figcaption class="scope-hint">
+        <span>筒をドラッグして回せます</span>
+        <button type="button" class="btn-quiet" id="motion-toggle" aria-pressed="true">回転を止める</button>
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ 中身を選ぶ ============ -->
+  <section class="block" id="nakami" aria-labelledby="nakami-title">
+    <header class="block-head">
+      <h2 id="nakami-title">中身を、選ぶ。</h2>
+      <p>先端の小さな部屋――オブジェクト室に入れるもので、表情はまるで変わります。このページの万華鏡にも、同じ中身が入っています。</p>
+    </header>
+
+    <fieldset class="chambers" id="chambers">
+      <legend class="sr-only">オブジェクト室の中身を選ぶ</legend>
+
+      <label class="chamber">
+        <input type="radio" name="chamber" value="glass" checked>
+        <span class="chamber-face">
+          <span class="chamber-swatch" data-set="glass" aria-hidden="true"></span>
+          <span class="chamber-name">硝子の欠片</span>
+          <span class="chamber-desc">アンティーク硝子を手で割った、水色と琥珀の破片。いちばん涼しい部屋です。</span>
+        </span>
+      </label>
+
+      <label class="chamber">
+        <input type="radio" name="chamber" value="hana">
+        <span class="chamber-face">
+          <span class="chamber-swatch" data-set="hana" aria-hidden="true"></span>
+          <span class="chamber-name">乾いた花</span>
+          <span class="chamber-desc">千日紅とかすみ草を乾燥させて裂いた、あたたかい破片。落ちる速さはいちばん遅く。</span>
+        </span>
+      </label>
+
+      <label class="chamber">
+        <input type="radio" name="chamber" value="konpeito">
+        <span class="chamber-face">
+          <span class="chamber-swatch" data-set="konpeito" aria-hidden="true"></span>
+          <span class="chamber-name">金平糖</span>
+          <span class="chamber-desc">職人に焼いてもらった小さな星。淡い色が交差して、砂糖菓子の窓になります。</span>
+        </span>
+      </label>
+    </fieldset>
+
+    <div class="speed">
+      <label for="speed">回転の速さ</label>
+      <input type="range" id="speed" min="0" max="300" value="100" step="1" aria-describedby="speed-note">
+      <span id="speed-note" class="speed-note">0で静止、右ほど早く回ります</span>
+    </div>
+  </section>
+
+  <!-- ============ つくり ============ -->
+  <section class="block" id="kumi" aria-labelledby="kumi-title">
+    <header class="block-head">
+      <h2 id="kumi-title">一本の筒に、<br>三つの仕事。</h2>
+      <p>組み立てはこの順序で、すべて工房の手作業です。</p>
+    </header>
+
+    <ol class="works">
+      <li class="work">
+        <div class="work-no" aria-hidden="true">I</div>
+        <div class="work-body">
+          <h3>真鍮の筒を挽く</h3>
+          <p>無垢の真鍮棒を旋盤で削り出し、梨地に仕上げます。使うほどに手の油が馴染み、深い飴色に変わっていきます。</p>
+        </div>
+        <dl class="work-spec">
+          <div><dt>全長</dt><dd>168&thinsp;mm</dd></div>
+          <div><dt>筒径</dt><dd>42&thinsp;mm</dd></div>
+        </dl>
+      </li>
+      <li class="work">
+        <div class="work-no" aria-hidden="true">II</div>
+        <div class="work-body">
+          <h3>三枚の鏡を合わせる</h3>
+          <p>裏面ではなく表面に銀を施した表面鏡を、60度の二等辺に糊付けします。歪みが大きいと模様がにじむため、一枚ずつ透かして選別します。</p>
+        </div>
+        <dl class="work-spec">
+          <div><dt>鏡</dt><dd>表面鏡 3枚</dd></div>
+          <div><dt>角度</dt><dd>60&thinsp;°</dd></div>
+        </dl>
+      </li>
+      <li class="work">
+        <div class="work-no" aria-hidden="true">III</div>
+        <div class="work-body">
+          <h3>オイル室を封じる</h3>
+          <p>先端の二重ガラスのあいだに欠片とオイルを入れ、熱で封じます。欠片が沈む速さはオイルの粘度で調整。仕上げに筒へ刻印を打って完成です。</p>
+        </div>
+        <dl class="work-spec">
+          <div><dt>室</dt><dd>二重ガラス</dd></div>
+          <div><dt>刻印</dt><dd>製作年月・番号</dd></div>
+        </dl>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============ 断面図・工房 ============ -->
+  <section class="block kobo" aria-labelledby="kobo-title">
+    <header class="block-head">
+      <h2 id="kobo-title">光座工房について</h2>
+      <p>横浜の台地にある、三人の工房。硝子を切る人、真鍮を挽く人、中身を選ぶ人。月に二十本しか作れませんが、どの一本にも同じ景色は入っていません。</p>
+    </header>
+
+    <figure class="cutaway" aria-labelledby="cutaway-cap">
+      <svg viewBox="0 0 720 240" role="img" aria-label="万華鏡の断面図" aria-describedby="cutaway-cap" class="cutaway-svg">
+        <desc id="cutaway-cap">万華鏡の断面図。左から対眼レンズ、真鍮の筒、その内側の三枚鏡、先端の二重ガラスとオイル室、欠片。</desc>
+        <!-- 筒 -->
+        <rect x="150" y="86" width="380" height="68" rx="10" class="ct-tube"/>
+        <rect x="150" y="86" width="380" height="68" rx="10" fill="none" class="ct-edge"/>
+        <!-- 内部の鏡 -->
+        <rect x="176" y="104" width="328" height="4" class="ct-mirror"/>
+        <rect x="176" y="132" width="328" height="4" class="ct-mirror"/>
+        <!-- 対眼側 -->
+        <rect x="120" y="96" width="34" height="48" rx="8" class="ct-eye"/>
+        <circle cx="137" cy="120" r="10" class="ct-lens"/>
+        <!-- 先端 オイル室 -->
+        <rect x="530" y="78" width="66" height="84" rx="6" class="ct-chamber"/>
+        <rect x="538" y="86" width="50" height="68" rx="4" class="ct-oil"/>
+        <circle cx="552" cy="100" r="3.2" class="ct-bit b1"/>
+        <circle cx="570" cy="112" r="4" class="ct-bit b2"/>
+        <path d="M556 128l6 -8l5 9z" class="ct-bit b3"/>
+        <circle cx="578" cy="140" r="3" class="ct-bit b1"/>
+        <path d="M548 142l5 -9l4 8z" class="ct-bit b2"/>
+        <circle cx="562" cy="150" r="2.6" class="ct-bit b3"/>
+        <!-- キャップ -->
+        <rect x="596" y="92" width="16" height="56" rx="5" class="ct-cap"/>
+        <!-- 引出し線 -->
+        <g class="ct-leader">
+          <path d="M137 60V96"/>
+          <path d="M340 44V104"/>
+          <path d="M563 30V78"/>
+          <path d="M240 186V154"/>
+        </g>
+        <g class="ct-label">
+          <text x="137" y="46" text-anchor="middle">対眼レンズ</text>
+          <text x="340" y="30" text-anchor="middle">三枚鏡</text>
+          <text x="563" y="18" text-anchor="middle">オイル室</text>
+          <text x="240" y="204" text-anchor="middle">真鍮筒・梨地</text>
+        </g>
+      </svg>
+      <figcaption id="cutaway-cap" class="sr-only">万華鏡の断面図</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ 仕様 ============ -->
+  <section class="block" id="shiyo" aria-labelledby="shiyo-title">
+    <header class="block-head">
+      <h2 id="shiyo-title">仕様</h2>
+    </header>
+
+    <div class="spec-wrap">
+      <dl class="spec">
+        <div><dt>全長</dt><dd>168 mm</dd></div>
+        <div><dt>筒径</dt><dd>42 mm（握り部 38 mm）</dd></div>
+        <div><dt>重量</dt><dd>約 310 g</dd></div>
+        <div><dt>筒</dt><dd>真鍮無垢・梨地 / 黒漆仕上げ</dd></div>
+        <div><dt>鏡</dt><dd>表面鏡 3枚（60&thinsp;°）</dd></div>
+        <div><dt>室</dt><dd>二重ガラス・オイル封入</dd></div>
+        <div><dt>付属</dt><dd>黒柿の置台・鹿革の拭き布・和紙の箱</dd></div>
+        <div><dt>価格</dt><dd>¥46,000（税込）</dd></div>
+        <div><dt>納期</dt><dd>予約から 2〜3か月</dd></div>
+      </dl>
+
+      <div class="spec-cta">
+        <p class="spec-note">次回の窯出しは12月。残り 7本の予約枠です。</p>
+        <button class="btn-reserve large" type="button" data-open-reserve>予約する</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="block" id="faq" aria-labelledby="faq-title">
+    <header class="block-head">
+      <h2 id="faq-title">よくある質問</h2>
+    </header>
+
+    <div class="faqs">
+      <details class="faq">
+        <summary>中身はあとから替えられますか</summary>
+        <p>オイル室は熱で密封しているため、ご自身での入れ替えはできません。毎年春の点検会で中身の替えを承っています（工房への持ち込みのみ・実費）。</p>
+      </details>
+      <details class="faq">
+        <summary>落としてしまったら</summary>
+        <p>ガラス室は二重構造なので、外側だけの破損であれば修理できます。鏡まで割れた場合も、部位ごとの交換を承ります。まずは工房までご連絡ください。</p>
+      </details>
+      <details class="faq">
+        <summary>贈り物に使えますか</summary>
+        <p>はい。和紙を貼った箱に入れ、熨斗（のし）も付けられます。刻印の文字入れ（15字まで）も、贈り物には人気です。</p>
+      </details>
+      <details class="faq">
+        <summary>ページの万華鏡と実物は同じですか</summary>
+        <p>雰囲気を再現したデモです。実物はオイルのなかを欠片がゆっくり落ちるので、動きはもっと気まぐれで、もっときれいです。</p>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p class="foot-word" aria-hidden="true">めぐる</p>
+  <p class="foot-note">このページは架空の商品「MEGURU」のデモです。商品・価格・工房は実在しません。フォームの内容はどこにも送信されません。</p>
+</footer>
+
+<!-- ============ 予約ダイアログ ============ -->
+<dialog class="reserve-dialog" id="reserve-dialog" aria-labelledby="reserve-title">
+  <form method="dialog" class="reserve-form" id="reserve-form" novalidate>
+    <h2 id="reserve-title">MEGURU を予約する</h2>
+    <p class="dialog-note">これはデモです。入力内容は送信・保存されません。</p>
+
+    <div class="field">
+      <label for="r-name">お名前</label>
+      <input id="r-name" name="name" type="text" autocomplete="name" required>
+    </div>
+
+    <div class="field">
+      <label for="r-mail">メールアドレス</label>
+      <input id="r-mail" name="mail" type="email" autocomplete="email" required>
+    </div>
+
+    <fieldset class="field">
+      <legend>筒の仕上げ</legend>
+      <label class="choice"><input type="radio" name="finish" value="pear" checked> 真鍮・梨地</label>
+      <label class="choice"><input type="radio" name="finish" value="black"> 黒漆</label>
+    </fieldset>
+
+    <div class="field">
+      <label for="r-chamber">オブジェクト室の中身</label>
+      <select id="r-chamber" name="chamber">
+        <option value="glass">硝子の欠片</option>
+        <option value="hana">乾いた花</option>
+        <option value="konpeito">金平糖</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="r-count">本数</label>
+      <select id="r-count" name="count">
+        <option>1</option><option>2</option><option>3</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="r-memo">刻印・熨斗などの希望（任意・15字まで）</label>
+      <input id="r-memo" name="memo" type="text" maxlength="15">
+    </div>
+
+    <p class="form-error" id="form-error" role="alert" hidden>お名前とメールアドレスを正しく入力してください。</p>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn-quiet" data-close-reserve>閉じる</button>
+      <button type="submit" class="btn-reserve">予約内容を確認する</button>
+    </div>
+  </form>
+
+  <div class="reserve-done" id="reserve-done" hidden>
+    <h2>予約を受け付けました</h2>
+    <p id="done-summary"></p>
+    <p>実在の商品ではないため、確認メールは届きません。12月の窯出しをどうぞお楽しみに。</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn-reserve" data-close-reserve>閉じる</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="app.js" defer></script>
+</body>
+</html>

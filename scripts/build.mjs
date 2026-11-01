@@ -8,6 +8,8 @@ const sites = [
   "grok-corporate",
   "gemini-lp",
   "gemini-corporate",
+  "devin-meguru",
+  "devin-tsumugiya",
 ];
 await rm(join(root, "dist"), { recursive: true, force: true });
 await mkdir(join(root, "dist"), { recursive: true });

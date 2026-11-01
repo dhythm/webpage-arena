@@ -1,0 +1,693 @@
+/* =====================================================
+   つむぎや織物株式会社 — 桐生の織元
+   ページの罫線は縦糸。区切りの帯は横糸。
+   地は晒（さらし）、墨は藍がかった黒。
+   ===================================================== */
+
+@font-face {
+  font-family: "Shippori Mincho";
+  src: url("assets/mincho-500.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Shippori Mincho";
+  src: url("assets/mincho-800.woff2") format("woff2");
+  font-weight: 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  src: url("assets/kaku-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  src: url("assets/kaku-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --sarashi: #f5f3ec;
+  --ink: #1d2a38;
+  --akane: #a5402d;
+  --karashi: #b8902f;
+  --asagi: #5f8977;
+  --hagare: #d9d4c3;
+  --line: #d6d0bd;
+  --dim: #5d6772;
+  --display: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --body: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15.5px;
+  line-height: 1.9;
+  /* 縦糸：ページ全体に通る細い経糸 */
+  background-color: var(--sarashi);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent 47px,
+    rgba(29, 42, 56, 0.055) 47px,
+    rgba(29, 42, 56, 0.055) 48px
+  );
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: rgba(165, 64, 45, 0.2); }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
+.skip {
+  position: absolute;
+  top: -4rem;
+  left: 1rem;
+  z-index: 20;
+  padding: 0.5rem 1rem;
+  background: var(--ink);
+  color: var(--sarashi);
+  text-decoration: none;
+}
+.skip:focus { top: 1rem; }
+
+:focus-visible {
+  outline: 2px solid var(--akane);
+  outline-offset: 3px;
+}
+
+h1, h2, h3 { font-family: var(--display); margin: 0; }
+p { margin: 0; }
+a { color: var(--akane); }
+
+/* ---------- header ---------- */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem clamp(1.25rem, 4vw, 3rem);
+  border-bottom: 3px solid var(--ink);
+  background: rgba(245, 243, 236, 0.95);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.brand-mark { width: 34px; height: 34px; flex: none; }
+.brand-word {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.brand-word small {
+  font-family: var(--body);
+  font-weight: 400;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: var(--dim);
+}
+
+.head-nav {
+  margin-left: auto;
+  display: flex;
+  gap: clamp(0.9rem, 2.5vw, 2rem);
+}
+.head-nav a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  padding-block: 0.2rem;
+  border-bottom: 2px solid transparent;
+}
+.head-nav a:hover { border-bottom-color: var(--akane); }
+
+.btn {
+  appearance: none;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--sarashi);
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1.3rem;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.btn:hover { background: var(--sarashi); color: var(--ink); }
+.btn.large { font-size: 1rem; padding: 0.75rem 2.4rem; }
+
+.btn-quiet {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--dim);
+  font-family: var(--body);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  cursor: pointer;
+}
+.btn-quiet:hover { color: var(--akane); }
+
+/* ---------- hero ---------- */
+
+.hero { padding-top: clamp(3rem, 7vw, 5.5rem); }
+
+.hero-inner {
+  max-width: 66rem;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(2.5rem, 5vw, 4rem);
+}
+
+.hero h1 {
+  font-weight: 800;
+  font-size: clamp(2.3rem, 6.2vw, 4.4rem);
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+}
+.hero-lead {
+  margin-top: 1.6rem;
+  color: var(--dim);
+  max-width: 36em;
+}
+
+/* 機（はた）の帯：全幅の布 */
+.loom { margin: 0; }
+.loom canvas {
+  display: block;
+  width: 100%;
+  height: 120px;
+  border-block: 2px solid var(--ink);
+}
+.loom-cap {
+  max-width: 66rem;
+  margin: 0 auto;
+  padding: 0.7rem clamp(1.25rem, 4vw, 3rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.78rem;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--line);
+}
+
+.stats {
+  max-width: 66rem;
+  margin: 0 auto;
+  padding: 2.2rem clamp(1.25rem, 4vw, 3rem) 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+.stats dt {
+  font-size: 0.72rem;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+}
+.stats dd {
+  margin: 0.2rem 0 0;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+  line-height: 1.1;
+}
+.stats .unit { font-family: var(--body); font-size: 0.6em; margin-left: 0.2em; }
+
+/* ---------- 共通ブロック（横糸の帯で区切る） ---------- */
+
+.block {
+  margin-top: clamp(3rem, 7vw, 5.5rem);
+  padding-top: 0;
+  border-top: 8px solid;
+  border-image: repeating-linear-gradient(
+    90deg,
+    var(--ink) 0 26px,
+    var(--sarashi) 26px 30px,
+    var(--akane) 30px 34px,
+    var(--sarashi) 34px 38px,
+    var(--ink) 38px 44px,
+    var(--karashi) 44px 45px,
+    var(--sarashi) 45px 47px
+  ) 8;
+}
+.block-head {
+  max-width: 66rem;
+  margin: 0 auto;
+  padding: clamp(2.2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 3rem) clamp(1.8rem, 4vw, 2.8rem);
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 38rem);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
+}
+.block-head h2 {
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: 0.12em;
+}
+.block-head p {
+  color: var(--dim);
+  font-size: 0.9rem;
+  padding-top: 0.5rem;
+}
+
+/* ---------- 事業 ---------- */
+
+.jigyo-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+  max-width: 66rem;
+}
+
+.jigyo {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr) minmax(0, 13rem);
+  gap: clamp(1.25rem, 3.5vw, 2.75rem);
+  align-items: start;
+  padding: 2.1rem 0;
+  border-top: 1px solid var(--line);
+}
+.jigyo:last-child { border-bottom: 1px solid var(--line); }
+
+.jigyo-cloth { padding-top: 0.35rem; }
+.cloth {
+  display: block;
+  height: 68px;
+  border: 1px solid var(--line);
+  /* 織り目の質感：細い縦糸の影 */
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35);
+}
+.c-shima {
+  background:
+    repeating-linear-gradient(90deg, rgba(29,42,56,0.06) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(0deg, #1d2a38 0 12px, #a5402d 12px 14px, #e8e2d2 14px 16px, #1d2a38 16px 20px);
+}
+.c-ori {
+  background:
+    repeating-linear-gradient(90deg, rgba(29,42,56,0.07) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(0deg, #e8e2d2 0 9px, #5f8977 9px 10px, #e8e2d2 10px 15px, #b8902f 15px 16px);
+}
+.c-hogushi {
+  background:
+    repeating-linear-gradient(90deg, rgba(29,42,56,0.05) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(0deg, #cfc4b2 0 6px, #a58a8f 6px 8px, #8a97a3 8px 12px, #b3a488 12px 15px);
+}
+
+.jigyo h3 { font-weight: 700; font-size: 1.15rem; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+.jigyo-body p { color: var(--dim); font-size: 0.88rem; max-width: 34em; }
+.jigyo-meta {
+  font-size: 0.75rem;
+  color: var(--dim);
+  letter-spacing: 0.04em;
+  padding-top: 0.5rem;
+  border-left: 3px solid var(--hagare);
+  padding-left: 0.9rem;
+}
+
+/* ---------- 織見本帳 ---------- */
+
+.weaver {
+  max-width: 66rem;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+  display: grid;
+  grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
+}
+
+.weaver-ctl { border: none; margin: 0; padding: 0; }
+
+.wft {
+  border: none;
+  margin: 0 0 1.4rem;
+  padding: 0;
+}
+.wft legend {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.55rem;
+  padding: 0;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip span {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 0.3rem 0.7rem 0.3rem 0.4rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.chip span::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--c);
+  border: 1px solid rgba(29, 42, 56, 0.25);
+}
+.chip input:checked + span {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+.chip input:focus-visible + span {
+  outline: 2px solid var(--akane);
+  outline-offset: 2px;
+}
+.chip.none span::before { background: none; }
+
+.rhythm { display: flex; gap: 1.2rem; font-size: 0.85rem; }
+.rhythm label { display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+.rhythm input { accent-color: var(--akane); }
+
+.weaver-out { margin: 0; }
+.weaver-out canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ink);
+}
+.swatch-cap {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+}
+.swatch-cap output {
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+}
+
+.ledger {
+  max-width: 66rem;
+  margin: clamp(2.5rem, 5vw, 4rem) auto 0;
+  width: calc(100% - 2 * clamp(1.25rem, 4vw, 3rem));
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.ledger caption {
+  text-align: left;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  padding-bottom: 0.7rem;
+}
+.ledger th {
+  text-align: left;
+  font-weight: 400;
+  color: var(--dim);
+  letter-spacing: 0.1em;
+  border-block: 2px solid var(--ink);
+  padding: 0.55rem 0.8rem;
+}
+.ledger td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.8rem;
+  vertical-align: middle;
+}
+.ledger td:first-child { font-family: var(--display); font-weight: 700; letter-spacing: 0.06em; }
+
+.mini {
+  display: inline-block;
+  width: 56px;
+  height: 30px;
+  background-image: var(--g);
+  border: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+/* ---------- 歴史：一本のたて糸 ---------- */
+
+.timeline {
+  list-style: none;
+  max-width: 66rem;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem) 1rem;
+}
+
+.timeline li {
+  position: relative;
+  padding: 0 0 2.2rem 7.5rem;
+}
+/* 一本のたて糸 */
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: 5.4rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--ink);
+}
+.timeline li::after {
+  content: "";
+  position: absolute;
+  left: calc(5.4rem - 4px);
+  top: 0.4rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sarashi);
+  border: 2px solid var(--akane);
+}
+.timeline li:last-child::before { bottom: auto; height: 0.8rem; }
+
+.tl-year {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  width: 4.6rem;
+  text-align: right;
+}
+.timeline p {
+  color: var(--dim);
+  font-size: 0.9rem;
+  max-width: 34em;
+}
+
+/* ---------- 採用 ---------- */
+
+.jobs {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+  max-width: 66rem;
+}
+.jobs li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 14rem);
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: 1.7rem 0;
+  border-top: 1px solid var(--line);
+}
+.jobs li:last-child { border-bottom: 1px solid var(--line); }
+.jobs h3 { font-weight: 700; font-size: 1.05rem; margin-bottom: 0.5rem; }
+.job-body p { color: var(--dim); font-size: 0.87rem; max-width: 36em; }
+.job-meta {
+  font-size: 0.75rem;
+  color: var(--dim);
+  border-left: 3px solid var(--hagare);
+  padding-left: 0.9rem;
+  align-self: center;
+}
+
+/* ---------- 問い合わせ帯 ---------- */
+
+.contact-block { border-top-width: 8px; }
+.contact-inner {
+  max-width: 66rem;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 4rem) clamp(1.25rem, 4vw, 3rem) clamp(3rem, 7vw, 5rem);
+  text-align: center;
+}
+.contact-inner h2 {
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
+.contact-inner p {
+  color: var(--dim);
+  margin: 1rem auto 2rem;
+  max-width: 30em;
+  font-size: 0.9rem;
+}
+
+/* ---------- footer ---------- */
+
+.foot {
+  border-top: 8px solid;
+  border-image: repeating-linear-gradient(
+    90deg,
+    var(--ink) 0 26px,
+    var(--sarashi) 26px 30px,
+    var(--akane) 30px 34px,
+    var(--sarashi) 34px 38px,
+    var(--ink) 38px 44px,
+    var(--karashi) 44px 45px,
+    var(--sarashi) 45px 47px
+  ) 8;
+  padding: clamp(2.5rem, 6vw, 4rem) clamp(1.25rem, 4vw, 3rem) 2.5rem;
+  text-align: center;
+}
+.foot-word {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(3rem, 12vw, 7rem);
+  letter-spacing: 0.3em;
+  line-height: 1.3;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+.foot address {
+  font-style: normal;
+  font-size: 0.8rem;
+  color: var(--dim);
+  margin-bottom: 1rem;
+}
+.foot-note {
+  font-size: 0.76rem;
+  color: var(--dim);
+  max-width: 42em;
+  margin: 0 auto;
+}
+
+/* ---------- dialog ---------- */
+
+.contact-dialog {
+  margin: auto;
+  width: min(34rem, calc(100vw - 2.5rem));
+  background: var(--sarashi);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+.contact-dialog::backdrop { background: rgba(29, 42, 56, 0.5); }
+
+.contact-dialog h2 {
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+.dialog-note { font-size: 0.78rem; color: var(--dim); margin-bottom: 1.6rem; }
+
+.field { margin-bottom: 1.15rem; }
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+}
+.field input, .field select, .field textarea {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 0.92rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: 2px solid var(--akane);
+  outline-offset: 1px;
+}
+.field textarea { resize: vertical; }
+
+.form-error { color: var(--akane); font-size: 0.8rem; margin-bottom: 0.9rem; }
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.4rem;
+  margin-top: 1.5rem;
+}
+
+.contact-done p { color: var(--dim); font-size: 0.88rem; margin-bottom: 1rem; }
+.contact-done #contact-summary {
+  color: var(--ink);
+  border: 1px dashed var(--line);
+  padding: 0.85rem 1rem;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 800px) {
+  .block-head { grid-template-columns: 1fr; gap: 0.8rem; }
+  .jigyo { grid-template-columns: 7.5rem 1fr; }
+  .jigyo-meta { grid-column: 2; }
+  .weaver { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .jobs li { grid-template-columns: 1fr; gap: 0.6rem; }
+  .job-meta { align-self: start; }
+}
+
+@media (max-width: 560px) {
+  .head { flex-wrap: wrap; row-gap: 0.6rem; }
+  .head-nav { order: 3; width: 100%; margin-left: 0; overflow-x: auto; }
+  .jigyo { grid-template-columns: 1fr; }
+  .jigyo-cloth { max-width: 12rem; }
+  .jigyo-meta { grid-column: auto; }
+  .timeline li { padding-left: 5.6rem; }
+  .timeline li::before { left: 4rem; }
+  .timeline li::after { left: calc(4rem - 4px); }
+  .tl-year { width: 3.2rem; font-size: 0.95rem; }
+  .ledger { font-size: 0.75rem; }
+  .ledger th:nth-child(6), .ledger td:nth-child(6) { display: none; }
+}

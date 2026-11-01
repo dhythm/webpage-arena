@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>つむぎや織物株式会社 — 先染め縞物の織元（桐生）｜架空の企業デモ</title>
+<meta name="description" content="糸を染めてから織る、先染め縞物だけを98年。桐生の織元「つむぎや織物」のホームページ（架空の企業デモ）。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/kaku-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+
+<header class="head">
+  <a class="brand" href="#top" aria-label="つむぎや トップへ">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="4" y="6" width="24" height="4" fill="#1d2a38"/>
+      <rect x="4" y="12" width="24" height="2.5" fill="#a5402d"/>
+      <rect x="4" y="16.5" width="24" height="4" fill="#1d2a38"/>
+      <rect x="4" y="22.5" width="24" height="2.5" fill="#b8902f"/>
+      <rect x="4" y="27" width="24" height="1.5" fill="#5f8977"/>
+    </svg>
+    <span class="brand-word">つむぎや<small>織物株式会社・桐生</small></span>
+  </a>
+  <nav class="head-nav" aria-label="ページ内の案内">
+    <a href="#jigyo">事業</a>
+    <a href="#mihon">織見本帳</a>
+    <a href="#rekishi">歴史</a>
+    <a href="#saiyo">採用</a>
+  </nav>
+  <button class="btn" type="button" data-open-contact>相談する</button>
+</header>
+
+<main id="main">
+
+  <!-- ============ hero ============ -->
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <h1 id="hero-title">たて糸は規律。<br>よこ糸は、実験。</h1>
+      <p class="hero-lead">糸を染めてから織る、先染め（さきぞめ）の縞物だけを九十八年。桐生の織元、つむぎや織物株式会社です。</p>
+    </div>
+    <figure class="loom">
+      <canvas id="loom" height="120" aria-label="いま織っている最中の布。よこ糸が一行ずつ重なって縞が育っていきます。"></canvas>
+      <figcaption class="loom-cap">
+        <span>ただいま製織中 — 品番 TY-0246「遠縞」</span>
+        <button type="button" class="btn-quiet" id="loom-toggle" aria-pressed="true">織るのを止める</button>
+      </figcaption>
+    </figure>
+    <dl class="stats">
+      <div><dt>創業</dt><dd>1927</dd></div>
+      <div><dt>織機</dt><dd>46<span class="unit">台</span></dd></div>
+      <div><dt>収蔵の柄</dt><dd>3,800<span class="unit">点</span></dd></div>
+      <div><dt>残糸の再利用率</dt><dd>91<span class="unit">%</span></dd></div>
+    </dl>
+  </section>
+
+  <!-- ============ 事業 ============ -->
+  <section class="block" id="jigyo" aria-labelledby="jigyo-title">
+    <header class="block-head">
+      <h2 id="jigyo-title">事業</h2>
+      <p>やることは創業時からひとつです。染めて、織って、使い切れなかった糸をまた糸にする。</p>
+    </header>
+
+    <ul class="jigyo-list">
+      <li class="jigyo">
+        <div class="jigyo-cloth" aria-hidden="true"><span class="cloth c-shima"></span></div>
+        <div class="jigyo-body">
+          <h3>先染め縞物の製造</h3>
+          <p>縞と格子だけを織り続けてきた反物の製造販売。綿・麻・絹の先染め糸を、シャトル織機で一日あたり反物およそ二反ぶんの速さで織ります。アパレル、寝具、インテリアの各社へ。</p>
+        </div>
+        <p class="jigyo-meta">糸：綿・麻・絹／巾：92–118cm</p>
+      </li>
+      <li class="jigyo">
+        <div class="jigyo-cloth" aria-hidden="true"><span class="cloth c-ori"></span></div>
+        <div class="jigyo-body">
+          <h3>別注と試織</h3>
+          <p>十メートルの試織から受け付けます。柄の設計、糸選び、組織の決定まで、打ち合わせは工場のラウンジで。学生の卒業制作にも門を開いています。</p>
+        </div>
+        <p class="jigyo-meta">最小ロット：10m／納期：試織 2週間〜</p>
+      </li>
+      <li class="jigyo">
+        <div class="jigyo-cloth" aria-hidden="true"><span class="cloth c-hogushi"></span></div>
+        <div class="jigyo-body">
+          <h3>残糸の再紡績「ほぐし糸」</h3>
+          <p>使い切れずに残った染糸をほぐし、綿と紡ぎ直した糸。色は混ざって二度と同じ色になりません。当社の全製品の約四割に、ほぐし糸が入っています。</p>
+        </div>
+        <p class="jigyo-meta">混率：ほぐし綿 40%／販売：玉糸でも</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============ 織見本帳 ============ -->
+  <section class="block" id="mihon" aria-labelledby="mihon-title">
+    <header class="block-head">
+      <h2 id="mihon-title">織見本帳</h2>
+      <p>よこ糸を三本まで選んで、あなただけの縞を試せます。出来上がりには見本帳と同じ形式で品番が振られます。</p>
+    </header>
+
+    <div class="weaver">
+      <form class="weaver-ctl" id="weaver-ctl">
+        <fieldset class="wft">
+          <legend>よこ糸 一</legend>
+          <div class="chips" data-slot="0"></div>
+        </fieldset>
+        <fieldset class="wft">
+          <legend>よこ糸 二</legend>
+          <div class="chips" data-slot="1"></div>
+        </fieldset>
+        <fieldset class="wft">
+          <legend>よこ糸 三</legend>
+          <div class="chips" data-slot="2"></div>
+        </fieldset>
+        <fieldset class="wft">
+          <legend>リズム</legend>
+          <div class="rhythm">
+            <label><input type="radio" name="rhythm" value="even"> 平らな縞</label>
+            <label><input type="radio" name="rhythm" value="tooshima" checked> 遠縞</label>
+          </div>
+        </fieldset>
+      </form>
+
+      <figure class="weaver-out">
+        <canvas id="swatch" width="640" height="420" aria-label="選んだよこ糸で織った縞見本"></canvas>
+        <figcaption class="swatch-cap">品番 <output id="hinban" for="weaver-ctl">TY-0000</output></figcaption>
+      </figure>
+    </div>
+
+    <table class="ledger">
+      <caption>見本帳より（一部）</caption>
+      <thead>
+        <tr><th scope="col">品番</th><th scope="col">柄名</th><th scope="col">見本</th><th scope="col">組成</th><th scope="col">巾</th><th scope="col">おもな用途</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>TY-0001</td><td>遠縞</td><td><span class="mini" style="--g:repeating-linear-gradient(0deg,#1d2a38 0 7px,#a5402d 7px 8px,#e8e2d2 8px 9px,#1d2a38 9px 13px)"></span></td><td>綿 100%</td><td>110cm</td><td>シャツ</td></tr>
+        <tr><td>TY-0118</td><td>雨縞</td><td><span class="mini" style="--g:repeating-linear-gradient(0deg,#5f8977 0 5px,#e8e2d2 5px 11px,#332f28 11px 12px)"></span></td><td>綿・麻</td><td>105cm</td><td>座布団</td></tr>
+        <tr><td>TY-0246</td><td>霧格子</td><td><span class="mini" style="--g:repeating-linear-gradient(0deg,#c8ccd4 0 6px,#5f8977 6px 8px,#c8ccd4 8px 14px),repeating-linear-gradient(90deg,rgba(29,42,56,.25) 0 6px,transparent 6px 14px)"></span></td><td>綿・絹</td><td>92cm</td><td>暖簾</td></tr>
+        <tr><td>TY-0890</td><td>土筆</td><td><span class="mini" style="--g:repeating-linear-gradient(0deg,#8a7a5c 0 3px,#e8e2d2 3px 4px,#8a7a5c 4px 10px,#a5402d 10px 11px)"></span></td><td>麻 100%</td><td>118cm</td><td>テーブル掛け</td></tr>
+        <tr><td>TY-1302</td><td>宵縞</td><td><span class="mini" style="--g:repeating-linear-gradient(0deg,#332f28 0 8px,#b8902f 8px 9px,#332f28 9px 12px,#7a5f74 12px 14px)"></span></td><td>綿・ほぐし糸</td><td>110cm</td><td>バッグ</td></tr>
+        <tr><td>TY-2711</td><td>千本格子</td><td><span class="mini" style="--g:repeating-linear-gradient(0deg,#2e4668 0 4px,#e8e2d2 4px 8px),repeating-linear-gradient(90deg,rgba(165,64,45,.4) 0 4px,transparent 4px 12px)"></span></td><td>綿 100%</td><td>98cm</td><td>浴衣</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 歴史 ============ -->
+  <section class="block" id="rekishi" aria-labelledby="rekishi-title">
+    <header class="block-head">
+      <h2 id="rekishi-title">歴史</h2>
+      <p>九十八年分を、一本のたて糸に沿って。</p>
+    </header>
+
+    <ol class="timeline">
+      <li><span class="tl-year">1927</span><p>桐生で創業。力織機三台、野暮ったい縞だけを織る小さな機屋として始まる。</p></li>
+      <li><span class="tl-year">1952</span><p>先染めに特化し、構内に染め場を併設。「糸から決める」今のかたちに。</p></li>
+      <li><span class="tl-year">1981</span><p>シャトルレス織機を導入。機音の静かな工場になり、近所から苦情が減ったという記録が残る。</p></li>
+      <li><span class="tl-year">2003</span><p>残糸の再紡績「ほぐし糸」の研究を開始。最初の三年間はほとんど失敗だった。</p></li>
+      <li><span class="tl-year">2014</span><p>織見本帳のデジタル公開を開始。海外からの問い合わせが増える。</p></li>
+      <li><span class="tl-year">2025</span><p>アーカイブ室を新設。月一回の工場見学の受け入れを始める。</p></li>
+    </ol>
+  </section>
+
+  <!-- ============ 採用 ============ -->
+  <section class="block" id="saiyo" aria-labelledby="saiyo-title">
+    <header class="block-head">
+      <h2 id="saiyo-title">採用</h2>
+      <p>機械に詳しい人より、布を見るのが好きな人。まずは見学に来てください。</p>
+    </header>
+
+    <ul class="jobs">
+      <li>
+        <div class="job-body">
+          <h3>織機の保全</h3>
+          <p>46台の織機の保守・調整・改造。機械いじりが好きな方。音で不調を聞き分ける仕事です。</p>
+        </div>
+        <p class="job-meta">正社員・桐生勤務・未経験可</p>
+      </li>
+      <li>
+        <div class="job-body">
+          <h3>企画・営業</h3>
+          <p>アパレル・インテリア各社との別注の窓口。生地を言葉で説明できる方を探しています。</p>
+        </div>
+        <p class="job-meta">正社員・桐生/東京・要普通免許</p>
+      </li>
+      <li>
+        <div class="job-body">
+          <h3>染め場のアシスタント</h3>
+          <p>染料の調合と糸染めの補助。色の記録を台帳に付ける、几帳面な仕事です。</p>
+        </div>
+        <p class="job-meta">契約社員・桐生勤務</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============ 問い合わせ ============ -->
+  <section class="block contact-block" aria-labelledby="contact-title">
+    <div class="contact-inner">
+      <h2 id="contact-title">生地の相談、工場見学、採用の話。</h2>
+      <p>電話でも受け付けていますが、布の話は文章のほうが正確です。</p>
+      <button class="btn large" type="button" data-open-contact>相談する</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p class="foot-word" aria-hidden="true">つむぎや</p>
+  <address>〒376-0046 群馬県桐生市宮前町二丁目 つむぎや織物株式会社（架空）</address>
+  <p class="foot-note">このページは架空の企業「つむぎや織物」のデモです。会社・事業・募集は実在しません。フォームの内容はどこにも送信されません。</p>
+</footer>
+
+<!-- ============ 相談ダイアログ ============ -->
+<dialog class="contact-dialog" id="contact-dialog" aria-labelledby="contact-dialog-title">
+  <form method="dialog" class="contact-form" id="contact-form" novalidate>
+    <h2 id="contact-dialog-title">相談する</h2>
+    <p class="dialog-note">これはデモです。入力内容は送信・保存されません。</p>
+
+    <div class="field">
+      <label for="c-type">種類</label>
+      <select id="c-type" name="type">
+        <option>生地の相談</option>
+        <option>別注・試織</option>
+        <option>工場見学</option>
+        <option>採用について</option>
+        <option>そのほか</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="c-name">お名前</label>
+      <input id="c-name" name="name" type="text" autocomplete="name" required>
+    </div>
+
+    <div class="field">
+      <label for="c-mail">メールアドレス</label>
+      <input id="c-mail" name="mail" type="email" autocomplete="email" required>
+    </div>
+
+    <div class="field">
+      <label for="c-body">内容</label>
+      <textarea id="c-body" name="body" rows="4" placeholder="例：シャツ用の薄手の縞を探しています" required></textarea>
+    </div>
+
+    <p class="form-error" id="c-error" role="alert" hidden>お名前・メールアドレス・内容を入力してください。</p>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn-quiet" data-close-contact>閉じる</button>
+      <button type="submit" class="btn">内容を確認する</button>
+    </div>
+  </form>
+
+  <div class="contact-done" id="contact-done" hidden>
+    <h2>相談を受け付けました</h2>
+    <p id="contact-summary"></p>
+    <p>実在の会社ではないため、返信は届きません。二営業日以内の返信を心がけている、という設定です。</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" data-close-contact>閉じる</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="app.js" defer></script>
+</body>
+</html>

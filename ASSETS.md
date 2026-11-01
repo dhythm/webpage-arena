@@ -26,9 +26,15 @@ WOFF2 subsets downloaded from Google Fonts with the complete page text and relev
 - [Zen Old Mincho](https://fonts.google.com/specimen/Zen+Old+Mincho), SIL Open Font License 1.1: `gpt-nagi/assets/LICENSE-ZenOldMincho.txt`.
 - [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk), SIL Open Font License 1.1: `gpt-umi/assets/LICENSE-SpaceGrotesk.txt`.
 - [Noto Sans JP](https://fonts.google.com/specimen/Noto+Sans+JP), SIL Open Font License 1.1: `gpt-umi/assets/LICENSE-NotoSansJP.txt`.
+- [Shippori Antique B1](https://fonts.google.com/specimen/Shippori+Antique+B1), SIL Open Font License 1.1: `devin-meguru/assets/LICENSE-ShipporiAntiqueB1.txt`.
+- [EB Garamond](https://fonts.google.com/specimen/EB+Garamond), SIL Open Font License 1.1: `devin-meguru/assets/LICENSE-EBGaramond.txt`.
+- [Shippori Mincho](https://fonts.google.com/specimen/Shippori+Mincho), SIL Open Font License 1.1: `devin-tsumugiya/assets/LICENSE-ShipporiMincho.txt`.
+- [Zen Kaku Gothic New](https://fonts.google.com/specimen/Zen+Kaku+Gothic+New), SIL Open Font License 1.1: `devin-tsumugiya/assets/LICENSE-ZenKakuGothicNew.txt`.
 
-If the Japanese copy is changed, rerun the subset generator to include new glyphs. System fallback fonts are also configured.
+`scripts/fetch-fonts-devin.py` reproduces the devin-* subsets. If the Japanese copy is changed, rerun the subset generator to include new glyphs. System fallback fonts are also configured.
 
 ## Original code-native visuals and audio
 
 NAGI and UMI logotypes, favicons, the audio waveform, observation diagram, material rings, and community wave graphic were authored in SVG/CSS/JS for this project. NAGI's demo audio is synthesized locally with filtered noise and a quiet sine oscillator using Web Audio; there are no third-party recordings or audio files.
+
+MEGURU's live kaleidoscope, cutaway diagram, logotype, and favicon, and tsumugiya's loom strip, woven swatches, yarn chips, logotype, and favicon were authored in SVG/CSS/Canvas for this project. No raster images or external services are used by the devin-* sites.

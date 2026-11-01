@@ -64,6 +64,48 @@ large lab wordmark
 - 構成: 建築図面グリッドと構造指標（延床、固定炭素量、大臣認定数、最大スパン）。その後に技術基盤、CAD木組解析ビューワー、主要設計実績、木造化炭素シミュレーター、会社概要、FS相談窓口へ。
 - 固有性: 3種の特許木組接合部（金輪継ぎハイブリッド、三方差し立体トラス、CLT偏心ブレース）のCADベクトル図面と応力ベクトル（曲げ・せん断・軸力）インタラクティブ解析ビューワー、建築用途別実績フィルタ、階数・延床面積に応じた木材量・CO₂炭素固定量シミュレーター、フィジビリティ調査相談ダイアログ。
 
+## MEGURU（devin-meguru）
+
+真鍮と硝子の万華鏡。対象は、部屋に「覗く楽しみ」を置きたい人、贈り物を探す人。ページの仕事は、覗く体験そのものを再現して予約へ案内すること。
+
+- 色: 夜 `#131722`、面 `#1a2130`、真鍮 `#b48f5c`、本文 `#ebe5d8`、補助 `#a2a8b4`。色彩はすべて万華鏡の内側に閉じ込め、クロームは真鍮だけ。
+- 文字: しっぽりアンチックB1（真鍮への刻印のような書体）を日本語に、EB Garamondを英数に。
+- 構成: 縦書きコピーと実際に動く万華鏡のヒーロー、中身（オブジェクト室）の切替、組立順の三工程、断面図と工房、仕様、質問。
+- 固有性: ページ自体が楽器。鏡セグメントへの複写で本物の万華鏡をCanvasに描き、ドラッグで筒が回る。番号は順序のある組立工程のみローマ数字で。
+
+```text
+wordmark            navigation          reserve
+縦書きのコピー       | live kaleidoscope scope (drag)
+                    | drag hint / pause
+3 chamber choices + speed
+I II III assembly rows with specs
+workshop note + cutaway diagram
+spec table          | price + reserve
+FAQ disclosure rows
+outlined wordmark
+```
+
+## つむぎや（devin-tsumugiya）
+
+桐生の織元（架空・創業1927）。対象は、生地を探すアパレル・インテリアの担当者と採用候補者。ページの仕事は、事業と見本帳を示し、相談の入口へ。
+
+- 色: 晒 `#f5f3ec`、藍墨 `#1d2a38`、茜 `#a5402d`、からし `#b8902f`、浅葱 `#5f8977`。
+- 文字: Shippori Minchoの力強い見出しと、Zen Kaku Gothic Newの本文。
+- 構成: ページ全体に縦糸の罫線を通し、区切りは横糸の縞。ヒーローでは品番「遠縞」の布がいま織られている最中。
+- 固有性: 構造がそのまま織物。織見本帳ではよこ糸を三本選ぶと実際に縞が織られ、台帳と同じ形式の品番が振られる。年表は一本のたて糸に沿って下る。
+
+```text
+mill identity       navigation / contact
+たて糸は規律。よこ糸は、実験。
+full-width loom strip weaving in progress
+stats row (創業/織機/収蔵柄/再利用率)
+3 business rows with woven swatches
+weft picker -> woven swatch + 品番 / archive ledger
+vertical warp-thread timeline
+jobs rows / contact invitation
+large つむぎや wordmark
+```
+
 ## Review and refinement
 
 [Anthropic frontend-design skill](https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md) とローカルimagegenスキルを使用。
