@@ -12,6 +12,8 @@ const sites = [
   "devin-tsumugiya",
   "claude-lp",
   "claude-corporate",
+  "muse-halo-lp",
+  "muse-arcline-hp",
 ];
 await rm(join(root, "dist"), { recursive: true, force: true });
 await mkdir(join(root, "dist"), { recursive: true });
