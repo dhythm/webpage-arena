@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#161b22" />
+    <meta
+      name="description"
+      content="雨聲 AMENEは、気圧・湿度・天候の移ろいに呼応して香りを調律する卓上気象調香ディフューザーです。空気が湿ると、雨の日の匂いがする。"
+    />
+    <title>雨聲 AMENE — 気象連動型アロマディフューザー</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">本文へスキップ</a>
+
+    <header class="header">
+      <div class="header-inner">
+        <a class="brand" href="#" aria-label="雨聲 AMENE トップ">
+          <svg class="brand-glyph" viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="7" fill="#1b232c" />
+            <path
+              d="M16 7c-3.2 4.2-6.5 8.8-6.5 12.8a6.5 6.5 0 0 0 13 0c0-4-3.3-8.6-6.5-12.8z"
+              fill="#38a3a5"
+            />
+            <circle cx="16" cy="19.5" r="2.8" fill="#e6ecef" />
+          </svg>
+          <span class="brand-text">
+            <span class="brand-name">雨聲</span>
+            <span class="brand-sub">AMENE</span>
+          </span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="主要ナビゲーション">
+          <a href="#concept">思想</a>
+          <a href="#chamber">天候調香</a>
+          <a href="#craft">素材と構造</a>
+          <a href="#specs">製品仕様</a>
+          <a href="#faq">よくある質問</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="cta-button outline" type="button" data-reserve-trigger>
+            先行予約を登録
+          </button>
+          <button
+            class="menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="mobile-nav"
+            aria-label="メニューを開く"
+          >
+            <span class="toggle-bar"></span>
+            <span class="toggle-bar"></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <nav
+      id="mobile-nav"
+      class="mobile-nav"
+      aria-label="モバイルナビゲーション"
+      hidden
+    >
+      <div class="mobile-nav-inner">
+        <a href="#concept">思想</a>
+        <a href="#chamber">天候調香</a>
+        <a href="#craft">素材と構造</a>
+        <a href="#specs">製品仕様</a>
+        <a href="#faq">よくある質問</a>
+        <button class="cta-button primary mobile-cta" type="button" data-reserve-trigger>
+          先行予約を登録
+        </button>
+      </div>
+    </nav>
+
+    <main id="main">
+      <!-- HERO -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-backdrop" aria-hidden="true"></div>
+        <div class="hero-container">
+          <div class="hero-content">
+            <div class="status-pill" aria-label="現在の気象観測シミュレーション">
+              <span class="pulse-dot" aria-hidden="true"></span>
+              <span id="hero-weather-status">観測気圧 1,008 hPa · 湿度 74% · ペトリコール微細調合</span>
+            </div>
+
+            <h1 id="hero-title" class="hero-heading">
+              空気が湿ると、<br />
+              雨の日の匂いがする。
+            </h1>
+
+            <p class="hero-lead">
+              窓の外の気圧と湿度、風のゆらぎをリアルタイムに感知。<br />
+              三種の天然精油を静かに調律し、部屋の空気に大気の気配を重ねる、<br />
+              新しい卓上気象調香ディフューザー「雨聲（あまね）」。
+            </p>
+
+            <div class="hero-buttons">
+              <button class="cta-button primary" type="button" data-reserve-trigger>
+                先行予約を受け取る
+              </button>
+              <a class="cta-button secondary" href="#chamber">
+                天候調香を試す ↓
+              </a>
+            </div>
+
+            <div class="hero-meta">
+              <span>先行予定価格 ¥38,500（税込）</span>
+              <span class="meta-divider" aria-hidden="true">/</span>
+              <span>2027年春 発売予定</span>
+              <span class="meta-divider" aria-hidden="true">/</span>
+              <span class="meta-note">※架空の製品デモ</span>
+            </div>
+          </div>
+
+          <div class="hero-display">
+            <div class="product-frame" id="product-canvas-container">
+              <!-- Visual representation of AMENE -->
+              <div class="product-silhouette" data-color="charcoal">
+                <div class="mist-plume" aria-hidden="true">
+                  <span class="particle p1"></span>
+                  <span class="particle p2"></span>
+                  <span class="particle p3"></span>
+                </div>
+                <div class="device-body">
+                  <div class="device-top-rim">
+                    <div class="nozzle-aperture"></div>
+                  </div>
+                  <div class="device-upper-chassis">
+                    <span class="brand-monogram">AMENE</span>
+                    <span class="sensor-slit" title="気圧通気スリット"></span>
+                  </div>
+                  <div class="device-glass-reservoir">
+                    <div class="water-meniscus"></div>
+                    <div class="wick-stem"></div>
+                  </div>
+                  <div class="device-slate-base"></div>
+                </div>
+              </div>
+
+              <div class="hero-card-floating">
+                <div class="floating-label">ATMOSPHERIC BLEND</div>
+                <div class="floating-value" id="hero-blend-name">雨前・ペトリコール</div>
+                <div class="floating-caption">地中の放線菌と雨粒が交わる、降雨直前の澄んだ大気香</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PHILOSOPHY -->
+      <section id="concept" class="section philosophy">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag">PHILOSOPHY</span>
+            <h2 class="section-title">気象の機微を、室内に取り戻す。</h2>
+          </div>
+
+          <div class="philosophy-grid">
+            <div class="philosophy-prose">
+              <p>
+                近代の建築は、高気密サッシと空調によって私たちを外気から保護してきました。
+                しかしその結果、季節の深まりや夕立の接近、夜半の湿度の変化といった、
+                身体が本来感じ取っていたはずの大気のゆらぎからも切り離されています。
+              </p>
+              <p>
+                雨聲（AMENE）は、単に部屋を好みの香りで満たすための芳香器ではありません。
+                外気と室内の境界に立ち、気圧降下や湿度の満ち引きに合わせて、
+                森林の樹木や土壌が本来放つ揮発成分を、同じリズムで呼吸させる装置です。
+              </p>
+            </div>
+
+            <div class="principles-list">
+              <article class="principle-card">
+                <div class="principle-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 3" />
+                  </svg>
+                </div>
+                <div class="principle-body">
+                  <h3>大気圧センサー連動</h3>
+                  <p>
+                    内蔵された高感度MEMS気圧センサーが、1hPa単位の大気のゆらぎを捕捉。
+                    低気圧の接近時には沈静を促すウッディ・ジオスミン調へ、
+                    高気圧の快晴時には爽快なシトラス・リーフ調へと、調合比率を自律的に推移させます。
+                  </p>
+                </div>
+              </article>
+
+              <article class="principle-card">
+                <div class="principle-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                  </svg>
+                </div>
+                <div class="principle-body">
+                  <h3>0.8μm 冷間ナノ微粒子</h3>
+                  <p>
+                    加熱による熱変性を一切行わず、毎秒240万回の超音波微小振動で精油を気化。
+                    空間に滞留しやすい極微小ミストのため、家具や書類を濡らすことなく、
+                    大気そのものが香りを帯びたかのように自然に広がります。
+                  </p>
+                </div>
+              </article>
+
+              <article class="principle-card">
+                <div class="principle-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M3 9h18M9 21V9" />
+                  </svg>
+                </div>
+                <div class="principle-body">
+                  <h3>三槽独立カートリッジ</h3>
+                  <p>
+                    基調となる「ペトリコール（土・雨）」、深呼吸を誘う「吉野檜（森）」、
+                    朝露の「ベルガモット（果実）」。3つの独立した気密ガラス管から、
+                    マイクロピエゾ弁によって滴下比率を無段階に調律します。
+                  </p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INTERACTIVE CHAMBER -->
+      <section id="chamber" class="section chamber-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag">ATMOSPHERIC CHAMBER</span>
+            <h2 class="section-title">天候調香シミュレーター</h2>
+            <p class="section-desc">
+              天候状態を選択すると、気圧と湿度に応じた香りの調合比率と大気ミストの挙動が変化します。
+              静寂の中で微細な環境音を試聴することもできます。
+            </p>
+          </div>
+
+          <div class="chamber-console">
+            <!-- Weather state buttons -->
+            <div class="chamber-controls" role="group" aria-label="気象プリセット選択">
+              <button
+                type="button"
+                class="chamber-tab active"
+                data-weather="rain"
+                aria-pressed="true"
+              >
+                <span class="tab-code">01</span>
+                <span class="tab-title">霖雨（りんう）</span>
+                <span class="tab-meta">長雨の午後 · 998 hPa / 86%</span>
+              </button>
+
+              <button
+                type="button"
+                class="chamber-tab"
+                data-weather="sunbreak"
+                aria-pressed="false"
+              >
+                <span class="tab-code">02</span>
+                <span class="tab-title">薄日（うすひ）</span>
+                <span class="tab-meta">雲の切れ間 · 1,012 hPa / 52%</span>
+              </button>
+
+              <button
+                type="button"
+                class="chamber-tab"
+                data-weather="breeze"
+                aria-pressed="false"
+              >
+                <span class="tab-code">03</span>
+                <span class="tab-title">薫風（くんぷう）</span>
+                <span class="tab-meta">乾いた初夏 · 1,018 hPa / 42%</span>
+              </button>
+
+              <button
+                type="button"
+                class="chamber-tab"
+                data-weather="mist"
+                aria-pressed="false"
+              >
+                <span class="tab-code">04</span>
+                <span class="tab-title">夜霧（よぎり）</span>
+                <span class="tab-meta">深夜のしじま · 1,006 hPa / 92%</span>
+              </button>
+            </div>
+
+            <div class="chamber-display-grid">
+              <!-- Interactive Visual Canvas -->
+              <div class="chamber-viewport">
+                <canvas
+                  id="vapor-canvas"
+                  class="vapor-canvas"
+                  width="540"
+                  height="340"
+                  aria-label="微粒子ミストと大気ゆらぎの動的シミュレーション"
+                ></canvas>
+                <div class="viewport-overlay">
+                  <div class="gauge-row">
+                    <span class="gauge-item">
+                      <span class="gauge-label">BAROMETER</span>
+                      <strong id="chamber-hpa">998</strong> <small>hPa</small>
+                    </span>
+                    <span class="gauge-item">
+                      <span class="gauge-label">HUMIDITY</span>
+                      <strong id="chamber-humidity">86</strong> <small>%</small>
+                    </span>
+                    <span class="gauge-item">
+                      <span class="gauge-label">VAPOR DENSITY</span>
+                      <strong id="chamber-rate">45</strong> <small>mL/h</small>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Scent Formulation Breakdown -->
+              <div class="chamber-analysis">
+                <h3 class="analysis-heading">精油ブレンド組成比率</h3>
+                <p class="analysis-lead" id="chamber-scent-desc">
+                  気圧降下に伴いジオスミン濃度を最大化。濡れた石畳と落ち葉の清涼なペトリコールが、深い集中の場を作ります。
+                </p>
+
+                <div class="scent-bars">
+                  <div class="scent-bar-item">
+                    <div class="scent-info">
+                      <span class="scent-name">ジオスミン（土壌・雨水）</span>
+                      <span class="scent-pct" id="pct-geosmin">52%</span>
+                    </div>
+                    <div class="bar-track">
+                      <div class="bar-fill" id="fill-geosmin" style="width: 52%"></div>
+                    </div>
+                  </div>
+
+                  <div class="scent-bar-item">
+                    <div class="scent-info">
+                      <span class="scent-name">吉野檜・苔（樹幹・深林）</span>
+                      <span class="scent-pct" id="pct-hinoki">28%</span>
+                    </div>
+                    <div class="bar-track">
+                      <div class="bar-fill" id="fill-hinoki" style="width: 28%"></div>
+                    </div>
+                  </div>
+
+                  <div class="scent-bar-item">
+                    <div class="scent-info">
+                      <span class="scent-name">高知ベルガモット（青果実）</span>
+                      <span class="scent-pct" id="pct-bergamot">12%</span>
+                    </div>
+                    <div class="bar-track">
+                      <div class="bar-fill" id="fill-bergamot" style="width: 12%"></div>
+                    </div>
+                  </div>
+
+                  <div class="scent-bar-item">
+                    <div class="scent-info">
+                      <span class="scent-name">ハイチベチバー（根茎・冷土）</span>
+                      <span class="scent-pct" id="pct-vetiver">8%</span>
+                    </div>
+                    <div class="bar-track">
+                      <div class="bar-fill" id="fill-vetiver" style="width: 8%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Web Audio Ambience -->
+                <div class="ambient-audio-player">
+                  <div class="audio-controls">
+                    <button
+                      id="audio-toggle-btn"
+                      class="audio-toggle"
+                      type="button"
+                      aria-pressed="false"
+                    >
+                      <span class="audio-icon" aria-hidden="true">▶</span>
+                      <span id="audio-label">環境音を試聴する</span>
+                    </button>
+                    <label class="volume-slider-label">
+                      <span>音量</span>
+                      <input
+                        id="volume-slider"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value="30"
+                        aria-label="環境音の音量調整"
+                      />
+                    </label>
+                  </div>
+                  <span class="audio-note">※Web Audio APIによる天候周波数の動的合成です</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CRAFT & MATERIALS -->
+      <section id="craft" class="section craft-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag">MATERIALS & FINISH</span>
+            <h2 class="section-title">建築の端正さと、道具の重み。</h2>
+            <p class="section-desc">
+              部屋の佇まいを乱さない、工業製品と工芸の境界にある造形。
+              3種の素材感からお選びいただけます。
+            </p>
+          </div>
+
+          <div class="craft-layout">
+            <div class="swatch-viewer">
+              <div class="color-preview-box" id="craft-preview" data-color="charcoal">
+                <div class="color-preview-inner">
+                  <div class="color-body-render"></div>
+                  <div class="color-badge" id="color-badge-text">墨黒 / CHARCOAL SLATE</div>
+                </div>
+              </div>
+
+              <div class="swatch-picker" role="group" aria-label="本体カラーの選択">
+                <button
+                  type="button"
+                  class="swatch-btn active"
+                  data-color="charcoal"
+                  aria-pressed="true"
+                  aria-label="墨黒 チャコールスレート"
+                >
+                  <span class="swatch-circle" style="background: #242930"></span>
+                  <span class="swatch-label">墨黒（Sumi-kuro）</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="swatch-btn"
+                  data-color="celadon"
+                  aria-pressed="false"
+                  aria-label="青磁 セラドンミスト"
+                >
+                  <span class="swatch-circle" style="background: #475a5e"></span>
+                  <span class="swatch-label">青磁（Seiji）</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="swatch-btn"
+                  data-color="frost"
+                  aria-pressed="false"
+                  aria-label="白雨 フロストシルバー"
+                >
+                  <span class="swatch-circle" style="background: #adb9c1"></span>
+                  <span class="swatch-label">白雨（Haku-u）</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="craft-details-list">
+              <div class="craft-item">
+                <div class="craft-num">01</div>
+                <div class="craft-info">
+                  <h3>硬質アルマイト削り出し上蓋</h3>
+                  <p>
+                    航空宇宙グレードのアルミブロックから精密CNC切削。
+                    微細なサンドブラスト加工により、指先に吸い付くようなマットな質感を獲得しています。
+                  </p>
+                </div>
+              </div>
+
+              <div class="craft-item">
+                <div class="craft-num">02</div>
+                <div class="craft-info">
+                  <h3>耐熱スモークフロストガラス</h3>
+                  <p>
+                    内部の残水量をほのかに透かす、肉厚のホウケイ酸ガラス。
+                    夜間には底部のLEDが水面を照らし、ほのかな満ち引きを光で知らせます。
+                  </p>
+                </div>
+              </div>
+
+              <div class="craft-item">
+                <div class="craft-num">03</div>
+                <div class="craft-info">
+                  <h3>天然玄昌石ベースプレート</h3>
+                  <p>
+                    宮城県産・雄勝玄昌石のスレートを台座に採用。
+                    硯（すずり）にも用いられる高い密度と撥水性により、本体の重心を安定させ微振動を吸収します。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SPECIFICATIONS -->
+      <section id="specs" class="section specs-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag">SPECIFICATIONS</span>
+            <h2 class="section-title">設計仕様</h2>
+          </div>
+
+          <div class="specs-wrapper">
+            <table class="specs-table">
+              <tbody>
+                <tr>
+                  <th scope="row">製品名</th>
+                  <td>雨聲（AMENE）気象連動アロマディフューザー</td>
+                </tr>
+                <tr>
+                  <th scope="row">型番</th>
+                  <td>AMN-01W</td>
+                </tr>
+                <tr>
+                  <th scope="row">外形寸法</th>
+                  <td>直径 94 mm × 高さ 148 mm</td>
+                </tr>
+                <tr>
+                  <th scope="row">本体質量</th>
+                  <td>約 680 g（タンク空時・ベースプレート含む）</td>
+                </tr>
+                <tr>
+                  <th scope="row">水タンク容量</th>
+                  <td>120 mL（最長約 16 時間稼働）</td>
+                </tr>
+                <tr>
+                  <th scope="row">精油カートリッジ</th>
+                  <td>三槽独立気密カートリッジ（各 15 mL・マグネット脱着式）</td>
+                </tr>
+                <tr>
+                  <th scope="row">霧化方式</th>
+                  <td>2.4 MHz 超微粒子冷間超音波ピエゾ霧化（平均粒子径 0.8 μm）</td>
+                </tr>
+                <tr>
+                  <th scope="row">センサー</th>
+                  <td>高精度MEMS気圧センサー（±0.1 hPa）、デジタル温湿度センサー</td>
+                </tr>
+                <tr>
+                  <th scope="row">無線通信</th>
+                  <td>Wi-Fi IEEE 802.11 b/g/n (2.4 GHz) / Bluetooth 5.3 Low Energy</td>
+                </tr>
+                <tr>
+                  <th scope="row">電源 / バッテリー</th>
+                  <td>USB Type-C (5V/2A) / 4,000 mAh リチウムイオン（コードレス駆動約6時間）</td>
+                </tr>
+                <tr>
+                  <th scope="row">予定価格</th>
+                  <td>¥38,500（税込・初回カートリッジ3種セット同梱）</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="section faq-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag">FREQUENTLY ASKED</span>
+            <h2 class="section-title">よくある質問</h2>
+          </div>
+
+          <div class="faq-accordion">
+            <details class="faq-item">
+              <summary class="faq-summary">
+                <span>インターネット接続がない環境でも動作しますか？</span>
+                <span class="faq-chevron" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq-answer">
+                <p>
+                  本体内蔵の気圧・温湿度センサーのみで自律稼働する「ローカル気象モード」を搭載しています。
+                  Wi-Fiに接続した場合は、気象庁オープンデータとの照合による降雨予測調香や、遠隔でのカートリッジ残量確認が可能です。
+                </p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-summary">
+                <span>市販のエッセンシャルオイルは使用できますか？</span>
+                <span class="faq-chevron" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq-answer">
+                <p>
+                  詰替用の専用気密ボトル（付属）をご使用いただくことで、お好みの天然精油を充填可能です。
+                  ただし、粘度の極めて高い樹脂系精油や人工香料は超音波振動板の目詰まりの原因となるため、希釈してご使用いただくか指定精油をお勧めしています。
+                </p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-summary">
+                <span>お手入れや水の交換頻度はどのくらいですか？</span>
+                <span class="faq-chevron" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq-answer">
+                <p>
+                  ガラス水タンクは上蓋を持ち上げるだけでワンタッチで取り外して水洗いが可能です。
+                  また、水タンク内部には銀イオン抗菌ブロックを内蔵しており、日々の雑菌繁殖を抑えます。週に1回程度の簡単な水洗いを推奨しています。
+                </p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-summary">
+                <span>先行予約の登録後はどうなりますか？</span>
+                <span class="faq-chevron" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq-answer">
+                <p>
+                  本ウェブサイトはフロントエンドデザイン検証のための架空の製品デモです。
+                  フォームに入力された情報は一切保存・送信されず、実際の決済や注文は発生いたしません。
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRE-ORDER CTA -->
+      <section class="section closing-cta">
+        <div class="container">
+          <div class="closing-card">
+            <span class="closing-kicker">BRING THE SKY INDOORS</span>
+            <h2 class="closing-title">空の呼吸を、あなたの部屋に。</h2>
+            <p class="closing-desc">
+              先行予約いただいた方には、初回限定の特別調香カートリッジ「雨夜（Uya）」を同梱してお届けします。
+            </p>
+            <div class="closing-actions">
+              <button class="cta-button primary large" type="button" data-reserve-trigger>
+                先行予約を登録する
+              </button>
+            </div>
+            <span class="closing-note">※架空の製品です。実際の販売・予約受付は行われておりません。</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container footer-inner">
+        <div class="footer-brand">
+          <span class="footer-title">雨聲 AMENE</span>
+          <p class="footer-tagline">気象連動型アロマディフューザー</p>
+        </div>
+
+        <nav class="footer-nav" aria-label="フッターナビゲーション">
+          <a href="#concept">思想</a>
+          <a href="#chamber">天候調香</a>
+          <a href="#craft">素材</a>
+          <a href="#specs">仕様</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+
+        <div class="footer-bottom">
+          <p class="footer-copy">© 2026 AMENE Inc. — Fictional Product Design Demonstration.</p>
+          <a class="footer-top-btn" href="#" aria-label="ページの先頭へ戻る">↑ TOP</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- MODAL RESERVATION DIALOG -->
+    <dialog id="reserve-dialog" class="reserve-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-box">
+        <button id="dialog-close-btn" class="dialog-close" type="button" aria-label="閉じる">
+          ×
+        </button>
+
+        <div class="dialog-header">
+          <span class="dialog-tag">PRE-ORDER INVITATION</span>
+          <h2 id="dialog-title">先行案内のご登録</h2>
+          <p class="dialog-desc">
+            発売時期と優先案内枠をメールでお知らせします。<br />
+            （※架空のデモのため、入力情報は保存されません）
+          </p>
+        </div>
+
+        <form id="reserve-form" class="reserve-form" novalidate>
+          <div class="form-group">
+            <label for="reserve-name">お名前 <span class="required">必須</span></label>
+            <input
+              id="reserve-name"
+              type="text"
+              name="name"
+              placeholder="山田 太郎"
+              required
+              autocomplete="name"
+            />
+            <span class="error-msg" id="name-error">お名前を入力してください</span>
+          </div>
+
+          <div class="form-group">
+            <label for="reserve-email">メールアドレス <span class="required">必須</span></label>
+            <input
+              id="reserve-email"
+              type="email"
+              name="email"
+              placeholder="hello@example.com"
+              required
+              autocomplete="email"
+            />
+            <span class="error-msg" id="email-error">正しいメールアドレスを入力してください</span>
+          </div>
+
+          <div class="form-group">
+            <label>ご希望の本体色</label>
+            <div class="radio-row">
+              <label class="radio-label">
+                <input type="radio" name="color-pref" value="charcoal" checked />
+                <span>墨黒（Sumi-kuro）</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="color-pref" value="celadon" />
+                <span>青磁（Seiji）</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="color-pref" value="frost" />
+                <span>白雨（Haku-u）</span>
+              </label>
+            </div>
+          </div>
+
+          <button class="cta-button primary full-width" type="submit">
+            案内を受け取る
+          </button>
+        </form>
+
+        <div id="reserve-success" class="reserve-success" hidden aria-live="polite">
+          <div class="success-glyph" aria-hidden="true">✓</div>
+          <h3>ご登録ありがとうございました</h3>
+          <p>
+            先行案内枠の仮予約体験が完了しました。<br />
+            （デモサイトのため、実際のメール送信は行われません）
+          </p>
+          <button id="success-close-btn" class="cta-button secondary" type="button">
+            ページに戻る
+          </button>
+        </div>
+      </div>
+    </dialog>
+  </body>
+</html>

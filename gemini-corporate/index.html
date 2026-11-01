@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1a3328" />
+    <meta
+      name="description"
+      content="森羅木工構造株式会社は、伝統木組の幾何学と計算力学・大断面CLTを融合し、耐震中高層木造ビル・大スパン木造空間の構造設計と施工エンジニアリングを手がける企業です。"
+    />
+    <title>森羅木工構造株式会社 — 100年後の森を、都市に組む。</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">本文へスキップ</a>
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-inner">
+        <a class="brand" href="#" aria-label="森羅木工構造株式会社 トップ">
+          <svg class="brand-logo" viewBox="0 0 36 36" aria-hidden="true">
+            <rect width="36" height="36" rx="6" fill="#1a3328" />
+            <path
+              d="M18 6 L30 28 L6 28 Z"
+              fill="none"
+              stroke="#f7f5f0"
+              stroke-width="2.6"
+              stroke-linejoin="round"
+            />
+            <path d="M18 14 L24 28 M18 14 L12 28" stroke="#c89658" stroke-width="2.2" />
+            <circle cx="18" cy="14" r="2.8" fill="#bd3220" />
+          </svg>
+          <div class="brand-text">
+            <span class="brand-name">森羅木工構造</span>
+            <span class="brand-en">SHINRA TIMBER ENGINEERING</span>
+          </div>
+        </a>
+
+        <nav class="desktop-nav" aria-label="主要ナビゲーション">
+          <a href="#technology">技術基盤</a>
+          <a href="#joinery">木組解析</a>
+          <a href="#works">設計実績</a>
+          <a href="#simulator">炭素試算</a>
+          <a href="#company">企業情報</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="btn btn-primary" type="button" data-fs-modal-trigger>
+            木造化FS相談 ↗
+          </button>
+          <button
+            class="menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="mobile-nav"
+            aria-label="メニューを開く"
+          >
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MOBILE DRAWER -->
+    <nav id="mobile-nav" class="mobile-nav" aria-label="モバイルナビゲーション" hidden>
+      <div class="mobile-nav-inner">
+        <a href="#technology">技術基盤</a>
+        <a href="#joinery">木組解析</a>
+        <a href="#works">設計実績</a>
+        <a href="#simulator">炭素試算</a>
+        <a href="#company">企業情報</a>
+        <button class="btn btn-primary mobile-cta" type="button" data-fs-modal-trigger>
+          木造化FS相談 ↗
+        </button>
+      </div>
+    </nav>
+
+    <main id="main">
+      <!-- HERO -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-grid-bg" aria-hidden="true"></div>
+        <div class="container hero-container">
+          <div class="hero-drafting-tag">
+            <span class="tag-coord">GRID REF: TK-2026 // LVL-01</span>
+            <span class="tag-status">STRUCTURAL COMPUTATION LAB</span>
+          </div>
+
+          <h1 id="hero-title" class="hero-heading">
+            100年後の森を、<br />
+            都市に組む。
+          </h1>
+
+          <p class="hero-lead">
+            日本古来の大工が培った仕口・継手の三次元幾何学と、現代の計算力学・大断面直交集成板（CLT）を融合。<br />
+            耐震中高層木造ビルから大スパン立体トラスまで、都市を「炭素の貯蔵庫」へと再構築する構造設計・エンジニアリング企業です。
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-dark" href="#works">
+              設計実績を見る
+            </a>
+            <a class="btn btn-outline" href="#joinery">
+              現代木組解析ビューワー ↓
+            </a>
+          </div>
+
+          <!-- STRUCTURAL METRICS BAR -->
+          <div class="hero-metrics-bar">
+            <div class="metric-cell">
+              <span class="metric-label">累計木造化延床面積</span>
+              <span class="metric-num">148,000<small>m²</small></span>
+              <span class="metric-sub">中高層・大空間建築 58件</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-label">都市固定炭素量</span>
+              <span class="metric-num">42,500<small>t-CO₂</small></span>
+              <span class="metric-sub">国産スギ・ヒノキ材換算</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-label">大臣認定・評定実績</span>
+              <span class="metric-num">14<small>件</small></span>
+              <span class="metric-sub">2時間耐火・純木造剛節点</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-label">最大クリアスパン</span>
+              <span class="metric-num">64.8<small>m</small></span>
+              <span class="metric-sub">張弦梁木造立体トラス</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TECHNOLOGY -->
+      <section id="technology" class="section tech-section">
+        <div class="container">
+          <div class="section-badge">
+            <span class="badge-idx">01</span>
+            <span class="badge-title">ENGINEERING CORE</span>
+          </div>
+
+          <h2 class="section-title">
+            伝統の幾何学を、<br />
+            数値解析で解き放つ。
+          </h2>
+
+          <p class="section-lead">
+            木造建築はもはや「低層住宅の素材」ではありません。
+            金物に過度に頼る接合から脱却し、木材同士の接触支圧と最新の炭素繊維補強を組み合わせることで、
+            鉄骨やコンクリートを凌駕する強靭さと軽さを都市にもたらします。
+          </p>
+
+          <div class="tech-grid">
+            <article class="tech-card">
+              <div class="card-header">
+                <span class="card-num">CORE-01</span>
+                <h3>現代仕口・継手の三次元幾何学</h3>
+              </div>
+              <p>
+                「金輪継ぎ」「追掛け大栓継ぎ」といった伝統大工の継手形状を3次元点群・FEMモデル化。
+                木繊維の異方性（木理方向による強度の違い）を正確に考慮した非線形解析により、
+                地震エネルギーを木の粘りで吸収する剛節点を開発しています。
+              </p>
+              <div class="card-spec">
+                <span>解析手法: 異方性弾塑性3D-FEM</span>
+                <span>実験検証: 実大加振試験（E-ディフェンス）</span>
+              </div>
+            </article>
+
+            <article class="tech-card">
+              <div class="card-header">
+                <span class="card-num">CORE-02</span>
+                <h3>大断面CLT×ハイブリッド制振構法</h3>
+              </div>
+              <p>
+                直交集成板（CLT）を単なる耐力壁としてではなく、スリット付き高減衰ダンパーとして機能させる独自特許構法。
+                大地震時の層間変形角を1/150以下に抑え、本震後の補修不要な事業継続性（BCP）を確保します。
+              </p>
+              <div class="card-spec">
+                <span>耐火性能: 1時間〜3時間耐火構造大臣認定</span>
+                <span>構造種別: 純木造 / 鉄骨木造ハイブリッド</span>
+              </div>
+            </article>
+
+            <article class="tech-card">
+              <div class="card-header">
+                <span class="card-num">CORE-03</span>
+                <h3>林業直結・炭素固定トレーサビリティ</h3>
+              </div>
+              <p>
+                原木伐採地（紀州・吉野・南三陸）の森林組合とオンライン直結。
+                製材からプレカット・建方までの炭素固定量とサプライチェーン履歴を二次元コードで個体管理し、
+                建築主のESG情報開示（Scope 3削減）を厳密に保証します。
+              </p>
+              <div class="card-spec">
+                <span>認証基準: FSC / PEFC / SGEC CoC認証</span>
+                <span>データ提供: LCA算定書・炭素固定証明書即時発行</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- INTERACTIVE JOINERY INSPECTOR -->
+      <section id="joinery" class="section joinery-section">
+        <div class="container">
+          <div class="section-badge">
+            <span class="badge-idx">02</span>
+            <span class="badge-title">ALGORITHMIC JOINERY INSPECTOR</span>
+          </div>
+
+          <h2 class="section-title">現代木組構造ビューワー</h2>
+          <p class="section-lead">
+            森羅木工構造が開発した特許接合部の構造力学的挙動をご確認いただけます。
+            接合部タイプを切り替え、設計応力ベクトル（軸力・せん断力・曲げモーメント）の作用状態を検証できます。
+          </p>
+
+          <div class="joinery-workbench">
+            <!-- Joint Switcher -->
+            <div class="joinery-nav" role="group" aria-label="接合部タイプの選択">
+              <button
+                type="button"
+                class="joint-tab active"
+                data-joint="kanawa"
+                aria-pressed="true"
+              >
+                <span class="jtab-code">TYPE-A</span>
+                <span class="jtab-name">金輪継ぎハイブリッド剛接合</span>
+                <span class="jtab-app">中高層柱梁接合・モーメント抵抗</span>
+              </button>
+
+              <button
+                type="button"
+                class="joint-tab"
+                data-joint="sanpo"
+                aria-pressed="false"
+              >
+                <span class="jtab-code">TYPE-B</span>
+                <span class="jtab-name">三方差し立体トラス剛節点</span>
+                <span class="jtab-app">大スパンアリーナ・空間立体格子</span>
+              </button>
+
+              <button
+                type="button"
+                class="joint-tab"
+                data-joint="clt"
+                aria-pressed="false"
+              >
+                <span class="jtab-code">TYPE-C</span>
+                <span class="jtab-name">CLT偏心ブレース耐震コア</span>
+                <span class="jtab-app">超高層制振壁・エネルギー吸収</span>
+              </button>
+            </div>
+
+            <!-- CAD / Stress Diagram Screen -->
+            <div class="joinery-stage-grid">
+              <div class="cad-viewport">
+                <div class="cad-grid-lines" aria-hidden="true"></div>
+                <svg
+                  id="joint-cad-svg"
+                  class="joint-cad-svg"
+                  viewBox="0 0 600 380"
+                  aria-label="構造接合部CAD図面"
+                >
+                  <!-- Base Joint Graphics (Interactive via JS) -->
+                  <g id="cad-drawings"></g>
+                </svg>
+
+                <div class="cad-overlay-meta">
+                  <div class="cad-scale">SCALE 1:20 // FEM MESH: QUAD-4</div>
+                  <div class="cad-title" id="cad-joint-title">
+                    KANAWA-HYBRID MOMENT CONNECTION (KH-01)
+                  </div>
+                </div>
+              </div>
+
+              <!-- Engineering Data & Stress Controls -->
+              <div class="joinery-metrics-panel">
+                <div class="controls-subheading">設計応力ベクトルの表示</div>
+                <div class="vector-toggle-group" role="group" aria-label="応力ベクトルの切替">
+                  <button
+                    type="button"
+                    class="vector-btn active"
+                    data-vector="moment"
+                    aria-pressed="true"
+                  >
+                    <span class="v-dot v-moment"></span>
+                    <span>曲げモーメント (M)</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="vector-btn active"
+                    data-vector="shear"
+                    aria-pressed="true"
+                  >
+                    <span class="v-dot v-shear"></span>
+                    <span>せん断力 (Q)</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="vector-btn active"
+                    data-vector="axial"
+                    aria-pressed="true"
+                  >
+                    <span class="v-dot v-axial"></span>
+                    <span>軸力 (N)</span>
+                  </button>
+                </div>
+
+                <div class="metrics-block">
+                  <div class="metric-row">
+                    <span class="m-label">許容耐力値</span>
+                    <strong class="m-val" id="val-capacity">380 kN·m</strong>
+                  </div>
+                  <div class="metric-row">
+                    <span class="m-label">最大層間変形角</span>
+                    <strong class="m-val" id="val-deformation">1/120 rad</strong>
+                  </div>
+                  <div class="metric-row">
+                    <span class="m-label">破壊モード</span>
+                    <strong class="m-val" id="val-failure">木材支圧降伏（高靭性）</strong>
+                  </div>
+                  <div class="metric-row">
+                    <span class="m-label">実大加振実証</span>
+                    <strong class="m-val" id="val-testing">震度7・JMA神戸波クリア</strong>
+                  </div>
+                </div>
+
+                <div class="joint-desc-box">
+                  <p id="joint-desc-text">
+                    伝統の「金輪継ぎ」の噛み合わせ幾何学を大断面集成材（360×600mm）に拡大。
+                    内部に高強度炭素繊維複合材（CFRP）インサートと高力ボルトを隠蔽配置し、
+                    金物を露出させずに鉄骨造同等の曲げ耐力と木質美観を両立します。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WORKS PORTFOLIO -->
+      <section id="works" class="section works-section">
+        <div class="container">
+          <div class="section-badge">
+            <span class="badge-idx">03</span>
+            <span class="badge-title">STRUCTURAL PORTFOLIO</span>
+          </div>
+
+          <h2 class="section-title">主要設計実績</h2>
+          <p class="section-lead">
+            都市部の中高層オフィスから大スパン公共アリーナまで、
+            木構造エンジニアリングが実現した建築事例。
+          </p>
+
+          <!-- Portfolio Category Filters -->
+          <div class="works-filters" role="group" aria-label="実績の用途別絞り込み">
+            <button
+              type="button"
+              class="filter-pill active"
+              data-filter="all"
+              aria-pressed="true"
+            >
+              すべて（4件）
+            </button>
+            <button
+              type="button"
+              class="filter-pill"
+              data-filter="highrise"
+              aria-pressed="false"
+            >
+              中高層都市建築
+            </button>
+            <button
+              type="button"
+              class="filter-pill"
+              data-filter="arena"
+              aria-pressed="false"
+            >
+              大スパン空間
+            </button>
+            <button
+              type="button"
+              class="filter-pill"
+              data-filter="civic"
+              aria-pressed="false"
+            >
+              公共・文教施設
+            </button>
+          </div>
+
+          <!-- Project Cards Grid -->
+          <div class="works-grid">
+            <article class="work-card" data-category="highrise">
+              <div class="work-thumb">
+                <div class="thumb-blueprint-visual wp1">
+                  <div class="elevation-lines"></div>
+                  <span class="blueprint-stamp">APPROVED CERT.</span>
+                </div>
+              </div>
+              <div class="work-body">
+                <div class="work-meta-top">
+                  <span class="work-cat">中高層都市建築</span>
+                  <span class="work-year">2026年竣工</span>
+                </div>
+                <h3 class="work-name">神田神保町ウッドタワー</h3>
+                <p class="work-summary">
+                  地上12階建ての都市型純木造ハイブリッドオフィス。
+                  金輪継ぎハイブリッド剛接合とCLT耐震コアにより、都心密集地での高耐震・2時間耐火を実現。
+                </p>
+                <div class="work-specs-table">
+                  <div><span>延床面積:</span> <strong>8,420 m²</strong></div>
+                  <div><span>木材使用量:</span> <strong>2,160 m³</strong></div>
+                  <div><span>炭素固定量:</span> <strong>1,750 t-CO₂</strong></div>
+                  <div><span>構造種別:</span> <strong>木造＋RCコア</strong></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="work-card" data-category="arena">
+              <div class="work-thumb">
+                <div class="thumb-blueprint-visual wp2">
+                  <div class="truss-arch-lines"></div>
+                  <span class="blueprint-stamp">SPAN 58.0M</span>
+                </div>
+              </div>
+              <div class="work-body">
+                <div class="work-meta-top">
+                  <span class="work-cat">大スパン空間</span>
+                  <span class="work-year">2025年竣工</span>
+                </div>
+                <h3 class="work-name">信州アルプス市民総合アリーナ</h3>
+                <p class="work-summary">
+                  58mの無柱大空間を渡る木造張弦梁立体トラス。
+                  地域産カラマツ大断面集成材と鋼管ロッドを三方差しノードで接合し、積雪荷重2.5mに耐える大屋根を構築。
+                </p>
+                <div class="work-specs-table">
+                  <div><span>延床面積:</span> <strong>12,800 m²</strong></div>
+                  <div><span>木材使用量:</span> <strong>3,400 m³</strong></div>
+                  <div><span>炭素固定量:</span> <strong>2,890 t-CO₂</strong></div>
+                  <div><span>構造種別:</span> <strong>木造張弦立体トラス</strong></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="work-card" data-category="civic">
+              <div class="work-thumb">
+                <div class="thumb-blueprint-visual wp3">
+                  <div class="panel-clt-lines"></div>
+                  <span class="blueprint-stamp">CIVIC PRIZE</span>
+                </div>
+              </div>
+              <div class="work-body">
+                <div class="work-meta-top">
+                  <span class="work-cat">公共・文教施設</span>
+                  <span class="work-year">2025年竣工</span>
+                </div>
+                <h3 class="work-name">静岡県立森の学舎キャンパス</h3>
+                <p class="work-summary">
+                  富士ヒノキCLTパネルによる壁式ラーメン構造。
+                  内外装に木肌を100%現し（あらわし）にした教室空間で、文教施設における知的集中力向上と温熱環境の最適化を実証。
+                </p>
+                <div class="work-specs-table">
+                  <div><span>延床面積:</span> <strong>6,900 m²</strong></div>
+                  <div><span>木材使用量:</span> <strong>1,850 m³</strong></div>
+                  <div><span>炭素固定量:</span> <strong>1,520 t-CO₂</strong></div>
+                  <div><span>構造種別:</span> <strong>CLT純木造4階建</strong></div>
+                </div>
+              </div>
+            </article>
+
+            <article class="work-card" data-category="highrise">
+              <div class="work-thumb">
+                <div class="thumb-blueprint-visual wp4">
+                  <div class="elevation-lines"></div>
+                  <span class="blueprint-stamp">CASBEE S-RANK</span>
+                </div>
+              </div>
+              <div class="work-body">
+                <div class="work-meta-top">
+                  <span class="work-cat">中高層都市建築</span>
+                  <span class="work-year">2024年竣工</span>
+                </div>
+                <h3 class="work-name">港区芝大門サステナブル本社ビル</h3>
+                <p class="work-summary">
+                  地上9階建ての木造化改修・増築プロジェクト。
+                  既存RC造の基礎耐力を活かし、上層階に超軽量な木造架構を積層することで、都市型容積率の有効活用とライフサイクルCO₂半減を達成。
+                </p>
+                <div class="work-specs-table">
+                  <div><span>延床面積:</span> <strong>5,100 m²</strong></div>
+                  <div><span>木材使用量:</span> <strong>1,320 m³</strong></div>
+                  <div><span>炭素固定量:</span> <strong>1,080 t-CO₂</strong></div>
+                  <div><span>構造種別:</span> <strong>RC＋木造増層ハイブリッド</strong></div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARBON SINK SIMULATOR -->
+      <section id="simulator" class="section sim-section">
+        <div class="container">
+          <div class="section-badge">
+            <span class="badge-idx">04</span>
+            <span class="badge-title">CARBON & COST SIMULATION</span>
+          </div>
+
+          <h2 class="section-title">木造化炭素固定シミュレーター</h2>
+          <p class="section-lead">
+            計画中の建築規模を入力すると、森羅木工構造の構法を適用した場合の
+            木材使用量、都市炭素固定量、および鉄骨・RC造対比でのCO₂削減効果を即座に試算します。
+          </p>
+
+          <div class="sim-workbench">
+            <div class="sim-inputs">
+              <div class="input-card">
+                <div class="input-header">
+                  <label for="floors-range">建物階数（地上）</label>
+                  <span class="input-current" id="floors-display">8 階</span>
+                </div>
+                <input
+                  id="floors-range"
+                  type="range"
+                  min="3"
+                  max="15"
+                  value="8"
+                  step="1"
+                />
+                <div class="range-bounds">
+                  <span>3階（低層）</span>
+                  <span>15階（超高層木造）</span>
+                </div>
+              </div>
+
+              <div class="input-card">
+                <div class="input-header">
+                  <label for="area-range">延床面積（m²）</label>
+                  <span class="input-current" id="area-display">5,000 m²</span>
+                </div>
+                <input
+                  id="area-range"
+                  type="range"
+                  min="1000"
+                  max="20000"
+                  value="5000"
+                  step="500"
+                />
+                <div class="range-bounds">
+                  <span>1,000 m²</span>
+                  <span>20,000 m²</span>
+                </div>
+              </div>
+
+              <div class="sim-note">
+                ※算出基準: 日本建築学会「建築物LCA指針」、林野庁「建築物における木材利用の二酸化炭素固定効果評価マニュアル」準拠。
+              </div>
+            </div>
+
+            <div class="sim-results">
+              <div class="res-card main-res">
+                <span class="res-label">都市固定炭素量 (Carbon Storage)</span>
+                <div class="res-value">
+                  <span id="res-carbon">1,025</span> <small>t-CO₂</small>
+                </div>
+                <div class="res-caption">
+                  スギ・ヒノキ人工林 約 <strong>5.8 ha</strong> の年間二酸化炭素吸収量に相当
+                </div>
+              </div>
+
+              <div class="res-sub-grid">
+                <div class="res-sub-card">
+                  <span class="sub-label">想定構造木材量</span>
+                  <div class="sub-value" id="res-wood">1,250 <small>m³</small></div>
+                </div>
+
+                <div class="res-sub-card">
+                  <span class="sub-label">RC/S造対比 CO₂削減</span>
+                  <div class="sub-value" id="res-co2-reduction">-42 <small>%</small></div>
+                </div>
+
+                <div class="res-sub-card">
+                  <span class="sub-label">建物自重低減（基礎工事削減）</span>
+                  <div class="sub-value" id="res-weight-reduction">-38 <small>%</small></div>
+                </div>
+
+                <div class="res-sub-card">
+                  <span class="sub-label">プレカット建方短縮</span>
+                  <div class="sub-value" id="res-time-reduction">約 2.5 <small>ヶ月</small></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CORPORATE OVERVIEW -->
+      <section id="company" class="section company-section">
+        <div class="container">
+          <div class="section-badge">
+            <span class="badge-idx">05</span>
+            <span class="badge-title">CORPORATE PROFILE</span>
+          </div>
+
+          <h2 class="section-title">会社概要と技術認定</h2>
+
+          <div class="company-grid">
+            <div class="company-table-wrapper">
+              <table class="corp-table">
+                <tbody>
+                  <tr>
+                    <th scope="row">会社名</th>
+                    <td>森羅木工構造株式会社（SHINRA Timber Engineering Co., Ltd.）</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">設立</th>
+                    <td>2018年4月（創業 1984年 森羅工務店構造研究室）</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">資本金</th>
+                    <td>3億2,000万円</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">代表取締役</th>
+                    <td>代表取締役・構造設計一級建築士　神林 宗輔</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">本社所在地</th>
+                    <td>〒135-0042 東京都江東区木場二丁目14番8号 木場ウッドエンジニアリングセンター 5F</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">技術研究所</th>
+                    <td>長野県伊那市高遠町上山田720 森羅木工構造 先端接合解析研究所</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">主要業務</th>
+                    <td>
+                      中高層木造建築・大スパン木造トラスの構造設計・監理<br />
+                      特許木組継手・金輪ハイブリッド接合具の製造・ライセンス販売<br />
+                      木造化フィジビリティスタディ（FS）およびLCA炭素固定認証算定
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row">登録・認可</th>
+                    <td>
+                      一級建築士事務所 東京都知事登録 第62841号<br />
+                      国土交通大臣認定 国住木第1184号〜第1197号（計14件）
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="company-sidebar">
+              <div class="credential-box">
+                <h3>所属技術者構成</h3>
+                <ul class="credential-list">
+                  <li>構造設計一級建築士: <strong>12名</strong></li>
+                  <li>一級建築士: <strong>28名</strong></li>
+                  <li>博士（工学・建築構造）: <strong>4名</strong></li>
+                  <li>伝統木工大工棟梁（技術顧問）: <strong>3名</strong></li>
+                </ul>
+              </div>
+
+              <div class="credential-box">
+                <h3>知的財産・特許</h3>
+                <ul class="credential-list">
+                  <li>特許第6891044号「木質ラーメン構造の仕口接合構造」</li>
+                  <li>特許第7042819号「CLTパネルを用いた制振ブレース機構」</li>
+                  <li>特許第7218903号「大断面集成材の三方差し立体トラス節点」</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLOSING CONSULTATION BANNER -->
+      <section id="contact" class="section consultation-section">
+        <div class="container">
+          <div class="consultation-card">
+            <span class="consult-tag">FEASIBILITY STUDY</span>
+            <h2 class="consult-title">構想段階の計画を、木造で解く。</h2>
+            <p class="consult-desc">
+              「この用途・スパン・階数で木造化が可能か」「コスト・耐火・工期の成立性はどうか」。<br />
+              基本計画段階での概算構造設計・炭素固定量試算・大臣認定適合のフィジビリティスタディ（FS）を承ります。
+            </p>
+            <div class="consult-actions">
+              <button class="btn btn-primary large" type="button" data-fs-modal-trigger>
+                木造化FS相談・技術資料請求 ↗
+              </button>
+            </div>
+            <span class="consult-note">※架空の企業ホームページデモです。実際の送信・契約は行われません。</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container footer-grid">
+        <div class="footer-left">
+          <div class="footer-brand">
+            <span class="f-brand-jp">森羅木工構造株式会社</span>
+            <span class="f-brand-en">SHINRA TIMBER ENGINEERING</span>
+          </div>
+          <p class="footer-address">
+            東京都江東区木場2-14-8 木場ウッドエンジニアリングセンター<br />
+            TEL: 03-5870-XXXX / E-mail: contact@example.com (Demo)
+          </p>
+        </div>
+
+        <nav class="footer-nav" aria-label="フッターリンク">
+          <a href="#technology">技術基盤</a>
+          <a href="#joinery">木組解析</a>
+          <a href="#works">設計実績</a>
+          <a href="#simulator">炭素試算</a>
+          <a href="#company">企業情報</a>
+        </nav>
+      </div>
+
+      <div class="container footer-bottom">
+        <p class="copy">© 2026 SHINRA Timber Engineering Co., Ltd. — Fictional Corporate Design Study.</p>
+        <a class="back-top" href="#" aria-label="ページ最上部へ戻る">↑ PAGE TOP</a>
+      </div>
+    </footer>
+
+    <!-- FEASIBILITY STUDY CONSULTATION MODAL -->
+    <dialog id="fs-dialog" class="fs-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-inner">
+        <button id="dialog-close-btn" class="dialog-close" type="button" aria-label="閉じる">
+          ×
+        </button>
+
+        <div class="dialog-head">
+          <span class="dialog-kicker">FEASIBILITY CONSULTATION</span>
+          <h2 id="dialog-title">木造化フィジビリティ調査 相談窓口</h2>
+          <p class="dialog-sub">
+            計画概要をお送りください。専門の構造設計エンジニアが初期適応性を検討いたします。<br />
+            （※架空のデモのため、入力情報は保存・送信されません）
+          </p>
+        </div>
+
+        <form id="fs-form" class="fs-form" novalidate>
+          <div class="form-row">
+            <div class="form-col">
+              <label for="fs-company">貴社名 / 組織名 <span class="req">必須</span></label>
+              <input
+                id="fs-company"
+                type="text"
+                name="company"
+                placeholder="例: 株式会社森羅設計事務所"
+                required
+              />
+              <span class="err-text" id="err-company">貴社名を入力してください</span>
+            </div>
+            <div class="form-col">
+              <label for="fs-name">ご担当者名 <span class="req">必須</span></label>
+              <input
+                id="fs-name"
+                type="text"
+                name="name"
+                placeholder="例: 建築 太郎"
+                required
+                autocomplete="name"
+              />
+              <span class="err-text" id="err-name">お名前を入力してください</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col">
+              <label for="fs-email">メールアドレス <span class="req">必須</span></label>
+              <input
+                id="fs-email"
+                type="email"
+                name="email"
+                placeholder="architect@example.com"
+                required
+                autocomplete="email"
+              />
+              <span class="err-text" id="err-email">正しいメールアドレスを入力してください</span>
+            </div>
+            <div class="form-col">
+              <label for="fs-type">検討用途</label>
+              <select id="fs-type" name="project_type">
+                <option value="office">中高層オフィス・商業ビル</option>
+                <option value="arena">アリーナ・大空間・スポーツ施設</option>
+                <option value="school">学校・文教施設・公共ホール</option>
+                <option value="hotel">宿泊施設・リゾート複合施設</option>
+                <option value="other">その他・木造化改修</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-col full">
+            <label for="fs-details">計画概要・ご相談内容</label>
+            <textarea
+              id="fs-details"
+              name="details"
+              rows="4"
+              placeholder="想定延床面積、階数、建設地、目標竣工時期などのご計画概要をお知らせください。"
+            ></textarea>
+          </div>
+
+          <button class="btn btn-primary full-width" type="submit">
+            相談内容を送信する
+          </button>
+        </form>
+
+        <div id="fs-success" class="fs-success" hidden aria-live="polite">
+          <div class="success-mark" aria-hidden="true">✓</div>
+          <h3>お問い合わせを受け付けました</h3>
+          <p>
+            木造化フィジビリティ調査のお申し込みデモが完了しました。<br />
+            （デモサイトのため、実際のメール送信・受付処理は行われません）
+          </p>
+          <button id="success-close-btn" class="btn btn-dark" type="button">
+            閉じる
+          </button>
+        </div>
+      </div>
+    </dialog>
+  </body>
+</html>
