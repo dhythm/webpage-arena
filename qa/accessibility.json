@@ -1,0 +1,66 @@
+[
+  {
+    "site": "gpt-nagi",
+    "width": 390,
+    "state": "page",
+    "violations": [],
+    "passes": 28,
+    "incomplete": 1
+  },
+  {
+    "site": "gpt-nagi",
+    "width": 390,
+    "state": "dialog",
+    "violations": [],
+    "passes": 17,
+    "incomplete": 1
+  },
+  {
+    "site": "gpt-nagi",
+    "width": 1440,
+    "state": "page",
+    "violations": [],
+    "passes": 28,
+    "incomplete": 1
+  },
+  {
+    "site": "gpt-nagi",
+    "width": 1440,
+    "state": "dialog",
+    "violations": [],
+    "passes": 17,
+    "incomplete": 1
+  },
+  {
+    "site": "gpt-umi",
+    "width": 390,
+    "state": "page",
+    "violations": [],
+    "passes": 23,
+    "incomplete": 1
+  },
+  {
+    "site": "gpt-umi",
+    "width": 390,
+    "state": "dialog",
+    "violations": [],
+    "passes": 17,
+    "incomplete": 1
+  },
+  {
+    "site": "gpt-umi",
+    "width": 1440,
+    "state": "page",
+    "violations": [],
+    "passes": 23,
+    "incomplete": 1
+  },
+  {
+    "site": "gpt-umi",
+    "width": 1440,
+    "state": "dialog",
+    "violations": [],
+    "passes": 17,
+    "incomplete": 1
+  }
+]
