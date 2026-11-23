@@ -1,0 +1,15 @@
+{
+  "id": "claude-kakehashi",
+  "title": "カケハシ",
+  "tagline": "請求書と入金消込を、一つの画面で。",
+  "type": "saas-lp",
+  "model": "Claude",
+  "tool": "Claude Code",
+  "modelVersion": "Opus 5.5",
+  "promptPath": "prompts/saas-lp.md",
+  "promptNotes": "お題のプロンプトをそのまま使用",
+  "created": "2026-11-24",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": []
+}
