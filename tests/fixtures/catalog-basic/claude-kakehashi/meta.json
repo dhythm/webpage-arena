@@ -1,0 +1,14 @@
+{
+  "id": "claude-kakehashi",
+  "title": "カケハシ C",
+  "tagline": "請求と入金を一つの画面で。",
+  "type": "saas-lp",
+  "model": "Claude",
+  "tool": "Claude Code",
+  "promptPath": "prompts/saas-lp.md",
+  "promptNotes": "フィクスチャ",
+  "created": "2026-12-02",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": []
+}

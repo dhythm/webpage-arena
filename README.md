@@ -4,22 +4,14 @@
 
 フォルダ名は `<作った AI>-<ページ>` の形です。各フォルダは独立していて、共通のフレームワークやビルドを必要としません。商品・企業・人物・価格・数値はすべて架空です。
 
-## 作品
+## ギャラリー
 
-| フォルダ | 作った AI | コンセプト | 主な体験 |
-| --- | --- | --- | --- |
-| [gpt-nagi](gpt-nagi/) | GPT | NAGI — 音と、暮らしのあいだに。陶器のようなポータブルスピーカー | 音の試聴、3色のイメージ切替、FAQ、先行案内のデモ |
-| [gpt-umi](gpt-umi/) | GPT | UMI 海洋循環研究所 — 海の可能性を、社会の次へ。 | 研究テーマの絞り込み、プロジェクト詳細、ジャーナル、相談フォームのデモ |
-| [grok-lp](grok-lp/) | Grok | 閑炉 一号 — 火を、机の端に。 | 香炉を一つ買うまでの物語、仕上げの比較、注文の手順 |
-| [grok-corporate](grok-corporate/) | Grok | 潮罫社 — 港の深さは、紙の上で決まる。 | 事業、海図、会社、採用、連絡先 |
-| [gemini-lp](gemini-lp/) | Gemini | 雨聲 AMENE — 空気が湿ると、雨の日の匂いがする。気象連動ディフューザー | 天候調香シミュレーター、微粒子 Canvas、環境音試聴、素材切替、予約デモ |
-| [gemini-corporate](gemini-corporate/) | Gemini | 森羅木工構造 — 100年後の森を、都市に組む。次世代木造エンジニアリング | 木組の CAD 図、応力ベクトル切替、実績フィルタ、炭素固定試算、FS 相談 |
-| [devin-meguru](devin-meguru/) | Devin | MEGURU — 覗くと、夜が咲く。真鍮と硝子の万華鏡 | 実際に動く万華鏡、中身の切替、断面図、予約デモ |
-| [devin-tsumugiya](devin-tsumugiya/) | Devin | つむぎや織物 — たて糸は規律。よこ糸は、実験。桐生の織元 | 織り途中の帯、よこ糸を選ぶ縞見本、見本帳、年表、相談デモ |
-| [claude-lp](claude-lp/) | Claude | TOKI — 朝は、三十分かけてやってくる。和紙の目覚ましランプ | WebGL で描いた和紙のランプと夜明けスライダー、素材の描画、仕上げ選択、予約デモ |
-| [claude-corporate](claude-corporate/) | Claude | KAISŌ Materials — 海から、建てる。海藻のコンクリートと断熱材 | 光がカーソルを追う打放しコンクリートの壁、素材の断面図、炭素台帳の絞り込み、サンプル請求デモ |
-| [muse-halo-lp](muse-halo-lp/) | Muse | HALO — 指先から、からだの声を聞く。チタン製スマートリング | 使い方の3ステップ、スペック、料金プラン、FAQ |
-| [muse-arcline-hp](muse-arcline-hp/) | Muse | Arcline — 中堅・中小企業のクラウド移行と DX 支援 | 事業内容、選ばれる理由、導入事例、代表メッセージ、会社概要 |
+作品の一覧は、各フォルダの `meta.json` から自動で作るギャラリーで見ます（作品表は手で書きません）。同じお題（`promptPath`）の作品が 1 行に並び、お題・種別・モデル・ツールで絞り込めます。元のプロンプトが残っていない既存作品は、種別（商品LP・企業HP）ごとにまとめています。
+
+- ローカルでは `npm run dev` を起動して http://127.0.0.1:4173/ を開きます。
+- 公開 URL は、W6（Pages の deploy workflow）と GitHub Pages の有効化の後に決まります。それまでは公開していません。
+- お題の本文は [prompts/](prompts/) にあります。ギャラリーの「プロンプトを読む」から、本文と全お題に共通の制約を読めます。
+- 作品の足し方と `meta.json` の規約は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
 
 デザインの意図は [DESIGN.md](DESIGN.md) と各フォルダの README に、画像・フォントの出典は [ASSETS.md](ASSETS.md) にあります。
 
@@ -31,7 +23,7 @@ Node.js 20.11 以降が必要です。実行時に必要な依存パッケージ
 npm run dev
 ```
 
-- 一覧ページ：http://127.0.0.1:4173/
+- ギャラリー：http://127.0.0.1:4173/（`meta.json` と `index.html` のテンプレートから、その場で描きます）
 - 各作品：http://127.0.0.1:4173/<フォルダ名>/（例：http://127.0.0.1:4173/claude-lp/）
 
 `PORT=4180 npm run dev` でポートを変えられます。サーバーは localhost でだけ待ち受けます。
@@ -39,9 +31,13 @@ npm run dev
 ## ビルド
 
 ```sh
-npm run build      # dist/ に全作品と一覧ページを出力し、HTML のローカル参照先を検査
+npm run build      # dist/ に全作品とギャラリーを出力し、HTML のローカル参照先を検査
 npm run preview    # dist/ をプレビュー
 ```
+
+`npm run build` は、ギャラリーのカードを `dist/index.html` に HTML として焼き込みます（JavaScript なしでも一覧が見えます）。お題は `dist/prompts/<お題のファイル名>.html`（例：`prompts/saas-lp.md` → `dist/prompts/saas-lp.html`）に、全お題に共通の制約と一緒に書き出します。`dist/` は生成物なのでコミットしません。
+
+`npm run dev` と `npm run build` は、どちらも `scripts/catalog.mjs` の同じ関数でギャラリーを描きます。
 
 ## ブラウザテスト
 
@@ -56,7 +52,8 @@ npm run test:a11y
 いまテストの対象になっているのは一部の作品だけです。
 
 - `npm test`：gpt-nagi・gpt-umi のレイアウト（320〜1920px）、画像の出し分け、主要操作、キーボード操作、reduced-motion、外部通信がないこと。grok-lp・grok-corporate の同じ6幅でのレイアウトと画像の読み込み。
-- `npm run test:a11y`：gpt-nagi・gpt-umi を axe-core（WCAG 2.2 AA までのルール）で検査。
+- `npm run test:a11y`：ギャラリー・gpt-nagi・gpt-umi を axe-core（WCAG 2.2 AA までのルール）で検査。
+- `npm run test:sites`：全作品のスモークテスト（375px・1280px で横はみ出し・外部通信・エラーがないこと）。ギャラリーについては、カード数が作品数と同じこと、絞り込みの件数が `meta.json` から数えた件数と同じこと、該当なしの文言、`dist/` を `/webpage-arena/` の下で配信したときのリンク切れ 0 も確かめます。
 
 結果は `qa/` に書き出されます。`qa/` は実行のたびに作り直される生成物なので、Git の管理対象から外しています。
 
