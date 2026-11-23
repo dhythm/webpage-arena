@@ -136,6 +136,18 @@ test("workflows [4/5]: 先頭ジョブで Pages の有効性を確かめ、404 �
   assert.match(deploy.lines.join("\n"), new RegExp(`needs:[^\\n]*\\b${builder.name}\\b`), "deploy が build を needs していない");
 });
 
+test("workflows: build・deploy は main のときだけ走る（workflow_dispatch で別ブランチを公開しない）", async () => {
+  const all = jobs(await pagesYaml());
+  const builder = findJob(all, /upload-pages-artifact/);
+  const deploy = all.find((job) => job.name === "deploy");
+  assert.ok(builder && deploy, "build ジョブか deploy ジョブが無い");
+  for (const job of [builder, deploy]) {
+    const condition = jobIf(job);
+    assert.match(condition, /&&\s*github\.ref\s*==\s*'refs\/heads\/main'/, `${job.name} ジョブの if が main に限っていない`);
+    assert.doesNotMatch(condition, /\|\|/, `${job.name} ジョブの if に || がある`);
+  }
+});
+
 test("workflows [5/5]: 公開パスは dist だけで、npm ci → check → build → upload → deploy の順", async () => {
   const text = await pagesYaml();
   const uploads = [...text.matchAll(/uses:\s*actions\/upload-pages-artifact@\S+/g)];
