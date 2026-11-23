@@ -1,0 +1,14 @@
+{
+  "id": "grok-sample",
+  "title": "カケハシ",
+  "tagline": "検査用の作品。",
+  "type": "saas-lp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": "prompts/saas-lp.md",
+  "promptNotes": "検査用",
+  "created": "2026-11-24",
+  "thumbnail": null,
+  "legacy": false,
+  "externalOrigins": []
+}
