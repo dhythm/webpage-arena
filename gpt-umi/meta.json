@@ -1,0 +1,14 @@
+{
+  "id": "gpt-umi",
+  "title": "UMI 海洋循環研究所",
+  "tagline": "海の可能性を、社会の次へ。",
+  "type": "corporate-hp",
+  "model": "GPT",
+  "tool": "unknown",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}

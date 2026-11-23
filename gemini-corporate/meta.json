@@ -1,0 +1,14 @@
+{
+  "id": "gemini-corporate",
+  "title": "森羅木工構造",
+  "tagline": "100年後の森を、都市に組む。",
+  "type": "corporate-hp",
+  "model": "Gemini",
+  "tool": "unknown",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}

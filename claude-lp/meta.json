@@ -1,0 +1,17 @@
+{
+  "id": "claude-lp",
+  "title": "TOKI",
+  "tagline": "朝は、三十分かけてやってくる。",
+  "type": "product-lp",
+  "model": "Claude",
+  "tool": "Claude Code",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": [
+    "https://fonts.googleapis.com",
+    "https://fonts.gstatic.com"
+  ]
+}

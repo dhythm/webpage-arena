@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 import { chromium } from "playwright";
-import { listSites } from "./sites.mjs";
+import { readMeta, siteCoverage } from "./sites.mjs";
 const repo = resolve(import.meta.dirname, "..");
 const rootFlag = process.argv.indexOf("--root");
 const root = rootFlag === -1 ? repo : resolve(repo, process.argv[rootFlag + 1]);
@@ -10,11 +10,6 @@ const viewports = [
   { width: 375, height: 812 },
   { width: 1280, height: 800 },
 ];
-const googleFonts = ["https://fonts.googleapis.com", "https://fonts.gstatic.com"];
-const ALLOWED_ORIGINS = {
-  "claude-lp": googleFonts,
-  "claude-corporate": googleFonts,
-};
 const KNOWN_FAILURES = {};
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -27,6 +22,18 @@ const types = {
   ".woff2": "font/woff2",
   ".json": "application/json",
 };
+const coverage = await siteCoverage(root);
+if (coverage.problems.length > 0 || coverage.sites.length !== coverage.expected) {
+  for (const problem of coverage.problems) console.log(`FAIL ${problem}`);
+  console.log(
+    `Smoke: site count mismatch: ${coverage.expected} expected, ${coverage.sites.length} listed`,
+  );
+  process.exit(1);
+}
+const sites = coverage.sites;
+const allowedOrigins = {};
+for (const site of sites)
+  allowedOrigins[site] = (await readMeta(root, site)).externalOrigins ?? [];
 const server = createServer(async (req, res) => {
   try {
     let file = resolve(
@@ -51,7 +58,7 @@ await new Promise((done) => server.listen(0, "127.0.0.1", done));
 const base = `http://127.0.0.1:${server.address().port}`;
 console.log(`Smoke server: ${base} (root ${root})`);
 async function smoke(browser, site, viewport) {
-  const allowed = new Set([base, ...(ALLOWED_ORIGINS[site] || [])]);
+  const allowed = new Set([base, ...allowedOrigins[site]]);
   const problems = new Set();
   const blocked = new Set();
   const context = await browser.newContext({ viewport, deviceScaleFactor: 1 });
@@ -111,7 +118,6 @@ async function smoke(browser, site, viewport) {
   }
   return [...problems];
 }
-const sites = await listSites(root);
 const counts = { passed: 0, failed: 0, skipped: 0 };
 const browser = await chromium.launch();
 try {
@@ -139,7 +145,13 @@ try {
   await new Promise((done) => server.close(done));
 }
 const total = counts.passed + counts.failed + counts.skipped;
+const expectedCases = coverage.expected * viewports.length;
 console.log(
   `Smoke: ${total} cases (${sites.length} sites x ${viewports.length} widths): ${counts.passed} passed, ${counts.failed} failed, ${counts.skipped} skipped`,
 );
-process.exit(total > 0 && counts.failed === 0 ? 0 : 1);
+console.log(
+  `Smoke: ${coverage.expected} sites expected (folders with index.html or meta.json), ${sites.length} smoked, ${total}/${expectedCases} cases`,
+);
+process.exit(
+  total > 0 && total === expectedCases && counts.failed === 0 ? 0 : 1,
+);

@@ -66,3 +66,16 @@ npm run test:a11y
 - 商品・企業・価格・仕様・データ・人物は架空にし、ページ上でもそう明記する。根拠のない受賞歴・レビュー・利用者数は載せない。
 - フォームはブラウザの中で完結するデモにし、送信・保存・決済はしない。
 - フォントは作品ごとに選ぶ。配信方法も作品ごとに違い、自己配信（gpt-*・devin-*）、Google Fonts（claude-*）、端末のフォント（そのほか）が混在している。
+
+## LP の追加手順
+
+新しい LP やモデルを足すのは、フォルダを 1 つ足すだけです。詳しい規約は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
+
+1. リポジトリ直下に `<model の小文字>-<slug>` のフォルダを作り、`index.html` を置く（例：`claude-kakehashi`）。
+2. 同じフォルダに `meta.json` を書く。
+3. `npm run thumbs -- <id>` でサムネイルを撮る。
+4. `npm run check` で規約を検査する。
+5. `npm run test:sites` で全作品のスモークテストを回す。
+6. 自分のフォルダだけを変更した PR を出す。
+
+同じお題を別のモデルで作るときは、同じ `promptPath` を使い、フォルダの prefix だけ変えます（例：`claude-kakehashi` と `grok-kakehashi`）。

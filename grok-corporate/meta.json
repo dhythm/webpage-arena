@@ -1,0 +1,14 @@
+{
+  "id": "grok-corporate",
+  "title": "潮罫社",
+  "tagline": "港の深さは、紙の上で決まる。",
+  "type": "corporate-hp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}

@@ -1,0 +1,14 @@
+{
+  "id": "gpt-nagi",
+  "title": "NAGI",
+  "tagline": "音と、暮らしのあいだに。",
+  "type": "product-lp",
+  "model": "GPT",
+  "tool": "unknown",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}

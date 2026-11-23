@@ -1,0 +1,14 @@
+{
+  "id": "gemini-lp",
+  "title": "雨聲 AMENE",
+  "tagline": "空気が湿ると、雨の日の匂いがする。",
+  "type": "product-lp",
+  "model": "Gemini",
+  "tool": "unknown",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}

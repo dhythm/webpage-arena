@@ -1,0 +1,9 @@
+[
+  { "id": "product-lp", "label": "商品LP" },
+  { "id": "corporate-hp", "label": "企業HP" },
+  { "id": "saas-lp", "label": "SaaS" },
+  { "id": "restaurant", "label": "飲食" },
+  { "id": "app-lp", "label": "アプリ" },
+  { "id": "event", "label": "イベント" },
+  { "id": "inn", "label": "宿" }
+]
