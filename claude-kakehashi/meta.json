@@ -10,6 +10,7 @@
   "promptNotes": "お題のプロンプトをそのまま使用",
   "created": "2026-11-24",
   "thumbnail": "thumb.webp",
+  "thumbWait": "#hero-ledger[data-settled]",
   "legacy": false,
   "externalOrigins": []
 }
