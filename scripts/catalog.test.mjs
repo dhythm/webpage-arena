@@ -2,8 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { pathToFileURL } from "node:url";
-import { chromium } from "playwright";
 import { join, resolve } from "node:path";
 import { checkSites } from "./check-sites.mjs";
 import { readMeta, siteCoverage } from "./sites.mjs";
@@ -42,16 +40,6 @@ function tally(list, key) {
 }
 async function hub(root) {
   return renderIndex(await loadCatalog(root), await template());
-}
-async function sevenRow(t) {
-  const root = await tempCopy(t, "catalog-basic");
-  const meta = JSON.parse(await readFile(join(root, "grok-lamp", "meta.json"), "utf8"));
-  for (const n of [1, 2, 3, 4, 5, 6]) {
-    const id = `lamp-${n}`;
-    await cp(join(root, "grok-lamp"), join(root, id), { recursive: true });
-    await writeFile(join(root, id, "meta.json"), JSON.stringify({ ...meta, id, title: `灯り ${n}` }));
-  }
-  return root;
 }
 async function tempCopy(t, name) {
   const root = await mkdtemp(join(tmpdir(), "catalog-"));
@@ -244,6 +232,10 @@ test("rows: every scroll row is keyboard-focusable and says it scrolls sideways"
       assert.ok(row.includes(`aria-label="${heading}の作品、横にスクロール"`), `${group.key}: ${row}`);
     }
   }
+  const css = await readFile(resolve(repo, "index.html"), "utf8");
+  assert.match(css, /flex:\s*0 0 max\(150px, calc\(\(100% - 6 \* 14px\) \/ 6\.5\)\)/);
+  assert.match(css, /scroll-snap-type:\s*x mandatory/);
+  assert.match(css, /scroll-snap-align:\s*start/);
 });
 
 test("lead and counts: the intro covers prompt rows and type rows, and the filter count starts empty", async () => {
@@ -343,66 +335,4 @@ test("repository: every link and resource in the hub is relative and no external
   }
   assert.doesNotMatch(html, /fonts\.googleapis|fonts\.gstatic|@import|<link\b[^>]*stylesheet/);
   assert.match(html, /:focus-visible/);
-});
-
-test("browser: a row of 7+ cards at 1280px shows about 6.5 cards, snaps to cards, scrolls with the keyboard and counts filtered works", async (t) => {
-  const root = await sevenRow(t);
-  const out = await mkdtemp(join(tmpdir(), "catalog-seven-"));
-  t.after(() => rm(out, { recursive: true, force: true }));
-  await buildDist(root, out);
-  const list = await metas(root);
-  const row = groupsOf(await readFile(join(out, "index.html"), "utf8")).find((g) => g.key === "type:product-lp");
-  assert.ok(row.ids.length >= 7, row.ids.join(", "));
-  const browser = await chromium.launch();
-  t.after(() => browser.close());
-  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-  await page.goto(pathToFileURL(join(out, "index.html")).href);
-  const ul = page.locator('[data-group="type:product-lp"] ul.row');
-  const box = await ul.evaluate((el) => {
-    const r = el.getBoundingClientRect();
-    const cards = [...el.querySelectorAll("[data-card]")].map((c) => c.getBoundingClientRect());
-    return {
-      left: r.left,
-      right: r.right,
-      width: el.clientWidth,
-      scroll: el.scrollWidth,
-      snap: getComputedStyle(el).scrollSnapType,
-      align: getComputedStyle(el.querySelector("[data-card]")).scrollSnapAlign,
-      cards: cards.map((c) => ({ left: c.left, right: c.right, width: c.width })),
-    };
-  });
-  assert.ok(box.scroll > box.width, `row overflows: ${box.scroll} > ${box.width}`);
-  const full = box.cards.filter((c) => c.right <= box.right + 0.5).length;
-  const peek = box.cards.find((c) => c.left < box.right && c.right > box.right + 0.5);
-  assert.equal(full, 6, JSON.stringify(box.cards));
-  assert.ok(peek, "the 7th card peeks past the right edge");
-  const visible = (box.right - peek.left) / peek.width;
-  assert.ok(visible > 0.25 && visible < 0.75, `7th card shows ${visible.toFixed(2)} of its width`);
-  assert.match(box.snap, /x mandatory/);
-  assert.equal(box.align, "start");
-  await ul.focus();
-  assert.equal(await page.evaluate(() => document.activeElement.getAttribute("aria-label")), "商品LPの作品、横にスクロール");
-  assert.notEqual(await ul.evaluate((el) => getComputedStyle(el).outlineStyle), "none");
-  await page.keyboard.press("ArrowRight");
-  await page.waitForFunction((el) => el.scrollLeft > 0, await ul.elementHandle(), { timeout: 3000 });
-  await ul.evaluate((el) => el.scrollTo({ left: 37, behavior: "instant" }));
-  await page.waitForTimeout(500);
-  const stop = await ul.evaluate((el) => {
-    const start = el.getBoundingClientRect().left;
-    return [...el.querySelectorAll("[data-card]")].map((c) => Math.round(c.getBoundingClientRect().left - start));
-  });
-  assert.ok(stop.some((x) => Math.abs(x) <= 1), `a card edge sits at the row start after scrolling: ${stop}`);
-  const count = page.locator("[data-count]");
-  assert.equal((await count.innerText()).trim(), "");
-  const want = list.filter((m) => m.type === "product-lp").length;
-  await page.selectOption("select[name=type]", "product-lp");
-  assert.equal((await count.innerText()).trim(), `${list.length} 作品中 ${want} 作品を表示`);
-  await page.click("button[type=reset]");
-  await page.waitForFunction(() => document.querySelector("[data-count]").textContent === "");
-  await page.setViewportSize({ width: 375, height: 812 });
-  const phone = await ul.evaluate((el) => {
-    const r = el.getBoundingClientRect();
-    return [...el.querySelectorAll("[data-card]")].map((c) => c.getBoundingClientRect()).filter((c) => c.left < r.right && c.right > r.right).length;
-  });
-  assert.equal(phone, 1, "at 375px the next card peeks too");
 });

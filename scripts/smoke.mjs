@@ -1,7 +1,8 @@
 import { createServer } from "node:http";
-import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve, extname, sep } from "node:path";
+import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 import { buildDist, renderRequest } from "./catalog.mjs";
 import { coverageSummary, readMeta, siteCoverage } from "./sites.mjs";
@@ -292,6 +293,97 @@ async function hubSubpath(browser) {
   }
   return [...problems];
 }
+async function checkSevenRow(browser) {
+  const problems = new Set();
+  const root = await mkdtemp(join(tmpdir(), "catalog-seven-root-"));
+  const out = await mkdtemp(join(tmpdir(), "catalog-seven-dist-"));
+  try {
+    await cp(join(repo, "tests/fixtures/catalog-basic"), root, { recursive: true });
+    const meta = JSON.parse(await readFile(join(root, "grok-lamp", "meta.json"), "utf8"));
+    for (const n of [1, 2, 3, 4, 5, 6]) {
+      const id = `lamp-${n}`;
+      await cp(join(root, "grok-lamp"), join(root, id), { recursive: true });
+      await writeFile(join(root, id, "meta.json"), JSON.stringify({ ...meta, id, title: `灯り ${n}` }));
+    }
+    await buildDist(root, out);
+    const html = await readFile(join(out, "index.html"), "utf8");
+    const group = html.match(/<section\b[^>]*\bdata-group="type:product-lp"[^>]*>([\s\S]*?)<\/section>/);
+    const ids = group ? [...group[1].matchAll(/\bdata-id="([^"]+)"/g)].map((m) => m[1]) : [];
+    if (ids.length < 7) problems.add(`seven: product-lp row has ${ids.length} cards`);
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    try {
+      await page.goto(pathToFileURL(join(out, "index.html")).href);
+      const ul = page.locator('[data-group="type:product-lp"] ul.row');
+      const box = await ul.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const cards = [...el.querySelectorAll("[data-card]")].map((c) => c.getBoundingClientRect());
+        return {
+          right: r.right,
+          width: el.clientWidth,
+          scroll: el.scrollWidth,
+          snap: getComputedStyle(el).scrollSnapType,
+          align: getComputedStyle(el.querySelector("[data-card]")).scrollSnapAlign,
+          cards: cards.map((c) => ({ left: c.left, right: c.right, width: c.width })),
+        };
+      });
+      if (!(box.scroll > box.width)) problems.add(`seven: row does not overflow ${box.scroll} <= ${box.width}`);
+      const full = box.cards.filter((c) => c.right <= box.right + 0.5).length;
+      const peek = box.cards.find((c) => c.left < box.right && c.right > box.right + 0.5);
+      if (full !== 6) problems.add(`seven: ${full} fully visible cards, want 6`);
+      if (!peek) problems.add("seven: the 7th card does not peek past the right edge");
+      else {
+        const visible = (box.right - peek.left) / peek.width;
+        if (!(visible > 0.25 && visible < 0.75))
+          problems.add(`seven: 7th card shows ${visible.toFixed(2)} of its width`);
+      }
+      if (!/x mandatory/.test(box.snap)) problems.add(`seven: snap is ${box.snap}`);
+      if (box.align !== "start") problems.add(`seven: snap-align is ${box.align}`);
+      await ul.focus();
+      const label = await page.evaluate(() => document.activeElement.getAttribute("aria-label"));
+      if (label !== "商品LPの作品、横にスクロール") problems.add(`seven: aria-label is "${label}"`);
+      if ((await ul.evaluate((el) => getComputedStyle(el).outlineStyle)) === "none")
+        problems.add("seven: no focus outline on the row");
+      await page.keyboard.press("ArrowRight");
+      await page.waitForFunction((el) => el.scrollLeft > 0, await ul.elementHandle(), { timeout: 3000 });
+      await ul.evaluate((el) => el.scrollTo({ left: 37, behavior: "instant" }));
+      await page.waitForTimeout(500);
+      const stop = await ul.evaluate((el) => {
+        const start = el.getBoundingClientRect().left;
+        return [...el.querySelectorAll("[data-card]")].map((c) =>
+          Math.round(c.getBoundingClientRect().left - start),
+        );
+      });
+      if (!stop.some((x) => Math.abs(x) <= 1))
+        problems.add(`seven: no card edge at the row start after scrolling: ${stop}`);
+      const count = page.locator("[data-count]");
+      if ((await count.innerText()).trim() !== "") problems.add("seven: filter count should start empty");
+      const want = ids.length;
+      await page.selectOption("select[name=type]", "product-lp");
+      const status = (await count.innerText()).trim();
+      const listed = (await page.locator("[data-card]").count());
+      const expect = `${listed} 作品中 ${want} 作品を表示`;
+      if (status !== expect) problems.add(`seven: count reads "${status}", want "${expect}"`);
+      await page.click("button[type=reset]");
+      await page.waitForFunction(() => document.querySelector("[data-count]").textContent === "");
+      await page.setViewportSize({ width: 375, height: 812 });
+      const phone = await ul.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return [...el.querySelectorAll("[data-card]")]
+          .map((c) => c.getBoundingClientRect())
+          .filter((c) => c.left < r.right && c.right > r.right).length;
+      });
+      if (phone !== 1) problems.add(`seven: at 375px ${phone} cards peek, want 1`);
+    } finally {
+      await page.close();
+    }
+  } catch (error) {
+    problems.add(`seven: ${error.message.split("\n")[0]}`);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+    await rm(out, { recursive: true, force: true });
+  }
+  return [...problems];
+}
 const counts = { passed: 0, failed: 0, skipped: 0 };
 const hubCounts = { passed: 0, failed: 0 };
 const browser = await chromium.launch();
@@ -300,6 +392,7 @@ try {
     const checks = [
       ...viewports.map((viewport) => [`hub ${viewport.width}px`, () => hub(browser, viewport)]),
       [`hub subpath ${subpath}`, () => hubSubpath(browser)],
+      ["hub 7-card row peek", () => checkSevenRow(browser)],
     ];
     for (const [label, run] of checks) {
       const problems = await run();
@@ -344,7 +437,7 @@ console.log(
 );
 if (withHub)
   console.log(
-    `Hub: ${hubCounts.passed + hubCounts.failed} checks (${viewports.map((v) => `${v.width}px`).join(", ")}, subpath ${subpath}): ${hubCounts.passed} passed, ${hubCounts.failed} failed`,
+    `Hub: ${hubCounts.passed + hubCounts.failed} checks (${viewports.map((v) => `${v.width}px`).join(", ")}, subpath ${subpath}, 7-card row): ${hubCounts.passed} passed, ${hubCounts.failed} failed`,
   );
 process.exit(
   total > 0 && total === expectedCases && counts.failed === 0 && hubCounts.failed === 0 ? 0 : 1,
