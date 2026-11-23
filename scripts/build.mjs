@@ -1,13 +1,11 @@
 import { cp, mkdir, rm, readFile, stat } from "node:fs/promises";
 import { resolve, join } from "node:path";
-import { siteCoverage } from "./sites.mjs";
+import { coverageSummary, siteCoverage } from "./sites.mjs";
 const root = resolve(import.meta.dirname, "..");
 const coverage = await siteCoverage(root);
 if (coverage.problems.length > 0 || coverage.sites.length !== coverage.expected) {
   for (const problem of coverage.problems) console.error(`FAIL ${problem}`);
-  console.error(
-    `Build: site count mismatch: ${coverage.expected} expected, ${coverage.sites.length} listed`,
-  );
+  for (const line of coverageSummary("Build", coverage)) console.error(line);
   process.exit(1);
 }
 const sites = coverage.sites;

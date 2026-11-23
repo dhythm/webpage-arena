@@ -12,7 +12,8 @@
     "check": "node --test scripts/*.test.mjs",
     "screenshots:webp": "node scripts/optimize-screenshots.mjs",
     "test:sites": "node scripts/smoke.mjs",
-    "test:smoke-selftest": "node scripts/smoke-selftest.mjs"
+    "test:smoke-selftest": "node scripts/smoke-selftest.mjs",
+    "thumbs": "node scripts/thumbs.mjs"
   },
   "engines": {
     "node": ">=20"

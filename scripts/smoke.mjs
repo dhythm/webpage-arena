@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 import { chromium } from "playwright";
-import { readMeta, siteCoverage } from "./sites.mjs";
+import { coverageSummary, readMeta, siteCoverage } from "./sites.mjs";
 const repo = resolve(import.meta.dirname, "..");
 const rootFlag = process.argv.indexOf("--root");
 const root = rootFlag === -1 ? repo : resolve(repo, process.argv[rootFlag + 1]);
@@ -25,9 +25,7 @@ const types = {
 const coverage = await siteCoverage(root);
 if (coverage.problems.length > 0 || coverage.sites.length !== coverage.expected) {
   for (const problem of coverage.problems) console.log(`FAIL ${problem}`);
-  console.log(
-    `Smoke: site count mismatch: ${coverage.expected} expected, ${coverage.sites.length} listed`,
-  );
+  for (const line of coverageSummary("Smoke", coverage)) console.log(line);
   process.exit(1);
 }
 const sites = coverage.sites;
