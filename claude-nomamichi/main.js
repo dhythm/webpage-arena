@@ -80,7 +80,7 @@
   button.addEventListener("click", () => {
     const os = document.querySelector('input[name="os"]:checked').value;
     const p = document.createElement("p");
-    p.textContent = `${os} 版のダウンロード……の、デモでした。のまみちは架空のアプリなので、ファイルは届かず、どのストアにも移動しません。ここで終わりです。`;
+    p.textContent = `${os}向けのダウンロード……の、デモでした。のまみちは架空のアプリなので、ファイルは届かず、どのストアにも移動しません。ここで終わりです。`;
     result.replaceChildren(p);
   });
 })();

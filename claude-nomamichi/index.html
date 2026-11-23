@@ -114,7 +114,7 @@
     </section>
 
     <section class="estimate" aria-labelledby="estimate-title">
-      <h2 id="estimate-title">これは目安で、安全の保証ではありません</h2>
+      <h2 id="estimate-title">これは目安で、<wbr>安全の保証ではありません</h2>
       <p>のまみちが塗る明るさは、街灯の位置と種類、店の営業時間から推定した濃淡です。人通りも、曜日と時間帯ごとの傾向から出した目安です。工事で街灯が消えている夜や、急に店が閉まった夜までは分かりません。地図は道を選ぶ手がかりのひとつとして使ってください。</p>
     </section>
 
@@ -146,16 +146,16 @@
       </div>
       <div class="phones">
         <figure class="phone">
-          <img src="img/screen-map-260.webp" srcset="img/screen-map-260.webp 260w, img/screen-map-520.webp 520w" sizes="(max-width: 720px) 220px, 240px" width="260" height="540" alt="地図の画面。大通りは街灯の色で太く塗られ、川沿いの道は点線で暗く表示されている。下に暗いから明るいまでの目安の帯。" loading="lazy" decoding="async">
+          <img src="img/screen-map-260.webp" srcset="img/screen-map-260.webp 260w, img/screen-map-520.webp 520w" sizes="(max-width: 720px) 208px, 228px" width="260" height="540" alt="地図の画面。大通りは街灯の色で太く塗られ、川沿いの道は点線で暗く表示されている。下に暗いから明るいまでの目安の帯。" loading="lazy" decoding="async">
           <figcaption><strong>近くの道の明るさ</strong>現在地のまわりを、灯りの濃淡で塗った地図。</figcaption>
         </figure>
         <figure class="phone">
-          <img src="img/screen-people-260.webp" srcset="img/screen-people-260.webp 260w, img/screen-people-520.webp 520w" sizes="(max-width: 720px) 220px, 240px" width="260" height="540" alt="人通りの目安の画面。川端通りの19時から1時までの棒グラフで、夜が遅くなるほど棒が低くなる。21時ごろは「やや多い」。" loading="lazy" decoding="async">
+          <img src="img/screen-people-260.webp" srcset="img/screen-people-260.webp 260w, img/screen-people-520.webp 520w" sizes="(max-width: 720px) 208px, 228px" width="260" height="540" alt="人通りの目安の画面。川端通りの19時から1時までの棒グラフで、夜が遅くなるほど棒が低くなる。21時ごろは「やや多い」。" loading="lazy" decoding="async">
           <figcaption><strong>人通りの目安</strong>通りごとに、時間帯の傾向を棒で見る。</figcaption>
         </figure>
         <figure class="phone">
-          <img src="img/screen-route-260.webp" srcset="img/screen-route-260.webp 260w, img/screen-route-520.webp 520w" sizes="(max-width: 720px) 220px, 240px" width="260" height="540" alt="帰り道をくらべる画面。明るい道は徒歩15分で暗い区間なし、いちばん近い道は徒歩12分で暗い区間3か所。明るい道が選ばれている。" loading="lazy" decoding="async">
-          <figcaption><strong>帰り道をくらべる</strong>三分の遠回りで暗い区間がなくなる、を数字で見る。</figcaption>
+          <img src="img/screen-route-260.webp" srcset="img/screen-route-260.webp 260w, img/screen-route-520.webp 520w" sizes="(max-width: 720px) 208px, 228px" width="260" height="540" alt="帰り道をくらべる画面。明るい道は徒歩15分で暗い区間なし、いちばん近い道は徒歩12分で暗い区間3か所。明るい道が選ばれている。" loading="lazy" decoding="async">
+          <figcaption><strong>帰り道をくらべる</strong>3分の遠回りで暗い区間がなくなるのを、数字で見る。</figcaption>
         </figure>
       </div>
     </section>
@@ -196,15 +196,15 @@
         <p>OS の名前はすべて架空の表記です。</p>
       </div>
       <div class="table-wrap">
-        <table>
+        <table role="table">
           <caption class="visually-hidden">のまみちの対応端末と OS（架空）</caption>
-          <thead>
-            <tr><th scope="col">端末</th><th scope="col">OS（架空）</th><th scope="col">内容</th></tr>
+          <thead role="rowgroup">
+            <tr role="row"><th scope="col" role="columnheader">端末</th><th scope="col" role="columnheader">OS（架空）</th><th scope="col" role="columnheader">内容</th></tr>
           </thead>
-          <tbody>
-            <tr><th scope="row">スマートフォン</th><td>Lumina OS 15 以降</td><td>地図・時刻ずらし・経路くらべ</td></tr>
-            <tr><th scope="row">スマートフォン</th><td>Kairo 12 以降</td><td>地図・時刻ずらし・経路くらべ</td></tr>
-            <tr><th scope="row">腕時計型</th><td>Kairo Wear 4 以降</td><td>曲がり角を振動で知らせる簡易版（構想中）</td></tr>
+          <tbody role="rowgroup">
+            <tr role="row"><th scope="row" role="rowheader"><span class="nb">スマートフォン</span><span class="nb">（Lumina OS）</span></th><td role="cell" data-label="OS（架空）"><span class="nb">Lumina OS 15 以降</span></td><td role="cell" data-label="内容"><span>地図・時刻ずらし・経路くらべ</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader"><span class="nb">スマートフォン</span><span class="nb">（Kairo）</span></th><td role="cell" data-label="OS（架空）"><span class="nb">Kairo 12 以降</span></td><td role="cell" data-label="内容"><span>地図・時刻ずらし・経路くらべ</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader"><span class="nb">腕時計型</span><span class="nb">（Kairo Wear）</span></th><td role="cell" data-label="OS（架空）"><span class="nb">Kairo Wear 4 以降</span></td><td role="cell" data-label="内容"><span>曲がり角を振動で知らせる簡易版<span class="nb">（構想中）</span></span></td></tr>
           </tbody>
         </table>
       </div>
@@ -219,9 +219,9 @@
       <div class="download-box">
         <fieldset>
           <legend>使う端末</legend>
-          <label><input type="radio" name="os" value="Lumina OS" checked> Lumina OS</label>
-          <label><input type="radio" name="os" value="Kairo"> Kairo</label>
-          <label><input type="radio" name="os" value="Kairo Wear"> Kairo Wear</label>
+          <label><input type="radio" name="os" value="スマートフォン（Lumina OS）" checked> スマートフォン（Lumina OS）</label>
+          <label><input type="radio" name="os" value="スマートフォン（Kairo）"> スマートフォン（Kairo）</label>
+          <label><input type="radio" name="os" value="腕時計型（Kairo Wear）"> 腕時計型（Kairo Wear）</label>
         </fieldset>
         <button type="button" class="button" id="download-demo">ダウンロード（デモ）</button>
         <div class="download-result" id="download-result" role="status" aria-live="polite"></div>

@@ -326,6 +326,7 @@ main > section.estimate {
 
 .estimate h2 {
   font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  word-break: keep-all;
 }
 
 .estimate p {
@@ -498,6 +499,11 @@ tbody th {
   font-weight: 700;
 }
 
+.nb {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 .requires {
   margin: 1.5rem 0 0;
   color: var(--muted);
@@ -632,6 +638,58 @@ input[type="radio"] {
 
   .walk-toggle {
     justify-self: start;
+  }
+}
+
+@media (max-width: 600px) {
+  .platforms table,
+  .platforms tbody,
+  .platforms tr,
+  .platforms th,
+  .platforms td {
+    display: block;
+  }
+
+  .platforms thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .platforms tbody tr {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .platforms tbody tr:first-child {
+    border-top: 1px solid var(--line);
+  }
+
+  .platforms tbody th,
+  .platforms tbody td {
+    padding: 0;
+    border: 0;
+  }
+
+  .platforms tbody th {
+    margin-bottom: 0.5rem;
+    font-size: 1.02rem;
+  }
+
+  .platforms tbody td {
+    display: grid;
+    grid-template-columns: 5.5em minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .platforms tbody td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 2.1;
   }
 }
 
