@@ -1,13 +1,39 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFile, stat } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { readMeta, siteCoverage } from "./sites.mjs";
 import { parseArgs, selectTargets, webpSize } from "./thumbs.mjs";
 const repo = resolve(import.meta.dirname, "..");
 const { sites } = await siteCoverage(repo);
 const thumb = (site) => join(repo, site, "thumb.webp");
+const knownIds = [
+  "claude-corporate",
+  "claude-lp",
+  "devin-meguru",
+  "devin-tsumugiya",
+  "gemini-corporate",
+  "gemini-lp",
+  "gpt-nagi",
+  "gpt-umi",
+  "grok-corporate",
+  "grok-lp",
+  "muse-arcline-hp",
+  "muse-halo-lp",
+];
+function assertOriginalSitesListed(listed) {
+  for (const id of knownIds) assert.ok(listed.includes(id), id);
+  assert.equal(listed.includes("tests"), false);
+  assert.equal(listed.includes("prompts"), false);
+}
+async function writeFixtureSite(root, id) {
+  const dir = join(root, id);
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, "index.html"), "<!doctype html><title>fixture</title>");
+  await writeFile(join(dir, "meta.json"), "{}");
+}
 function riff(chunk, payload) {
   const body = Buffer.concat([Buffer.from("WEBP"), Buffer.from(chunk), Buffer.alloc(4), payload]);
   body.writeUInt32LE(payload.length, 8);
@@ -17,8 +43,26 @@ function riff(chunk, payload) {
   return Buffer.concat([head, body]);
 }
 
-test("repository: there are twelve sites", () => {
-  assert.equal(sites.length, 12);
+test("repository: the original twelve site ids are listed and tests/prompts are not sites", () => {
+  assertOriginalSitesListed(sites);
+});
+
+test("repository: a valid extra LP is listed alongside the original twelve", async () => {
+  const root = await mkdtemp(join(tmpdir(), "thumb-plus-one-"));
+  try {
+    for (const id of knownIds) await writeFixtureSite(root, id);
+    await writeFixtureSite(root, "grok-extra");
+    await writeFixtureSite(root, "tests");
+    await writeFixtureSite(root, "prompts");
+    const coverage = await siteCoverage(root);
+    assert.deepEqual(coverage.problems, []);
+    assertOriginalSitesListed(coverage.sites);
+    assert.ok(coverage.sites.includes("grok-extra"));
+    assert.equal(coverage.sites.length, knownIds.length + 1);
+    assert.equal(coverage.expected, knownIds.length + 1);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test("thumbs: every site has thumb.webp", async () => {
