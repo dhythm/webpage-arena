@@ -293,7 +293,10 @@ test("repository: adding one valid new LP to the legacy sites still passes check
   const root = await makeRoot(t, files);
   for (const site of legacySites) {
     await mkdir(join(root, site));
-    for (const file of ["meta.json", "index.html"])
+    const meta = JSON.parse(await readFile(join(repo, site, "meta.json"), "utf8"));
+    const files = ["meta.json", "index.html"];
+    if (typeof meta.thumbnail === "string") files.push(meta.thumbnail);
+    for (const file of files)
       await cp(join(repo, site, file), join(root, site, file));
   }
   const { sites, errors } = await checkSites(root, { tracked: [] });
