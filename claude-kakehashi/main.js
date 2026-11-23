@@ -2,6 +2,9 @@
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   const yen = (n) => `${n.toLocaleString("ja-JP")}円`;
   const comma = (n) => n.toLocaleString("ja-JP");
+  const setText = (node, value) => {
+    if (node.textContent !== value) node.textContent = value;
+  };
 
   const ledger = document.getElementById("hero-ledger");
   if (ledger) {
@@ -114,9 +117,9 @@
 
     const renderTally = () => {
       const inv = openInvoices();
-      els.tallyDeposits.textContent = `${openDeposits().length}件`;
-      els.tallyInvoices.textContent = `${inv.length}件`;
-      els.tallyAmount.textContent = yen(inv.reduce((s, i) => s + i.amount, 0));
+      setText(els.tallyDeposits, `${openDeposits().length}件`);
+      setText(els.tallyInvoices, `${inv.length}件`);
+      setText(els.tallyAmount, yen(inv.reduce((s, i) => s + i.amount, 0)));
     };
 
     const renderDeposits = () => {
@@ -407,24 +410,24 @@
 
     const update = () => {
       const name = company.value.trim();
-      to.textContent = `${name || "貴社名"} 御中`;
+      setText(to, `${name || "貴社名"} 御中`);
       const n = Math.max(1, Math.floor(Number(count.value) || 0));
       const u = Number(users.value);
       const index = PLANS.findIndex((p) => n <= p.invoices && u <= p.users);
       rows.forEach((row) => row.classList.toggle("is-chosen", Number(row.dataset.plan) === index));
       if (index === -1) {
-        plan.textContent = "月500枚を超える場合の料金は決めていません。架空のサービスのため、この条件の見積もりは出せません。";
-        sub.textContent = "—";
-        tax.textContent = "—";
-        total.textContent = "—";
+        setText(plan, "月500枚を超える場合の料金は決めていません。架空のサービスのため、この条件の見積もりは出せません。");
+        setText(sub, "—");
+        setText(tax, "—");
+        setText(total, "—");
         return;
       }
       const p = PLANS[index];
       const t = Math.floor(p.price * 0.1);
-      plan.textContent = `月${comma(n)}枚・${u}人なら「${p.name}」になります。`;
-      sub.textContent = yen(p.price);
-      tax.textContent = yen(t);
-      total.textContent = yen(p.price + t);
+      setText(plan, `月${comma(n)}枚・${u}人なら「${p.name}」になります。`);
+      setText(sub, yen(p.price));
+      setText(tax, yen(t));
+      setText(total, yen(p.price + t));
     };
 
     form.addEventListener("submit", (event) => event.preventDefault());

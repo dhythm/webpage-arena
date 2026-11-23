@@ -77,6 +77,14 @@ a {
   border: 0;
 }
 
+.phrase {
+  word-break: keep-all;
+}
+
+.order-narrow {
+  display: none;
+}
+
 .skip {
   position: absolute;
   left: 1rem;
@@ -353,18 +361,20 @@ a {
 }
 
 .entry {
+  --rule-gap: 1.75rem;
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-content: center;
-  gap: 0.15rem 1rem;
-  padding: 0.75rem 1rem;
+  align-self: center;
+  align-content: start;
+  gap: 0 1rem;
+  padding: 0.5rem 1rem;
   background:
-    repeating-linear-gradient(to bottom, transparent 0 1.9rem, rgb(30 102 86 / 0.18) 1.9rem calc(1.9rem + 1px)),
+    linear-gradient(to bottom, transparent calc(var(--rule-gap) - 1px), rgb(30 102 86 / 0.18) calc(var(--rule-gap) - 1px)) 0 0.5rem / 100% var(--rule-gap) repeat-y,
     var(--passbook);
   border-left: 3px solid var(--rule);
   font-size: 0.9375rem;
-  line-height: 1.6;
+  line-height: var(--rule-gap);
 }
 
 .entry .pb {
@@ -1372,6 +1382,18 @@ mark {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .app-figure .app-note-match {
+    order: -1;
+  }
+
+  .order-wide {
+    display: none;
+  }
+
+  .order-narrow {
+    display: inline;
+  }
+
   .gaps thead {
     display: none;
   }
@@ -1523,14 +1545,8 @@ mark {
     margin-left: 0;
   }
 
-  .demo-check {
-    position: sticky;
-    top: auto;
-    bottom: 0;
-    z-index: 2;
-    max-height: 55vh;
-    overflow-y: auto;
-    box-shadow: 0 -10px 24px -14px rgb(29 38 36 / 0.5);
+  .demo-invoices {
+    order: 1;
   }
 
   .quote-form {
@@ -1560,6 +1576,82 @@ mark {
   .journal-table th,
   .journal-table td {
     padding: 0.4rem 0.35rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .plans,
+  .plans tbody,
+  .plans tr,
+  .plans th,
+  .plans td {
+    display: block;
+  }
+
+  .plans thead {
+    display: none;
+  }
+
+  .plans tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .plans tr {
+    padding: 0.35rem 0.9rem 0.45rem;
+    border: 1px solid var(--rule-light);
+    border-top: 3px solid var(--rule-light);
+    background: var(--white);
+  }
+
+  .plans tbody th {
+    padding: 0.35rem 0 0.4rem;
+    font-size: 1rem;
+  }
+
+  .plans td,
+  .plans td:nth-child(4) {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+  }
+
+  .plans td:last-child {
+    border-bottom: 0;
+    font-weight: 700;
+  }
+
+  .plans td::before {
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+
+  .plans td:nth-child(2)::before {
+    content: "請求書の枚数";
+  }
+
+  .plans td:nth-child(3)::before {
+    content: "使う人数";
+  }
+
+  .plans td:nth-child(4)::before {
+    content: "税理士の閲覧席";
+  }
+
+  .plans td:nth-child(5)::before {
+    content: "月額（税抜）";
+  }
+
+  .plans tr.is-chosen {
+    border-color: var(--rule);
+    background: #dcebe5;
+  }
+
+  .plans tr.is-chosen th {
+    box-shadow: none;
   }
 }
 

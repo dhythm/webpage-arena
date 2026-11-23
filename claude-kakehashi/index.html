@@ -120,7 +120,7 @@
 
   <section id="problem" class="band" aria-labelledby="problem-title">
     <div class="band-intro">
-      <h2 id="problem-title">消込が止まるのは、記帳と<br>請求書が少しずれているときです。</h2>
+      <h2 id="problem-title" class="phrase">消込が<wbr>止まるのは、<wbr>記帳と<br>請求書が<wbr>少し<wbr>ずれて<wbr>いるときです。</h2>
       <p>振込のほとんどは、金額で探せばすぐ見つかります。時間を取られるのは残りの数件です。表計算の台帳と銀行の明細を並べて、一行ずつ目で追うことになります。経理が一人なら、その人が休むと月末の締めも止まります。</p>
     </div>
 
@@ -155,13 +155,13 @@
         </tr>
       </tbody>
     </table>
-    <p class="band-close">カケハシは、この三つのずれを「候補」として先に並べます。決めるのは、あなたです。</p>
+    <p class="band-close phrase">カケハシは、<wbr>この三つの<wbr>ずれを<wbr>「候補」として<wbr>先に<wbr>並べます。<wbr>決めるのは、<wbr>あなたです。</p>
   </section>
 
   <section id="product" class="band band-product" aria-labelledby="product-title">
     <div class="band-intro">
-      <h2 id="product-title">開くのは、この一画面だけです。</h2>
-      <p>請求書の列、照合の候補、入金明細の列が一つの画面に並びます。銀行の CSV を読み込むと、入金の一行ごとに、合いそうな請求書が候補として出ます。</p>
+      <h2 id="product-title" class="phrase">開くのは、<wbr>この<wbr>一画面<wbr>だけです。</h2>
+      <p><span class="order-wide">請求書の列、照合の候補、入金明細の列</span><span class="order-narrow">照合の候補、請求書の列、入金明細の列</span>が一つの画面に並びます。銀行の CSV を読み込むと、入金の一行ごとに、合いそうな請求書が候補として出ます。</p>
     </div>
 
     <figure class="app-figure">
@@ -224,7 +224,7 @@
           <h3>請求書の列</h3>
           <p>今月出した請求書と、まだ入金のない過去の請求書。期日を過ぎたものがいちばん上に来ます。</p>
         </div>
-        <div class="app-note">
+        <div class="app-note app-note-match">
           <h3>照合の候補</h3>
           <p>なぜこの組み合わせなのかを一行で添えます。名義、金額、差額のどれで見つけたかが分かるので、判断が速くなります。</p>
         </div>
@@ -239,7 +239,7 @@
   <section id="features" class="band" aria-labelledby="features-title">
     <div class="band-intro">
       <h2 id="features-title">カケハシがすること、<br>あなたに残ること。</h2>
-      <p>自動にするのは探す作業までです。お金の扱いを決める操作は、必ず人の手に残します。</p>
+      <p class="phrase">自動にするのは<wbr>探す作業<wbr>までです。<wbr>お金の扱いを<wbr>決める操作は、<wbr>必ず<wbr>人の手に<wbr>残します。</p>
     </div>
     <table class="duties">
       <caption class="visually-hidden">主な機能と、カケハシと利用者の役割分担</caption>
@@ -302,7 +302,7 @@
     </div>
 
     <div class="demo" id="demo-app">
-      <div class="demo-tally" aria-live="polite">
+      <div class="demo-tally">
         <p>照合待ちの入金 <b id="tally-deposits">5件</b></p>
         <p>未消込の請求書 <b id="tally-invoices">6件</b> <b id="tally-amount">609,400円</b></p>
         <button type="button" class="text-button" id="demo-reset">最初からやり直す</button>
@@ -383,7 +383,7 @@
         </label>
       </form>
 
-      <p class="quote-to" id="quote-to" aria-live="polite">貴社名 御中</p>
+      <p class="quote-to" id="quote-to">貴社名 御中</p>
 
       <table class="plans">
         <caption class="visually-hidden">プランごとの月額（税抜、架空）と条件</caption>
@@ -421,7 +421,7 @@
         </tbody>
       </table>
 
-      <div class="quote-total" aria-live="polite">
+      <div class="quote-total">
         <p class="quote-plan" id="quote-plan">この条件では「ふたり経理」になります。</p>
         <dl class="totals">
           <div><dt>小計</dt><dd class="num" id="q-sub">5,980円</dd></div>
