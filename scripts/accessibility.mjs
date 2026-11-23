@@ -7,26 +7,24 @@ const baseUrl = (process.env.BASE_URL || "http://127.0.0.1:4173").replace(
   /\/+$/,
   "",
 );
+const targets = [
+  { site: "hub", path: "/", states: ["page"] },
+  { site: "gpt-nagi", path: "/gpt-nagi/", states: ["page", "dialog"], dialog: ".header [data-reserve]" },
+  { site: "gpt-umi", path: "/gpt-umi/", states: ["page", "dialog"], dialog: ".header-contact" },
+];
 const browser = await chromium.launch();
 const report = [];
 try {
-  for (const site of ["gpt-nagi", "gpt-umi"])
+  for (const { site, path, states, dialog } of targets)
     for (const width of [390, 1440]) {
       const page = await browser.newPage({ viewport: { width, height: 1000 } });
-      await page.goto(`${baseUrl}/${site}/`, {
+      await page.goto(`${baseUrl}${path}`, {
         waitUntil: "networkidle",
       });
       await page.evaluate(() => document.fonts.ready);
       await page.addScriptTag({ path: require.resolve("axe-core/axe.min.js") });
-      for (const state of ["page", "dialog"]) {
-        if (state === "dialog")
-          await page
-            .locator(
-              site === "gpt-nagi"
-                ? ".header [data-reserve]"
-                : ".header-contact",
-            )
-            .click();
+      for (const state of states) {
+        if (state === "dialog") await page.locator(dialog).click();
         const result = await page.evaluate(() =>
           axe.run(document, {
             runOnly: {
@@ -64,6 +62,9 @@ try {
     JSON.stringify(report, null, 2),
   );
 }
+console.log(
+  `Accessibility: ${report.length} checks (${targets.map((t) => t.site).join(", ")}), ${report.filter((r) => r.violations.length).length} with violations`,
+);
 assert.ok(
   report.every((r) => r.violations.length === 0),
   "Accessibility violations found; see qa/accessibility.json",

@@ -1,0 +1,14 @@
+{
+  "id": "grok-kakehashi",
+  "title": "カケハシ G",
+  "tagline": "消込を、朝の五分で。",
+  "type": "saas-lp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": "prompts/saas-lp.md",
+  "promptNotes": "フィクスチャ",
+  "created": "2026-12-01",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": []
+}

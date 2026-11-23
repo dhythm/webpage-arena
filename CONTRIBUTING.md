@@ -29,13 +29,13 @@
   "id": "grok-kakehashi",
   "title": "KAKEHASHI",
   "tagline": "ページの一行目に置くコピー。",
-  "type": "product-lp",
+  "type": "saas-lp",
   "model": "Grok",
   "tool": "Cursor",
-  "promptPath": "prompts/kakehashi.md",
+  "promptPath": "prompts/saas-lp.md",
   "promptNotes": "お題のプロンプトをそのまま使用",
   "created": "2026-12-01",
-  "thumbnail": null,
+  "thumbnail": "thumb.webp",
   "legacy": false,
   "externalOrigins": []
 }
@@ -52,7 +52,7 @@
 | `promptPath` | 必須 | `null` か、実在する `prompts/*.md` |
 | `promptNotes` | 必須 | プロンプトについての補足 |
 | `created` | 必須 | `YYYY-MM-DD` |
-| `thumbnail` | 必須 | `null` か、フォルダ内に実在するファイル |
+| `thumbnail` | 必須 | `"thumb.webp"`（640×400・60KB 以下。`npm run thumbs` で作る）。全作品で必須 |
 | `legacy` | 必須 | 新規作品は `false` |
 | `externalOrigins` | 必須 | 読み込みを許す外部オリジン。新規作品は `[]` |
 | `modelVersion` | 任意 | モデルの版 |
