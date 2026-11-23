@@ -26,13 +26,19 @@ jobs:
           API_URL: ${{ github.api_url }}
           REPO: ${{ github.repository }}
         run: |
-          status=$(curl -sS -o /dev/null -w '%{http_code}' \
+          body=$(mktemp)
+          status=$(curl -sS -o "$body" -w '%{http_code}' \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "$API_URL/repos/${REPO}/pages")
+            "$API_URL/repos/${REPO}/pages") || status=000
           case "$status" in
             200)
+              build_type=$(jq -r '.build_type // empty' "$body" 2>/dev/null) || build_type=""
+              if [ "$build_type" != "workflow" ]; then
+                echo "::error title=pages::Pages の Source が GitHub Actions ではありません（build_type=${build_type:-なし}）。Settings → Pages → Source を GitHub Actions にしてください"
+                exit 1
+              fi
               echo "enabled=true" >> "$GITHUB_OUTPUT"
               ;;
             404)

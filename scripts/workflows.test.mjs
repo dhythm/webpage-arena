@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { readFile, writeFile, mkdtemp, mkdir, chmod, rm } from "node:fs/promises";
+import { resolve, join } from "node:path";
+import { tmpdir } from "node:os";
+import { spawnSync } from "node:child_process";
 const repo = resolve(import.meta.dirname, "..");
 const pagesPath = resolve(repo, ".github/workflows/pages.yml");
 async function pagesYaml() {
@@ -167,4 +169,147 @@ test("workflows: 標準ランナー（ubuntu-latest）と Node 20 だけを使�
   assert.ok(runners.length > 0, "runs-on が無い");
   assert.ok(runners.every((runner) => runner === "ubuntu-latest"), `標準ランナー以外がある: ${runners.join(", ")}`);
   assert.match(text, /node-version:\s*["']?20["']?\s*$/m, "Node 20 を使っていない");
+});
+
+function gateScript(text) {
+  const [first] = jobs(text);
+  const start = first.lines.findIndex((line) => /^(-\s+)?run:\s*\|\s*$/.test(line.trim()));
+  assert.notEqual(start, -1, "先頭ジョブに run: | のブロックが無い");
+  const indent = indentOf(first.lines[start]);
+  const end = first.lines.findIndex((line, i) => i > start && indentOf(line) <= indent);
+  const lines = first.lines.slice(start + 1, end === -1 ? undefined : end);
+  const base = Math.min(...lines.map(indentOf));
+  const script = lines.map((line) => line.slice(base)).join("\n") + "\n";
+  assert.doesNotMatch(script, /\$\{\{/, "gate の run: に式 ${{ }} が埋め込まれている（env 経由にする）");
+  return script;
+}
+
+const stubCurl = `#!/usr/bin/env bash
+out=/dev/stdout
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o) out="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+if [ -n "$STUB_CURL_EXIT" ]; then
+  echo "curl: ($STUB_CURL_EXIT) Could not resolve host: api.github.invalid" >&2
+  printf '%s' "$STUB_CURL_STDOUT"
+  exit "$STUB_CURL_EXIT"
+fi
+printf '%s' "$STUB_BODY" > "$out"
+printf '%s' "$STUB_STATUS"
+`;
+
+async function runGate(stub) {
+  const script = gateScript(await pagesYaml());
+  const dir = await mkdtemp(join(tmpdir(), "pages-gate-"));
+  try {
+    const bin = join(dir, "bin");
+    await mkdir(bin);
+    await writeFile(join(bin, "curl"), stubCurl);
+    await chmod(join(bin, "curl"), 0o755);
+    const scriptPath = join(dir, "gate.sh");
+    await writeFile(scriptPath, script);
+    const output = join(dir, "github_output");
+    await writeFile(output, "");
+    const result = spawnSync("bash", ["--noprofile", "--norc", "-eo", "pipefail", scriptPath], {
+      encoding: "utf8",
+      env: {
+        PATH: `${bin}:${process.env.PATH}`,
+        GITHUB_OUTPUT: output,
+        GH_TOKEN: "stub-token",
+        API_URL: "https://api.github.invalid",
+        REPO: "owner/repo",
+        STUB_STATUS: stub.status ?? "",
+        STUB_BODY: stub.body ?? "",
+        STUB_CURL_EXIT: stub.curlExit ?? "",
+        STUB_CURL_STDOUT: stub.curlStdout ?? "",
+      },
+    });
+    return {
+      code: result.status,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      output: await readFile(output, "utf8"),
+    };
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+}
+
+function describe(r) {
+  return `exit=${r.code} output=${JSON.stringify(r.output)} stdout=${JSON.stringify(r.stdout)} stderr=${JSON.stringify(r.stderr)}`;
+}
+
+function assertGateFails(r, label) {
+  assert.notEqual(r.code, 0, `${label}: gate が exit 0 で終わった（静かに skip / deploy してしまう）: ${describe(r)}`);
+  assert.match(r.stdout, /::error/, `${label}: ::error が出ていない: ${describe(r)}`);
+  assert.doesNotMatch(r.output, /enabled=/, `${label}: enabled= を書いている: ${describe(r)}`);
+}
+
+test("workflows gate: 200 かつ build_type=workflow のときだけ enabled=true で exit 0（stub curl で実行）", async () => {
+  const r = await runGate({ status: "200", body: JSON.stringify({ build_type: "workflow", html_url: "https://owner.github.io/repo/" }) });
+  assert.equal(r.code, 0, describe(r));
+  assert.equal(r.output.trim(), "enabled=true", describe(r));
+  assert.doesNotMatch(r.stdout, /::error/, describe(r));
+});
+
+test("workflows gate: 404 は notice「Pages 未有効のためスキップ」・enabled=false・exit 0（stub curl で実行）", async () => {
+  const r = await runGate({ status: "404", body: JSON.stringify({ message: "Not Found" }) });
+  assert.equal(r.code, 0, describe(r));
+  assert.equal(r.output.trim(), "enabled=false", describe(r));
+  assert.match(r.stdout, /::notice[^\n]*Pages 未有効のためスキップ/, describe(r));
+});
+
+for (const status of ["403", "500", "502", "503", "301", "401"]) {
+  test(`workflows gate: HTTP ${status} は ::error で非ゼロ終了し、skip も deploy もしない（stub curl で実行）`, async () => {
+    const r = await runGate({ status, body: JSON.stringify({ message: "boom", build_type: "workflow" }) });
+    assertGateFails(r, `HTTP ${status}`);
+    assert.match(r.stdout, new RegExp(`::error[^\\n]*${status}`), `HTTP ${status}: ::error に status が出ていない: ${describe(r)}`);
+  });
+}
+
+for (const [label, stub] of [
+  ["curl が失敗し -w で 000 を出す（exit 6）", { curlExit: "6", curlStdout: "000" }],
+  ["curl が失敗し何も出さない（exit 7）", { curlExit: "7", curlStdout: "" }],
+]) {
+  test(`workflows gate: ネットワークエラー（${label}）は status 000 として ::error で非ゼロ終了（stub curl で実行）`, async () => {
+    const r = await runGate(stub);
+    assertGateFails(r, label);
+    assert.match(r.stdout, /::error[^\n]*000/, `${label}: ::error に 000 が出ていない: ${describe(r)}`);
+  });
+}
+
+for (const [label, body] of [
+  ["build_type: legacy", JSON.stringify({ build_type: "legacy" })],
+  ["build_type 欠落", JSON.stringify({ html_url: "https://owner.github.io/repo/" })],
+  ["build_type: null", JSON.stringify({ build_type: null })],
+  ["build_type: Workflow（大文字違い）", JSON.stringify({ build_type: "Workflow" })],
+  ["本文が JSON でない", "<html>oops</html>"],
+  ["本文が空", ""],
+]) {
+  test(`workflows gate: 200 でも ${label} なら「Source を GitHub Actions に」の ::error で非ゼロ終了（stub curl で実行）`, async () => {
+    const r = await runGate({ status: "200", body });
+    assertGateFails(r, `200 + ${label}`);
+    assert.match(r.stdout, /::error[^\n]*Source を GitHub Actions に/, `200 + ${label}: Source の案内が無い: ${describe(r)}`);
+  });
+}
+
+test("workflows gate: enabled=true は 200) の中だけ、catch-all *) は ::error と exit 1、curl 失敗は || status=000", async () => {
+  const script = gateScript(await pagesYaml());
+  assert.equal(script.match(/enabled=true/g)?.length, 1, "enabled=true がちょうど 1 か所でない");
+  const branches = script.split(/^\s*(?=\S+\)\s*$)/m);
+  const ok = branches.find((b) => /^200\)/.test(b));
+  const rest = branches.find((b) => /^\*\)/.test(b));
+  assert.ok(ok, "case に 200) が無い");
+  assert.ok(rest, "case に catch-all *) が無い");
+  assert.match(ok.split(/^\s*;;/m)[0], /enabled=true/, "enabled=true が 200) の中に無い");
+  const catchAll = rest.split(/^\s*;;/m)[0];
+  assert.match(catchAll, /::error/, "*) が ::error を出していない");
+  assert.match(catchAll, /^\s*exit 1\s*$/m, "*) が exit 1 していない");
+  assert.doesNotMatch(catchAll, /enabled=/, "*) が enabled= を書いている");
+  assert.match(script, /curl -sS /, "curl の -sS が無い");
+  assert.doesNotMatch(script, /-o \/dev\/null/, "レスポンス本文を捨てている（build_type を読めない）");
+  assert.match(script, /status=\$\(curl[\s\S]*?\)\s*\|\|\s*status=000/, "curl 失敗時に status=000 にしていない");
 });
