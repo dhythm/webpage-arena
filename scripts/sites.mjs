@@ -1,6 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
-const excluded = new Set(["node_modules", "dist", "qa", "scripts"]);
+const excluded = new Set(["node_modules", "dist", "qa", "scripts", "tests", "prompts"]);
 async function isFile(path) {
   return (await stat(path).catch(() => null))?.isFile() ?? false;
 }
@@ -29,9 +29,18 @@ export async function siteCoverage(root) {
   }
   return {
     expected: folders.length,
-    sites: folders.filter((folder) => folder.meta).map((folder) => folder.name),
+    sites: folders.filter((folder) => folder.meta && folder.index).map((folder) => folder.name),
+    missingIndex: folders.filter((folder) => !folder.index).map((folder) => folder.name),
+    missingMeta: folders.filter((folder) => !folder.meta).map((folder) => folder.name),
     problems,
   };
+}
+export function coverageSummary(label, coverage) {
+  const names = (list) => (list.length ? ` (${list.join(", ")})` : "");
+  return [
+    `${label}: site count mismatch: ${coverage.expected} expected, ${coverage.sites.length} listed`,
+    `${label}: missing: ${coverage.missingIndex.length} without index.html${names(coverage.missingIndex)}, ${coverage.missingMeta.length} without meta.json${names(coverage.missingMeta)}`,
+  ];
 }
 export async function readMeta(root, site) {
   return JSON.parse(await readFile(join(root, site, "meta.json"), "utf8"));

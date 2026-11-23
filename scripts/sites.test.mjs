@@ -24,11 +24,15 @@ test("siteCoverage counts every folder with index.html or meta.json and reports 
   assert.deepEqual(await sites.siteCoverage(fixture("meta-missing")), {
     expected: 2,
     sites: ["grok-sample"],
+    missingIndex: [],
+    missingMeta: ["grok-orphan"],
     problems: ["grok-orphan: index.html without meta.json"],
   });
   assert.deepEqual(await sites.siteCoverage(fixture("meta-no-index")), {
     expected: 1,
-    sites: ["grok-sample"],
+    sites: [],
+    missingIndex: ["grok-sample"],
+    missingMeta: [],
     problems: ["grok-sample: meta.json without index.html"],
   });
 });
