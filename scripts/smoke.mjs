@@ -160,6 +160,7 @@ const visibleCards = (page) =>
   page.evaluate(
     () => [...document.querySelectorAll("[data-card]")].filter((card) => card.checkVisibility()).length,
   );
+const countText = (page) => page.evaluate(() => document.querySelector("[data-count]").textContent.trim());
 async function choose(page, selection) {
   for (const name of Object.keys(dimensions))
     await page.selectOption(`select[name="${name}"]`, selection[name] ?? "");
@@ -183,6 +184,9 @@ async function checkFilters(page, problems) {
       const shown = await visibleCards(page);
       const want = matching({ [name]: value });
       if (shown !== want) problems.add(`filter: ${name}=${value} shows ${shown}, meta has ${want}`);
+      const status = await countText(page);
+      if (status !== `${metas.length} 作品中 ${want} 作品を表示`)
+        problems.add(`filter: ${name}=${value} count reads "${status}"`);
     }
   }
   const first = metas[0];
@@ -210,6 +214,8 @@ async function checkFilters(page, problems) {
   await choose(page, {});
   if ((await visibleCards(page)) !== metas.length)
     problems.add(`filter: reset shows ${await visibleCards(page)} of ${metas.length}`);
+  if ((await countText(page)) !== "")
+    problems.add(`filter: count without filters reads "${await countText(page)}"`);
   await page.evaluate(() => document.activeElement?.blur());
   let focused = null;
   for (let i = 0; i < 40 && focused !== "prompt"; i++) {

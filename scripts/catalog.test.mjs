@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { pathToFileURL } from "node:url";
+import { chromium } from "playwright";
 import { join, resolve } from "node:path";
 import { checkSites } from "./check-sites.mjs";
 import { readMeta, siteCoverage } from "./sites.mjs";
@@ -40,6 +42,16 @@ function tally(list, key) {
 }
 async function hub(root) {
   return renderIndex(await loadCatalog(root), await template());
+}
+async function sevenRow(t) {
+  const root = await tempCopy(t, "catalog-basic");
+  const meta = JSON.parse(await readFile(join(root, "grok-lamp", "meta.json"), "utf8"));
+  for (const n of [1, 2, 3, 4, 5, 6]) {
+    const id = `lamp-${n}`;
+    await cp(join(root, "grok-lamp"), join(root, id), { recursive: true });
+    await writeFile(join(root, id, "meta.json"), JSON.stringify({ ...meta, id, title: `灯り ${n}` }));
+  }
+  return root;
 }
 async function tempCopy(t, name) {
   const root = await mkdtemp(join(tmpdir(), "catalog-"));
@@ -145,39 +157,104 @@ test("filters: the form is hidden until JS runs and the no-match message exists 
   for (const card of cardsOf(html)) assert.doesNotMatch(card.match(/<li[^>]*>/)[0], /\bhidden\b/);
 });
 
-test("prompt: promptPath null shows プロンプト未収録 and a real prompt links to prompts/<name>.html", async () => {
+test("prompt: プロンプト未収録 appears only in the group note; only cards with a prompt link to prompts/<name>.html", async () => {
   const root = fixture("catalog-basic");
   const list = await metas(root);
-  const cards = cardsOf(await hub(root));
+  const html = await hub(root);
+  const cards = cardsOf(html);
   for (const meta of list) {
     const card = cards.find((c) => c.includes(`data-id="${meta.id}"`));
     assert.ok(card, meta.id);
+    assert.doesNotMatch(card, /プロンプト未収録/, meta.id);
     if (meta.promptPath === null) {
-      assert.match(card, /プロンプト未収録/, meta.id);
       assert.doesNotMatch(card, /href="prompts\//, meta.id);
+      assert.doesNotMatch(card, /プロンプトを読む/, meta.id);
     } else {
       const name = meta.promptPath.slice("prompts/".length, -".md".length);
-      assert.match(card, new RegExp(`<a href="prompts/${name}\\.html">`), meta.id);
-      assert.doesNotMatch(card, /プロンプト未収録/, meta.id);
+      assert.match(card, new RegExp(`<a href="prompts/${name}\\.html">プロンプトを読む</a>`), meta.id);
     }
+  }
+  for (const group of groupsOf(html)) {
+    const heading = group.html.match(/<h2\b[^>]*>([^<]*)<\/h2>/)[1];
+    const note = group.html.match(/<p class="group-note">([\s\S]*?)<\/p>/)[1];
+    assert.doesNotMatch(heading, /プロンプト未収録/, group.key);
+    if (group.key.startsWith("type:")) assert.match(note, /プロンプト未収録/, group.key);
+    else assert.doesNotMatch(note, /プロンプト未収録/, group.key);
+    assert.equal((group.html.match(/プロンプト未収録/g) ?? []).length, group.key.startsWith("type:") ? 1 : 0, group.key);
   }
 });
 
-test("cards: lazy 640x400 thumb, title, tagline, type, model, tool, created and the count of other works on the same prompt", async () => {
+test("cards: lazy 640x400 thumb, title, tagline, type, model, tool, created and the count of other works in the same row", async () => {
   const root = fixture("catalog-basic");
   const list = await metas(root);
   const types = JSON.parse(await readFile(resolve(repo, "site-types.json"), "utf8"));
   const sizes = tally(list, groupKey);
   const esc = (text) => text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+  const shown = (value) => (value === "unknown" ? "記録なし" : value);
   const cards = cardsOf(await hub(root));
   assert.equal(cards.length, list.length);
   for (const meta of list) {
     const card = cards.find((c) => c.includes(`data-id="${meta.id}"`));
     assert.match(card, new RegExp(`<img\\b(?=[^>]*\\bsrc="${meta.id}/thumb\\.webp")(?=[^>]*\\bloading="lazy")(?=[^>]*\\bwidth="640")(?=[^>]*\\bheight="400")`), meta.id);
     assert.match(card, new RegExp(`<a href="${meta.id}/">${esc(meta.title)}</a>`), meta.id);
-    for (const text of [meta.tagline, meta.model, meta.tool, meta.created, types.find((t) => t.id === meta.type).label])
+    for (const text of [meta.tagline, meta.created])
       assert.ok(card.includes(esc(text)), `${meta.id} shows ${text}`);
-    assert.ok(card.includes(`同じお題のほかの作品 ${sizes.get(groupKey(meta)) - 1} 件`), meta.id);
+    assert.ok(card.includes(`<dt>モデル</dt><dd>${esc(shown(meta.model))}</dd>`), `${meta.id} model`);
+    assert.ok(card.includes(`<dt>ツール</dt><dd>${esc(shown(meta.tool))}</dd>`), `${meta.id} tool`);
+    const facts = card.match(/<dl\b[\s\S]*?<\/dl>/)[0];
+    assert.doesNotMatch(facts, /<dd>unknown<\/dd>/, meta.id);
+    const label = types.find((t) => t.id === meta.type).label;
+    const others = sizes.get(groupKey(meta)) - 1;
+    if (meta.promptPath === null) {
+      assert.ok(card.includes(`<dt>種別</dt><dd>${esc(label)}</dd>`), `${meta.id} 種別`);
+      assert.doesNotMatch(card, /<dt>お題<\/dt>/, meta.id);
+      assert.ok(card.includes(`同じ種別のほかの作品 ${others} 件`), meta.id);
+      assert.doesNotMatch(card, /同じお題/, meta.id);
+    } else {
+      assert.ok(card.includes(`<dt>お題</dt><dd>${esc(label)}</dd>`), `${meta.id} お題`);
+      assert.ok(card.includes(`同じお題のほかの作品 ${others} 件`), meta.id);
+      assert.doesNotMatch(card, /同じ種別/, meta.id);
+    }
+  }
+});
+
+test("labels: unknown shows as 記録なし on cards and filter options while real names stay as is", async () => {
+  for (const root of [fixture("catalog-basic"), repo]) {
+    const list = await metas(root);
+    const html = await hub(root);
+    for (const name of ["model", "tool"]) {
+      const select = html.match(new RegExp(`<select\\b[^>]*\\bname="${name}"[^>]*>([\\s\\S]*?)</select>`))[1];
+      const options = [...select.matchAll(/<option value="([^"]*)">([^<]*)<\/option>/g)].filter((m) => m[1] !== "");
+      for (const [value, count] of tally(list, (m) => m[name])) {
+        const option = options.find((m) => m[1] === value);
+        assert.ok(option, `${root} ${name}=${value}`);
+        assert.equal(option[2], `${value === "unknown" ? "記録なし" : value}（${count}）`, `${root} ${name}=${value}`);
+      }
+    }
+    assert.doesNotMatch(html.replace(/\bvalue="unknown"|\bdata-(?:model|tool)="unknown"/g, ""), /unknown/, root);
+  }
+});
+
+test("rows: every scroll row is keyboard-focusable and says it scrolls sideways", async () => {
+  for (const root of [fixture("catalog-basic"), repo]) {
+    for (const group of groupsOf(await hub(root))) {
+      const heading = group.html.match(/<h2\b[^>]*>([^<]*)<\/h2>/)[1];
+      const row = group.html.match(/<ul\b[^>]*\bclass="row"[^>]*>/)[0];
+      assert.match(row, /\btabindex="0"/, group.key);
+      assert.ok(row.includes(`aria-label="${heading}の作品、横にスクロール"`), `${group.key}: ${row}`);
+    }
+  }
+});
+
+test("lead and counts: the intro covers prompt rows and type rows, and the filter count starts empty", async () => {
+  for (const root of [fixture("catalog-basic"), repo]) {
+    const list = await metas(root);
+    const html = await hub(root);
+    assert.match(html, /<p class="lead">[\s\S]*お題ごとに1行に並べます。プロンプトが残っていない作品は種別ごとにまとめています。[\s\S]*?<\/p>/);
+    const groups = new Set(list.map(groupKey)).size;
+    const models = new Set(list.map((m) => m.model)).size;
+    assert.ok(html.includes(`<p class="total">${list.length} 作品・${models} モデル・${groups} グループ</p>`), root);
+    assert.match(html, /<p class="status" data-count aria-live="polite"><\/p>/, root);
   }
 });
 
@@ -266,4 +343,66 @@ test("repository: every link and resource in the hub is relative and no external
   }
   assert.doesNotMatch(html, /fonts\.googleapis|fonts\.gstatic|@import|<link\b[^>]*stylesheet/);
   assert.match(html, /:focus-visible/);
+});
+
+test("browser: a row of 7+ cards at 1280px shows about 6.5 cards, snaps to cards, scrolls with the keyboard and counts filtered works", async (t) => {
+  const root = await sevenRow(t);
+  const out = await mkdtemp(join(tmpdir(), "catalog-seven-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  await buildDist(root, out);
+  const list = await metas(root);
+  const row = groupsOf(await readFile(join(out, "index.html"), "utf8")).find((g) => g.key === "type:product-lp");
+  assert.ok(row.ids.length >= 7, row.ids.join(", "));
+  const browser = await chromium.launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  await page.goto(pathToFileURL(join(out, "index.html")).href);
+  const ul = page.locator('[data-group="type:product-lp"] ul.row');
+  const box = await ul.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const cards = [...el.querySelectorAll("[data-card]")].map((c) => c.getBoundingClientRect());
+    return {
+      left: r.left,
+      right: r.right,
+      width: el.clientWidth,
+      scroll: el.scrollWidth,
+      snap: getComputedStyle(el).scrollSnapType,
+      align: getComputedStyle(el.querySelector("[data-card]")).scrollSnapAlign,
+      cards: cards.map((c) => ({ left: c.left, right: c.right, width: c.width })),
+    };
+  });
+  assert.ok(box.scroll > box.width, `row overflows: ${box.scroll} > ${box.width}`);
+  const full = box.cards.filter((c) => c.right <= box.right + 0.5).length;
+  const peek = box.cards.find((c) => c.left < box.right && c.right > box.right + 0.5);
+  assert.equal(full, 6, JSON.stringify(box.cards));
+  assert.ok(peek, "the 7th card peeks past the right edge");
+  const visible = (box.right - peek.left) / peek.width;
+  assert.ok(visible > 0.25 && visible < 0.75, `7th card shows ${visible.toFixed(2)} of its width`);
+  assert.match(box.snap, /x mandatory/);
+  assert.equal(box.align, "start");
+  await ul.focus();
+  assert.equal(await page.evaluate(() => document.activeElement.getAttribute("aria-label")), "商品LPの作品、横にスクロール");
+  assert.notEqual(await ul.evaluate((el) => getComputedStyle(el).outlineStyle), "none");
+  await page.keyboard.press("ArrowRight");
+  await page.waitForFunction((el) => el.scrollLeft > 0, await ul.elementHandle(), { timeout: 3000 });
+  await ul.evaluate((el) => el.scrollTo({ left: 37, behavior: "instant" }));
+  await page.waitForTimeout(500);
+  const stop = await ul.evaluate((el) => {
+    const start = el.getBoundingClientRect().left;
+    return [...el.querySelectorAll("[data-card]")].map((c) => Math.round(c.getBoundingClientRect().left - start));
+  });
+  assert.ok(stop.some((x) => Math.abs(x) <= 1), `a card edge sits at the row start after scrolling: ${stop}`);
+  const count = page.locator("[data-count]");
+  assert.equal((await count.innerText()).trim(), "");
+  const want = list.filter((m) => m.type === "product-lp").length;
+  await page.selectOption("select[name=type]", "product-lp");
+  assert.equal((await count.innerText()).trim(), `${list.length} 作品中 ${want} 作品を表示`);
+  await page.click("button[type=reset]");
+  await page.waitForFunction(() => document.querySelector("[data-count]").textContent === "");
+  await page.setViewportSize({ width: 375, height: 812 });
+  const phone = await ul.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return [...el.querySelectorAll("[data-card]")].map((c) => c.getBoundingClientRect()).filter((c) => c.left < r.right && c.right > r.right).length;
+  });
+  assert.equal(phone, 1, "at 375px the next card peeks too");
 });

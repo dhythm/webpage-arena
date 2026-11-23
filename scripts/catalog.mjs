@@ -22,6 +22,7 @@ export function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+const recorded = (value) => (value === "unknown" ? "記録なし" : value);
 const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 async function isFile(path) {
   return (await stat(path).catch(() => null))?.isFile() ?? false;
@@ -85,7 +86,8 @@ export async function loadCatalog(root, options = {}) {
         promptPath: site.promptPath,
         promptHref: site.promptHref,
         type,
-        label: site.promptPath
+        label: site.promptPath ? prompt?.title ?? site.promptPath : site.typeLabel,
+        filterLabel: site.promptPath
           ? prompt?.title ?? site.promptPath
           : `${site.typeLabel}（プロンプト未収録）`,
         sites: [],
@@ -120,7 +122,7 @@ export async function loadCatalog(root, options = {}) {
     filters: {
       prompt: choices(
         "group",
-        (key) => groups.get(key).label,
+        (key) => groups.get(key).filterLabel,
         (a, b) => groupIndex.get(a.value) - groupIndex.get(b.value),
       ),
       type: choices(
@@ -128,8 +130,8 @@ export async function loadCatalog(root, options = {}) {
         (type) => typeLabel.get(type) ?? type,
         (a, b) => rank(a.value) - rank(b.value) || compare(a.value, b.value),
       ),
-      model: choices("model", (value) => value, byLabel),
-      tool: choices("tool", (value) => value, byLabel),
+      model: choices("model", recorded, byLabel),
+      tool: choices("tool", recorded, byLabel),
     },
   };
 }
@@ -138,21 +140,20 @@ function renderCard(site) {
   const thumb = site.thumb
     ? `<a class="thumb" href="${e(site.href)}" tabindex="-1" aria-hidden="true"><img src="${e(site.thumb)}" alt="" loading="lazy" decoding="async" width="640" height="400" /></a>`
     : `<div class="thumb thumb-none" aria-hidden="true">サムネイルなし</div>`;
-  const prompt = site.promptHref
-    ? `<a href="${e(site.promptHref)}">プロンプトを読む</a>`
-    : `<span class="prompt-none">プロンプト未収録</span>`;
+  const prompt = site.promptHref ? `<a href="${e(site.promptHref)}">プロンプトを読む</a>` : "";
+  const kind = site.promptHref ? "お題" : "種別";
   return `<li class="card" data-card data-id="${e(site.id)}" data-prompt="${e(site.group)}" data-type="${e(site.type)}" data-model="${e(site.model)}" data-tool="${e(site.tool)}">
             ${thumb}
             <div class="card-body">
               <h3 class="card-title"><a href="${e(site.href)}">${e(site.title)}</a></h3>
               <p class="tagline">${e(site.tagline)}</p>
               <dl class="facts">
-                <div><dt>モデル</dt><dd>${e(site.model)}</dd></div>
-                <div><dt>ツール</dt><dd>${e(site.tool)}</dd></div>
-                <div><dt>お題</dt><dd>${e(site.typeLabel)}</dd></div>
+                <div><dt>モデル</dt><dd>${e(recorded(site.model))}</dd></div>
+                <div><dt>ツール</dt><dd>${e(recorded(site.tool))}</dd></div>
+                <div><dt>${kind}</dt><dd>${e(site.typeLabel)}</dd></div>
                 <div><dt>作成日</dt><dd><time datetime="${e(site.created)}">${e(site.created)}</time></dd></div>
               </dl>
-              <p class="card-foot">${prompt}<span class="siblings">同じお題のほかの作品 ${site.others} 件</span></p>
+              <p class="card-foot">${prompt}<span class="siblings">同じ${kind}のほかの作品 ${site.others} 件</span></p>
             </div>
           </li>`;
 }
@@ -163,13 +164,13 @@ function renderGroups(catalog) {
       const id = `group-${index + 1}`;
       const note = group.promptHref
         ? `<a href="${e(group.promptHref)}">お題を読む</a>`
-        : "元のプロンプトは残っていません";
+        : "プロンプト未収録（元のプロンプトは残っていません）";
       return `<section class="group" data-group="${e(group.key)}" aria-labelledby="${id}">
         <div class="group-head">
           <h2 id="${id}">${e(group.label)}</h2>
           <p class="group-note">${group.sites.length} 作品・${note}</p>
         </div>
-        <ul class="row" role="list">
+        <ul class="row" role="list" tabindex="0" aria-label="${e(group.label)}の作品、横にスクロール">
           ${group.sites.map(renderCard).join("\n          ")}
         </ul>
       </section>`;
@@ -193,7 +194,7 @@ function renderFilters(catalog) {
         ${fields}
         <button type="reset">条件をクリア</button>
       </form>
-      <p class="status" data-count aria-live="polite">${catalog.sites.length} 作品</p>
+      <p class="status" data-count aria-live="polite"></p>
       <p class="empty" data-empty hidden>条件に合う作品はありません。条件を減らすか「条件をクリア」を押してください。</p>`;
 }
 function renderTotal(catalog) {
