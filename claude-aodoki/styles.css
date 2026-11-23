@@ -385,6 +385,7 @@ section[id] {
 }
 
 .tag {
+  position: relative;
   background: var(--flour);
   color: var(--sumi);
   width: 5.2em;
@@ -435,9 +436,30 @@ section[id] {
   width: 100%;
 }
 
+.tag-price > span {
+  display: block;
+  white-space: nowrap;
+}
+
 .tag-feature {
   background: #f4f5f2;
   border-top-color: var(--noren);
+  padding-top: 30px;
+}
+
+.tag-mark {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--noren);
+  color: #f4f5f2;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  padding: 3px 6px 5px;
+  border-radius: 0 0 2px 2px;
 }
 
 .tag-feature .tag-name {
@@ -550,6 +572,13 @@ section[id] {
 
 .skyline {
   margin-bottom: 40px;
+}
+
+.skyline-label {
+  font-size: 13px;
+  color: var(--mute);
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
 }
 
 .skyline-bar {
@@ -779,19 +808,43 @@ input[type="text"]::placeholder {
   color: #6b7586;
 }
 
-.slots,
+.slots {
+  display: grid;
+  gap: 12px;
+}
+
+.slot-group {
+  display: grid;
+  grid-template-columns: 2em minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+}
+
+.slot-name {
+  font-family: var(--mincho);
+  font-size: 15px;
+  color: var(--mute);
+  padding-top: 7px;
+}
+
+.slots-empty {
+  font-size: 14px;
+  color: var(--mute);
+}
+
+.slot-list,
 .seat-choice {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.slots label,
+.slot-list label,
 .seat-choice label {
   position: relative;
 }
 
-.slots input,
+.slot-list input,
 .seat-choice input {
   position: absolute;
   opacity: 0;
@@ -800,7 +853,7 @@ input[type="text"]::placeholder {
   cursor: pointer;
 }
 
-.slots span,
+.slot-list span,
 .seat-choice span {
   display: block;
   padding: 8px 14px;
@@ -810,20 +863,20 @@ input[type="text"]::placeholder {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.slots input:checked + span,
+.slot-list input:checked + span,
 .seat-choice input:checked + span {
   background: var(--ink);
   color: var(--sumi);
   border-color: var(--ink);
 }
 
-.slots input:focus-visible + span,
+.slot-list input:focus-visible + span,
 .seat-choice input:focus-visible + span {
   outline: 2px solid var(--lamp);
   outline-offset: 2px;
 }
 
-.slots input:disabled + span {
+.slot-list input:disabled + span {
   opacity: 0.45;
   text-decoration: line-through;
 }

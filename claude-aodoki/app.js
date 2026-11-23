@@ -1,6 +1,7 @@
+import { dateOptions, dayLabel, minuteOf, parseNow, sameDay, slotsFor, statusText, toMin } from "./hours.js";
+
 (() => {
   const root = document.documentElement;
-  const days = ["日", "月", "火", "水", "木", "金", "土"];
   const stops = [
     [0, [58, 86, 128]],
     [0.45, [36, 57, 95]],
@@ -39,52 +40,22 @@
   addEventListener("resize", paint);
   paint();
 
-  const pad = (n) => String(n).padStart(2, "0");
-  const hm = (m) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
-  const isClosedDay = (d) => d.getDay() === 1 || (d.getDay() === 2 && d.getDate() >= 15 && d.getDate() <= 21);
-  const isWeekend = (d) => d.getDay() === 0 || d.getDay() === 6;
-  const sessions = (d) => {
-    if (isClosedDay(d)) return [];
-    if (isWeekend(d))
-      return [
-        { open: 690, close: 840, last: 810 },
-        { open: 1020, close: 1290, last: 1260 },
-      ];
-    return [{ open: 1050, close: 1350, last: 1320 }];
-  };
-  const dayLabel = (d) => `${d.getMonth() + 1}月${d.getDate()}日（${days[d.getDay()]}）`;
-  const nextOpening = (from) => {
-    for (let i = 1; i <= 14; i++) {
-      const d = new Date(from.getFullYear(), from.getMonth(), from.getDate() + i);
-      const s = sessions(d);
-      if (s.length) return `${i === 1 ? "明日" : `${days[d.getDay()]}曜`}の ${hm(s[0].open)}`;
-    }
-    return "";
-  };
+  let injected = parseNow(window.__AODOKI_NOW);
+  const now = () => (injected ? new Date(injected.getTime()) : new Date());
 
   const nowEl = document.querySelector(".now");
   const nowText = document.getElementById("now-text");
   const skyNow = document.getElementById("sky-now");
   const tellTime = () => {
-    const now = new Date();
-    const m = now.getHours() * 60 + now.getMinutes();
-    const s = sessions(now);
-    const current = s.find((x) => m >= x.open && m < x.close);
-    const later = s.find((x) => m < x.open);
-    let text;
-    if (!s.length) text = `今日（${days[now.getDay()]}曜）はお休みです。次は${nextOpening(now)}から。`;
-    else if (current) text = `いま ${hm(m)}。のれん、出ています。最後の注文は ${hm(current.last)} です。`;
-    else if (later) text = `いま ${hm(m)}。今日は ${hm(later.open)} にのれんを出します。`;
-    else text = `いま ${hm(m)}。今日はもう閉めました。次は${nextOpening(now)}から。`;
+    const t = now();
+    const { text, open } = statusText(t);
     nowText.textContent = text;
-    nowEl.classList.toggle("is-open", Boolean(current));
-    const h = now.getHours() + now.getMinutes() / 60;
+    nowEl.classList.toggle("is-open", open);
+    const h = minuteOf(t) / 60;
     const inRange = h >= 16 && h < 24;
     skyNow.classList.toggle("is-shown", inRange);
     if (inRange) skyNow.style.left = `${((h - 16) / 8) * 100}%`;
   };
-  tellTime();
-  setInterval(tellTime, 30000);
 
   const plan = document.querySelector(".plan");
   const kinds = document.querySelectorAll(".seat-kind");
@@ -116,14 +87,10 @@
   const peopleSel = document.getElementById("r-people");
   const avail = document.getElementById("r-avail");
   const error = document.getElementById("r-error");
-  const slotInputs = [...form.querySelectorAll('input[name="time"]')];
+  const slotBox = document.getElementById("r-slots");
   const caps = { counter: 6, window: 2, koagari: 4 };
   const seatNames = { counter: "カウンター", window: "窓際の二人席", koagari: "小上がり" };
   const peopleNames = { 1: "ひとり", 2: "ふたり", 3: "三人", 4: "四人" };
-  const toMin = (t) => {
-    const [h, mi] = t.split(":").map(Number);
-    return h * 60 + mi;
-  };
   const hash = (str) => {
     let h = 2166136261;
     for (const ch of str) {
@@ -138,38 +105,64 @@
     return Math.min(cap, n);
   };
 
-  const today = new Date();
   const dates = new Map();
-  for (let i = 0; dates.size < 10 && i < 21; i++) {
-    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
-    if (!sessions(d).length) continue;
-    const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    dates.set(key, d);
-    const opt = document.createElement("option");
-    opt.value = key;
-    opt.textContent = `${dayLabel(d)}${i === 0 ? "　今夜" : ""}`;
-    dateSel.append(opt);
-  }
+  const buildDates = () => {
+    const keep = dateSel.value;
+    dates.clear();
+    dateSel.querySelectorAll("option[value]:not([value=''])").forEach((o) => o.remove());
+    for (const { key, date, label } of dateOptions(now(), 10)) {
+      dates.set(key, date);
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = label;
+      dateSel.append(opt);
+    }
+    dateSel.value = dates.has(keep) ? keep : "";
+  };
 
-  const isToday = (d) => d.toDateString() === today.toDateString();
   const selected = (name) => form.querySelector(`input[name="${name}"]:checked`)?.value ?? "";
 
-  const refreshSlots = () => {
+  const buildSlots = () => {
     const key = dateSel.value;
     const d = dates.get(key);
-    const nowM = new Date().getHours() * 60 + new Date().getMinutes();
-    slotInputs.forEach((input) => {
-      let off = false;
-      if (d) {
-        const m = toMin(input.value);
-        const evening = sessions(d).find((s) => s.open >= 1000);
-        if (!evening || m < evening.open || m > evening.last) off = true;
-        if (isToday(d) && m < nowM + 30) off = true;
-        if (Object.keys(caps).every((seat) => left(key, input.value, seat) === 0)) off = true;
+    const keep = selected("time");
+    slotBox.replaceChildren();
+    if (!d) {
+      const empty = document.createElement("p");
+      empty.className = "slots-empty";
+      empty.textContent = "日にちを選ぶと、その日の時刻が出ます。";
+      slotBox.append(empty);
+      return;
+    }
+    const t = now();
+    const nowM = sameDay(d, t) ? minuteOf(t) : -Infinity;
+    let first = true;
+    for (const group of slotsFor(d)) {
+      const wrap = document.createElement("div");
+      wrap.className = "slot-group";
+      const name = document.createElement("p");
+      name.className = "slot-name";
+      name.textContent = group.name;
+      const list = document.createElement("div");
+      list.className = "slot-list";
+      for (const time of group.times) {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "time";
+        input.value = time;
+        if (first) input.required = true;
+        first = false;
+        input.disabled = toMin(time) < nowM + 30 || Object.keys(caps).every((seat) => left(key, time, seat) === 0);
+        input.checked = !input.disabled && time === keep;
+        const span = document.createElement("span");
+        span.textContent = time;
+        label.append(input, span);
+        list.append(label);
       }
-      input.disabled = off;
-      if (off && input.checked) input.checked = false;
-    });
+      wrap.append(name, list);
+      slotBox.append(wrap);
+    }
   };
 
   const refreshAvail = () => {
@@ -184,12 +177,29 @@
   };
 
   const refresh = () => {
-    refreshSlots();
     refreshAvail();
     error.textContent = "";
   };
-  form.addEventListener("change", refresh);
-  refresh();
+  form.addEventListener("change", (event) => {
+    if (event.target === dateSel) buildSlots();
+    refresh();
+  });
+
+  const renderAll = () => {
+    tellTime();
+    buildDates();
+    buildSlots();
+    refresh();
+  };
+  renderAll();
+  setInterval(tellTime, 30000);
+  window.Aodoki = {
+    setNow(value) {
+      injected = parseNow(value);
+      renderAll();
+    },
+    now,
+  };
 
   const ticket = document.getElementById("ticket");
   ticket.addEventListener("animationend", (e) => {
