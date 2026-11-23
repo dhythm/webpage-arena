@@ -128,24 +128,60 @@ time,
 .masthead nav {
   grid-column: 1 / -1;
   grid-row: 2;
+  min-width: 0;
 }
 
 .masthead nav ul {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0 1.25rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.masthead nav li {
+  flex: 0 0 auto;
 }
 
 .masthead nav a {
-  display: inline-block;
+  display: block;
   padding: 0.6rem 0;
   font-size: 0.9375rem;
+  white-space: nowrap;
   text-decoration: none;
   border-bottom: 2px solid transparent;
 }
 
+.masthead nav a:focus-visible {
+  outline-offset: -3px;
+}
+
 .masthead nav a:hover {
   border-bottom-color: var(--ink);
+}
+
+@media (max-width: 40rem) {
+  .masthead nav ul {
+    gap: 0;
+    justify-content: space-between;
+  }
+
+  .masthead nav li {
+    flex: 1 0 auto;
+  }
+
+  .masthead nav a {
+    padding-inline: 0.1875rem;
+    font-size: 0.875rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 23rem) {
+  .masthead nav a {
+    padding-inline: 0;
+  }
 }
 
 @media (min-width: 64rem) {
@@ -476,6 +512,17 @@ time,
   color: var(--hull);
 }
 
+.mark[aria-pressed="true"]::before {
+  content: "";
+  display: inline-block;
+  width: 0.35em;
+  height: 0.7em;
+  margin-right: 0.55em;
+  border: solid currentColor;
+  border-width: 0 0.16em 0.16em 0;
+  transform: translateY(-0.12em) rotate(45deg);
+}
+
 .act.is-marked {
   background: #fdf3cc;
 }
@@ -621,8 +668,7 @@ time,
   transition: opacity 0.2s;
 }
 
-.pier-zone.is-dim rect,
-.pier-zone.is-dim text {
+.pier-zone.is-dim rect {
   opacity: 0.2;
 }
 
