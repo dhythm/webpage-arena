@@ -1,0 +1,14 @@
+{
+  "id": "grok-lamp",
+  "title": "閑灯",
+  "tagline": "机の端の灯り。",
+  "type": "product-lp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": null,
+  "promptNotes": "フィクスチャ",
+  "created": "2026-11-01",
+  "thumbnail": "thumb.webp",
+  "legacy": true,
+  "externalOrigins": []
+}

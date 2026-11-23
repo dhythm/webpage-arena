@@ -1,0 +1,14 @@
+{
+  "id": "devin-firm",
+  "title": "架空工務店",
+  "tagline": "木で建てる。",
+  "type": "corporate-hp",
+  "model": "Devin",
+  "tool": "Devin",
+  "promptPath": null,
+  "promptNotes": "フィクスチャ",
+  "created": "2026-11-01",
+  "thumbnail": "thumb.webp",
+  "legacy": true,
+  "externalOrigins": []
+}

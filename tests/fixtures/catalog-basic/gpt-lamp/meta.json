@@ -1,0 +1,14 @@
+{
+  "id": "gpt-lamp",
+  "title": "LAMP <&>",
+  "tagline": "灯りの \"試作\"。",
+  "type": "product-lp",
+  "model": "GPT",
+  "tool": "unknown",
+  "promptPath": null,
+  "promptNotes": "フィクスチャ",
+  "created": "2026-11-01",
+  "thumbnail": "thumb.webp",
+  "legacy": true,
+  "externalOrigins": []
+}

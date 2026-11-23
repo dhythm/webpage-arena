@@ -4,107 +4,318 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>webpage-arena</title>
+    <meta
+      name="description"
+      content="同じお題を、いろいろなモデル・ツールで作った LP を並べて見比べるギャラリー。"
+    />
     <style>
+      :root {
+        --paper: #f4f3ef;
+        --card: #fbfaf7;
+        --ink: #1d1d1b;
+        --muted: #5f5e58;
+        --line: #d6d4cc;
+        --field: #8a887f;
+        --accent: #173cda;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
       body {
         margin: 0;
-        padding: clamp(24px, 6vw, 72px) clamp(16px, 6vw, 72px);
-        background: #f4f3ef;
-        color: #1d1d1b;
+        padding: clamp(24px, 4vw, 56px) clamp(16px, 3vw, 48px);
+        background: var(--paper);
+        color: var(--ink);
         font-family: system-ui, "Hiragino Sans", "Noto Sans JP", sans-serif;
         line-height: 1.6;
       }
+      .page {
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 4px 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--ink);
+      }
       h1 {
-        margin: 0 0 32px;
+        margin: 0;
         font-size: 20px;
         font-weight: 700;
       }
-      table {
-        width: 100%;
-        max-width: 960px;
-        border-collapse: collapse;
+      .lead {
+        flex: 1 1 320px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
       }
-      th,
-      td {
-        padding: 14px 16px 14px 0;
-        border-bottom: 1px solid #d6d4cc;
-        text-align: left;
-        vertical-align: top;
-      }
-      thead th {
-        font-size: 13px;
-        font-weight: 500;
-        color: #6b6a63;
-        border-bottom: 1px solid #1d1d1b;
-      }
-      tbody th {
-        width: 7em;
-        font-weight: 700;
+      .total {
+        margin: 0;
+        font: 13px/1.6 var(--mono);
+        color: var(--muted);
       }
       a {
         color: inherit;
         text-underline-offset: 4px;
       }
       a:hover {
-        color: #173cda;
+        color: var(--accent);
       }
-      a:focus-visible {
-        outline: 2px solid #173cda;
-        outline-offset: 3px;
+      a:focus-visible,
+      select:focus-visible,
+      button:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 2px;
       }
-      small {
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        align-items: end;
+        gap: 12px 16px;
+        margin: 24px 0 0;
+      }
+      .field {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+      }
+      label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      select,
+      button {
+        min-height: 40px;
+        font: inherit;
+        font-size: 14px;
+        color: var(--ink);
+        border: 1px solid var(--field);
+        border-radius: 6px;
+      }
+      select {
+        width: 100%;
+        min-width: 0;
+        padding: 6px 10px;
+        background: #fff;
+      }
+      button {
+        padding: 6px 14px;
+        background: transparent;
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--ink);
+      }
+      .status {
+        margin: 16px 0 0;
+        font: 13px/1.6 var(--mono);
+        color: var(--muted);
+      }
+      .empty {
+        margin: 24px 0 0;
+        padding: 20px;
+        border: 1px dashed var(--field);
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      .group {
+        margin-top: 36px;
+      }
+      .group-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 2px 16px;
+        margin-bottom: 12px;
+      }
+      h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .group-note {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .row {
+        display: flex;
+        gap: 14px;
+        margin: 0;
+        padding: 0 0 12px;
+        list-style: none;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+      }
+      .card {
+        display: flex;
+        flex: 1 0 180px;
+        flex-direction: column;
+        max-width: 320px;
+        min-width: 0;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        scroll-snap-align: start;
+      }
+      .card:focus-within,
+      .card:hover {
+        border-color: var(--ink);
+      }
+      .thumb {
         display: block;
-        color: #6b6a63;
+        aspect-ratio: 640 / 400;
+        border-bottom: 1px solid var(--line);
+        background: #e9e7e0;
+      }
+      .thumb img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .thumb-none {
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .card-body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 6px;
+        padding: 12px 12px 14px;
+      }
+      .card-title {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+      }
+      .tagline {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+        overflow-wrap: anywhere;
+      }
+      .facts {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0 10px;
+        margin: 4px 0 0;
         font-size: 12px;
       }
-      @media (max-width: 560px) {
-        tbody th {
-          width: auto;
+      .facts div {
+        display: contents;
+      }
+      .facts dt {
+        color: var(--muted);
+      }
+      .facts dd {
+        margin: 0;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .facts time {
+        font-family: var(--mono);
+      }
+      .card-foot {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin: auto 0 0;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+        font-size: 12px;
+      }
+      .card-foot a {
+        color: var(--accent);
+      }
+      .prompt-none,
+      .siblings {
+        color: var(--muted);
+      }
+      footer {
+        margin-top: 48px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+        color: var(--muted);
+      }
+      footer p {
+        margin: 0 0 4px;
+      }
+      @media (max-width: 640px) {
+        .card {
+          flex: 0 0 78%;
         }
       }
     </style>
   </head>
   <body>
-    <h1>webpage-arena</h1>
-    <table>
-      <thead>
-        <tr>
-          <th scope="col">モデル</th>
-          <th scope="col">LP（商品）</th>
-          <th scope="col">HP（企業）</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">GPT</th>
-          <td><a href="gpt-nagi/">NAGI</a><small>gpt-nagi</small></td>
-          <td><a href="gpt-umi/">UMI</a><small>gpt-umi</small></td>
-        </tr>
-        <tr>
-          <th scope="row">Grok</th>
-          <td><a href="grok-lp/">閑炉</a><small>grok-lp</small></td>
-          <td><a href="grok-corporate/">潮罫社</a><small>grok-corporate</small></td>
-        </tr>
-        <tr>
-          <th scope="row">Gemini</th>
-          <td><a href="gemini-lp/">雨聲 AMENE</a><small>gemini-lp</small></td>
-          <td><a href="gemini-corporate/">森羅木工構造</a><small>gemini-corporate</small></td>
-        </tr>
-        <tr>
-          <th scope="row">Devin</th>
-          <td><a href="devin-meguru/">MEGURU</a><small>devin-meguru</small></td>
-          <td><a href="devin-tsumugiya/">つむぎや織物</a><small>devin-tsumugiya</small></td>
-        </tr>
-        <tr>
-          <th scope="row">Claude</th>
-          <td><a href="claude-lp/">TOKI</a><small>claude-lp</small></td>
-          <td><a href="claude-corporate/">KAISŌ Materials</a><small>claude-corporate</small></td>
-        </tr>
-        <tr>
-          <th scope="row">Muse</th>
-          <td><a href="muse-halo-lp/">HALO</a><small>muse-halo-lp</small></td>
-          <td><a href="muse-arcline-hp/">Arcline</a><small>muse-arcline-hp</small></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="page">
+      <header>
+        <h1>webpage-arena</h1>
+        <p class="lead">
+          同じお題を、いろいろなモデル・ツールで作った LP のギャラリー。お題ごとに 1 行に並べています。
+        </p>
+        <p class="total"><!--catalog:total--></p>
+      </header>
+      <main>
+        <!--catalog:filters-->
+        <!--catalog:groups-->
+      </main>
+      <footer>
+        <p>商品・企業・人物・価格・数値はすべて架空です。</p>
+        <p><a href="prompts/_template.html">全お題に共通の制約</a></p>
+      </footer>
+    </div>
+    <script>
+      (() => {
+        const form = document.querySelector("[data-filters]");
+        if (!form) return;
+        const cards = [...document.querySelectorAll("[data-card]")];
+        const groups = [...document.querySelectorAll("[data-group]")];
+        const count = document.querySelector("[data-count]");
+        const empty = document.querySelector("[data-empty]");
+        const names = ["prompt", "type", "model", "tool"];
+        const apply = () => {
+          const chosen = names
+            .map((name) => [name, form.elements[name].value])
+            .filter(([, value]) => value);
+          let shown = 0;
+          for (const card of cards) {
+            const match = chosen.every(([name, value]) => card.dataset[name] === value);
+            card.hidden = !match;
+            if (match) shown++;
+          }
+          for (const group of groups)
+            group.hidden = !group.querySelector("[data-card]:not([hidden])");
+          count.textContent = chosen.length
+            ? `${shown} / ${cards.length} 作品を表示`
+            : `${cards.length} 作品`;
+          empty.hidden = shown > 0;
+        };
+        form.addEventListener("change", apply);
+        form.addEventListener("reset", () => setTimeout(apply));
+        form.addEventListener("submit", (event) => event.preventDefault());
+        form.hidden = false;
+        apply();
+      })();
+    </script>
   </body>
 </html>
