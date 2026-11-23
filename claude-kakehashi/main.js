@@ -1,5 +1,6 @@
 (() => {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const narrow = window.matchMedia("(max-width: 640px)");
   const yen = (n) => `${n.toLocaleString("ja-JP")}円`;
   const comma = (n) => n.toLocaleString("ja-JP");
   const setText = (node, value) => {
@@ -59,6 +60,7 @@
       status: document.getElementById("demo-status"),
       reset: document.getElementById("demo-reset"),
     };
+    const panel = document.getElementById("demo-check");
 
     let state;
     const fresh = () => ({
@@ -358,6 +360,7 @@
       els.deposits.querySelector(`[data-id="${id}"]`)?.focus();
       const dep = currentDeposit();
       if (dep) {
+        if (narrow.matches) panel?.scrollIntoView({ block: "nearest", behavior: reduce.matches ? "auto" : "smooth" });
         const hint = suggest(dep);
         announce(dep.interest
           ? "利息の入金を選びました。"

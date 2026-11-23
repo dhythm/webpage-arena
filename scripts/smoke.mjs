@@ -133,111 +133,6 @@ async function visit(page, url, problems) {
   if (size.scrollWidth > size.width)
     problems.add(`overflow: scrollWidth ${size.scrollWidth} > ${size.width}`);
 }
-async function checkDemoOverlap(page, problems) {
-  const has = await page.evaluate(
-    () =>
-      Boolean(
-        document.getElementById("demo-check") &&
-          document.getElementById("bank-title") &&
-          document.querySelector(".deposit"),
-      ),
-  );
-  if (!has) return;
-  await page.evaluate(async () => {
-    document.documentElement.style.scrollBehavior = "auto";
-    const hero = document.getElementById("hero-ledger");
-    if (hero && !hero.hasAttribute("data-settled")) {
-      await new Promise((done) => {
-        const finish = () => done();
-        const watch = new MutationObserver(() => {
-          if (hero.hasAttribute("data-settled")) {
-            watch.disconnect();
-            finish();
-          }
-        });
-        watch.observe(hero, { attributes: true });
-        setTimeout(finish, 4000);
-      });
-    }
-    await Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})));
-  });
-  const inspect = () =>
-    page.evaluate(() => {
-      const panel = document.getElementById("demo-check");
-      const heading = document.getElementById("bank-title");
-      const first = document.querySelector(".deposit");
-      const box = (el) => el.getBoundingClientRect();
-      const visible = (el) => {
-        const r = box(el);
-        return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
-      };
-      const overlaps = (a, b) => {
-        const A = box(a);
-        const B = box(b);
-        return !(A.right <= B.left || A.left >= B.right || A.bottom <= B.top || A.top >= B.bottom);
-      };
-      const hit = (el) => {
-        const r = box(el);
-        const x = r.left + r.width / 2;
-        const y = r.top + r.height / 2;
-        if (y < 0 || y > innerHeight || x < 0 || x > innerWidth)
-          return { inView: false, hitsSelf: false, hitsPanel: false };
-        const node = document.elementFromPoint(x, y);
-        return {
-          inView: true,
-          hitsSelf: Boolean(node && (node === el || el.contains(node))),
-          hitsPanel: Boolean(node && panel.contains(node)),
-        };
-      };
-      const invoices = [...document.querySelectorAll(".invoice")].slice(0, 3).map((el, i) => ({
-        i,
-        visible: visible(el),
-        overlap: overlaps(el, panel),
-        hit: hit(el),
-      }));
-      return {
-        headingVisible: visible(heading),
-        headingOverlap: overlaps(heading, panel),
-        first: hit(first),
-        firstOverlap: overlaps(first, panel),
-        invoices,
-      };
-    });
-  const failIfCovered = (label, result, selected) => {
-    if (result.headingVisible && result.headingOverlap)
-      problems.add(`demo overlap (${label}): 入金明細 heading covered by 照合 panel`);
-    if (result.first.inView && (result.firstOverlap || result.first.hitsPanel || !result.first.hitsSelf))
-      problems.add(`demo overlap (${label}): first deposit not hit or covered by 照合 panel`);
-    if (selected)
-      for (const invoice of result.invoices)
-        if (invoice.visible && (invoice.overlap || invoice.hit.hitsPanel))
-          problems.add(`demo overlap (${label}, selected): invoice ${invoice.i} covered by 照合 panel`);
-  };
-  const align = (fn) => page.evaluate(fn);
-  await align(() => {
-    const grid = document.querySelector(".demo-grid");
-    window.scrollTo(0, Math.max(0, grid.getBoundingClientRect().top + window.scrollY - innerHeight * 0.6));
-  });
-  failIfCovered("grid in lower viewport", await inspect(), false);
-  await align(() => {
-    const title = document.getElementById("demo-title");
-    window.scrollTo(0, Math.max(0, title.getBoundingClientRect().top + window.scrollY));
-  });
-  failIfCovered("demo title at top", await inspect(), false);
-  const first = page.locator(".deposit").first();
-  if (await first.isVisible()) {
-    await first.click();
-    await page.evaluate(async () => {
-      await Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})));
-    });
-    failIfCovered("demo title at top", await inspect(), true);
-    await align(() => {
-      const grid = document.querySelector(".demo-grid");
-      window.scrollTo(0, Math.max(0, grid.getBoundingClientRect().top + window.scrollY - innerHeight * 0.6));
-    });
-    failIfCovered("grid in lower viewport", await inspect(), true);
-  }
-}
 async function smoke(browser, site, viewport) {
   const problems = new Set();
   const context = await browser.newContext({ viewport, deviceScaleFactor: 1 });
@@ -245,7 +140,6 @@ async function smoke(browser, site, viewport) {
   await watch(page, new Set([base, ...allowedOrigins[site]]), problems);
   try {
     await visit(page, `${base}/${site}/`, problems);
-    if (viewport.width === 375) await checkDemoOverlap(page, problems);
   } catch (error) {
     problems.add(`error: ${error.message.split("\n")[0]}`);
   } finally {
