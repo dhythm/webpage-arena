@@ -1,0 +1,15 @@
+{
+  "id": "claude-nomamichi",
+  "title": "のまみち",
+  "tagline": "夜道の明るさと人通りの目安を地図で見る、歩行者向けアプリ",
+  "type": "app-lp",
+  "model": "Claude",
+  "tool": "Claude Code",
+  "modelVersion": "Opus 5.5",
+  "promptPath": "prompts/app-lp.md",
+  "promptNotes": "お題のプロンプトをそのまま使用",
+  "created": "2026-11-24",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": []
+}
