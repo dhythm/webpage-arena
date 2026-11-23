@@ -1,0 +1,15 @@
+{
+  "id": "claude-aodoki",
+  "title": "青時",
+  "tagline": "駅から徒歩数分の、席数の少ない蕎麦屋",
+  "type": "restaurant",
+  "model": "Claude",
+  "tool": "Claude Code",
+  "modelVersion": "Opus 5.5",
+  "promptPath": "prompts/restaurant.md",
+  "promptNotes": "お題のプロンプトをそのまま使用",
+  "created": "2026-11-24",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": []
+}
