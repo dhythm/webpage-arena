@@ -5,7 +5,7 @@
     iso: { name: "磯", base: 33000 },
   };
   const roomOrder = ["migiwa", "nagi", "iso"];
-  const holidayEve = 5000;
+  const saturdaySurcharge = 5000;
   const solo = 8000;
   const span = 28;
   const dows = ["日", "月", "火", "水", "木", "金", "土"];
@@ -61,9 +61,20 @@
     const h = (Math.imul(serial(d) * 3 + roomOrder.indexOf(room) + 7, 2654435761) >>> 0) % 100;
     return h < 30 ? "full" : "open";
   };
+  const perPerson = (room, d) => rooms[room].base + (d.getDay() === 6 ? saturdaySurcharge : 0);
   const nightPrice = (room, d, guests) => {
-    const per = rooms[room].base + (d.getDay() === 6 ? holidayEve : 0);
+    const per = perPerson(room, d);
     return guests === 1 ? per + solo : per * 2;
+  };
+  const nightTerm = (room, d, guests) => {
+    const per = perPerson(room, d);
+    return guests === 1 ? `${yen(per)} ＋ 一名利用 ${yen(solo)}` : `${yen(per)} × 2名`;
+  };
+  const breakdown = (room, stay, guests) => {
+    const terms = stay.map((d) => nightTerm(room, d, guests));
+    const wrap = (t) => (guests === 1 && terms.length > 1 ? `（${t}）` : t);
+    if (terms.length > 1 && terms.every((t) => t === terms[0])) return `${wrap(terms[0])} × ${terms.length}泊`;
+    return terms.map(wrap).join(" ＋ ");
   };
   const label = (d) => `${d.getMonth() + 1}月${d.getDate()}日（${dows[d.getDay()]}）`;
 
@@ -178,6 +189,10 @@
     const p = document.createElement("p");
     p.className = "quote-total";
     p.textContent = `合計 ${yen(total)}`;
+    const detail = document.createElement("span");
+    detail.className = "quote-breakdown";
+    detail.textContent = breakdown(room, stay, guests);
+    p.append(detail);
     const small = document.createElement("small");
     small.textContent = "架空の料金・税込";
     p.append(small);
@@ -213,7 +228,7 @@
     h.textContent = "ご予約を承りました（デモ）";
     const p1 = document.createElement("p");
     p1.className = "result-code";
-    p1.textContent = `${rooms[room].name}・${label(stay[0])}から${kanjiCount[nights]}泊・${kanjiCount[guests]}名・${yen(total)}`;
+    p1.textContent = `${rooms[room].name}・${label(stay[0])}から${kanjiCount[nights]}泊・${kanjiCount[guests]}名・${yen(total)} ＝ ${breakdown(room, stay, guests)}`;
     const p2 = document.createElement("p");
     p2.textContent = "これはブラウザの中だけで動くデモです。予約は実際には作られておらず、内容はどこにも送信・保存していません。岸ねの宿は架空の宿です。";
     card.append(h, p1, p2);
