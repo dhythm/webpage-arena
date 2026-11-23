@@ -46,10 +46,15 @@ import { dateOptions, dayLabel, minuteOf, parseNow, sameDay, slotsFor, statusTex
   const nowEl = document.querySelector(".now");
   const nowText = document.getElementById("now-text");
   const skyNow = document.getElementById("sky-now");
+  const nowStatus = document.getElementById("now-status");
+  let phase = null;
   const tellTime = () => {
     const t = now();
     const { text, open } = statusText(t);
     nowText.textContent = text;
+    const next = text.replace(/^いま \d{1,2}:\d{2}。/, "");
+    if (phase !== null && next !== phase) nowStatus.textContent = next;
+    phase = next;
     nowEl.classList.toggle("is-open", open);
     const h = minuteOf(t) / 60;
     const inRange = h >= 16 && h < 24;
