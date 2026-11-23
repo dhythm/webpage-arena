@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { checkSites } from "./check-sites.mjs";
@@ -27,6 +27,24 @@ const baseMeta = {
   externalOrigins: [],
 };
 const page = "<!doctype html>\n<title>fixture</title>\n";
+const legacySites = [
+  "claude-corporate",
+  "claude-lp",
+  "devin-meguru",
+  "devin-tsumugiya",
+  "gemini-corporate",
+  "gemini-lp",
+  "gpt-nagi",
+  "gpt-umi",
+  "grok-corporate",
+  "grok-lp",
+  "muse-arcline-hp",
+  "muse-halo-lp",
+];
+function assertIncludesLegacy(sites) {
+  for (const site of legacySites)
+    assert.ok(sites.includes(site), `${site} not in: ${sites.join(", ")}`);
+}
 async function makeRoot(t, files) {
   const root = await mkdtemp(join(tmpdir(), "check-sites-"));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -250,10 +268,39 @@ test("git: tracked dist/ or sites.json fails", async () => {
   assert.ok(errors.includes("sites.json: generated file is tracked by Git"));
 });
 
-test("repository: all twelve sites pass check", async () => {
+test("repository: all sites pass check and the twelve legacy sites are listed", async () => {
   const { sites, errors } = await checkSites(repo);
   assert.deepEqual(errors, []);
-  assert.equal(sites.length, 12);
+  assertIncludesLegacy(sites);
+});
+
+test("repository: adding one valid new LP to the legacy sites still passes check", async (t) => {
+  const files = {
+    "prompts/saas-lp.md": await readFile(resolve(repo, "prompts/saas-lp.md"), "utf8"),
+    "tests/fixtures/.keep": "",
+    "claude-zzsample/meta.json": {
+      ...baseMeta,
+      id: "claude-zzsample",
+      type: "saas-lp",
+      model: "Claude",
+      tool: "Claude Code",
+      promptPath: "prompts/saas-lp.md",
+    },
+    "claude-zzsample/index.html": ["problem", "product", "features", "pricing", "faq", "demo"]
+      .map((id) => `<section id="${id}"></section>`)
+      .join("\n"),
+  };
+  const root = await makeRoot(t, files);
+  for (const site of legacySites) {
+    await mkdir(join(root, site));
+    for (const file of ["meta.json", "index.html"])
+      await cp(join(repo, site, file), join(root, site, file));
+  }
+  const { sites, errors } = await checkSites(root, { tracked: [] });
+  assert.deepEqual(errors, []);
+  assertIncludesLegacy(sites);
+  assert.ok(sites.includes("claude-zzsample"), sites.join(", "));
+  assert.ok(!sites.includes("prompts") && !sites.includes("tests"), sites.join(", "));
 });
 
 test('README: has the "LP の追加手順" section', async () => {

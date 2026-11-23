@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { listFolders, listSites, readMeta } from "./sites.mjs";
 const repo = resolve(import.meta.dirname, "..");
@@ -14,6 +15,20 @@ const fixedSections = {
   inn: ["rooms", "meals", "around", "pricing", "reserve"],
 };
 const looseTypes = ["product-lp", "corporate-hp"];
+const legacySites = [
+  "claude-corporate",
+  "claude-lp",
+  "devin-meguru",
+  "devin-tsumugiya",
+  "gemini-corporate",
+  "gemini-lp",
+  "gpt-nagi",
+  "gpt-umi",
+  "grok-corporate",
+  "grok-lp",
+  "muse-arcline-hp",
+  "muse-halo-lp",
+];
 async function siteTypes() {
   return JSON.parse(await readFile(join(repo, "site-types.json"), "utf8")).map(
     (type) => type.id,
@@ -102,11 +117,61 @@ test("prompts: README.md explains reusing promptPath and adding a type with site
   assert.match(readme, /prefix/);
 });
 
-test("prompts: prompts/ and tests/ are not listed as sites", async () => {
-  const names = (await listFolders(repo)).map((folder) => folder.name);
+async function legacyPlusNewLp(t) {
+  const root = await mkdtemp(join(tmpdir(), "prompts-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (const site of legacySites) {
+    await mkdir(join(root, site));
+    for (const file of ["meta.json", "index.html"])
+      await cp(join(repo, site, file), join(root, site, file));
+  }
+  await mkdir(join(root, "prompts"));
+  await cp(join(repo, "prompts/saas-lp.md"), join(root, "prompts/saas-lp.md"));
+  await mkdir(join(root, "tests/fixtures"), { recursive: true });
+  await mkdir(join(root, "claude-zzsample"));
+  await writeFile(
+    join(root, "claude-zzsample/meta.json"),
+    JSON.stringify({
+      id: "claude-zzsample",
+      title: "Fixture",
+      tagline: "検査用の作品。",
+      type: "saas-lp",
+      model: "Claude",
+      tool: "Claude Code",
+      promptPath: "prompts/saas-lp.md",
+      promptNotes: "検査用",
+      created: "2026-11-24",
+      thumbnail: null,
+      legacy: false,
+      externalOrigins: [],
+    }),
+  );
+  await writeFile(
+    join(root, "claude-zzsample/index.html"),
+    fixedSections["saas-lp"].map((id) => `<section id="${id}"></section>`).join("\n"),
+  );
+  return root;
+}
+async function assertSiteList(root) {
+  const names = (await listFolders(root)).map((folder) => folder.name);
   assert.ok(!names.includes("prompts"), names.join(", "));
   assert.ok(!names.includes("tests"), names.join(", "));
-  assert.equal(names.length, 12);
+  for (const site of legacySites)
+    assert.ok(names.includes(site), `${site} not in: ${names.join(", ")}`);
+  return names;
+}
+
+test("prompts: prompts/ and tests/ are not listed as sites", async () => {
+  await assertSiteList(repo);
+});
+
+test("prompts: adding one valid new LP to the legacy sites keeps the site list and gate passing", async (t) => {
+  const root = await legacyPlusNewLp(t);
+  const names = await assertSiteList(root);
+  assert.ok(names.includes("claude-zzsample"), names.join(", "));
+  const { checked, errors } = await sectionGaps(root);
+  assert.deepEqual(checked, ["claude-zzsample"]);
+  assert.deepEqual(errors, []);
 });
 
 test("requiredSections gate: every new site with promptPath has all required ids", async () => {
