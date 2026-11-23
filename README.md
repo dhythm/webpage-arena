@@ -9,7 +9,8 @@
 作品の一覧は、各フォルダの `meta.json` から自動で作るギャラリーで見ます（作品表は手で書きません）。同じお題（`promptPath`）の作品が 1 行に並び、お題・種別・モデル・ツールで絞り込めます。元のプロンプトが残っていない既存作品は、種別（商品LP・企業HP）ごとにまとめています。
 
 - ローカルでは `npm run dev` を起動して http://127.0.0.1:4173/ を開きます。
-- 公開 URL は、W6（Pages の deploy workflow）と GitHub Pages の有効化の後に決まります。それまでは公開していません。
+- 公開 URL は https://dhythm.github.io/webpage-arena/ です。`.github/workflows/pages.yml` が main への push（と手動実行）のたびに `npm run build` の `dist/` だけを公開します。PR では動きません。
+- GitHub Pages の有効化はユーザーの操作です（Settings → Pages → Source：GitHub Actions）。有効化されるまでは、pages workflow は「Pages 未有効のためスキップ」と notice を出して緑で終わり、何も公開しません。
 - お題の本文は [prompts/](prompts/) にあります。ギャラリーの「プロンプトを読む」から、本文と全お題に共通の制約を読めます。
 - 作品の足し方と `meta.json` の規約は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
 
