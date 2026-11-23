@@ -1,0 +1,14 @@
+{
+  "id": "muse-halo-lp",
+  "title": "HALO",
+  "tagline": "指先から、からだの声を聞く。",
+  "type": "product-lp",
+  "model": "Muse",
+  "tool": "Muse",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}

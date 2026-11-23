@@ -1,0 +1,14 @@
+{
+  "id": "grok-lp",
+  "title": "閑炉 一号",
+  "tagline": "火を、机の端に。",
+  "type": "product-lp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}

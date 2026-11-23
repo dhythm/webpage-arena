@@ -1,0 +1,14 @@
+{
+  "id": "devin-tsumugiya",
+  "title": "つむぎや織物",
+  "tagline": "たて糸は規律。よこ糸は、実験。",
+  "type": "corporate-hp",
+  "model": "Devin",
+  "tool": "Devin",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}

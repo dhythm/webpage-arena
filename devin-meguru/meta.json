@@ -1,0 +1,14 @@
+{
+  "id": "devin-meguru",
+  "title": "MEGURU",
+  "tagline": "覗くと、夜が咲く。",
+  "type": "product-lp",
+  "model": "Devin",
+  "tool": "Devin",
+  "promptPath": null,
+  "promptNotes": "元プロンプト未収録",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}
