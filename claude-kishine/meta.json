@@ -1,0 +1,15 @@
+{
+  "id": "claude-kishine",
+  "title": "岸ねの宿",
+  "tagline": "海辺の、部屋が3つだけの小さな宿",
+  "type": "inn",
+  "model": "Claude",
+  "tool": "Claude Code",
+  "modelVersion": "Opus 5.5",
+  "promptPath": "prompts/inn.md",
+  "promptNotes": "お題のプロンプトをそのまま使用",
+  "created": "2026-11-24",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": []
+}
