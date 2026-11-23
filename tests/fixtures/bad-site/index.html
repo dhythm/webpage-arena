@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>bad-site fixture</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      .too-wide {
+        width: 1600px;
+        height: 40px;
+        background: #c33;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>bad-site</h1>
+    <div class="too-wide"></div>
+    <script>
+      fetch("https://example.invalid/collect").catch(() => {});
+      fetch("./submit", { method: "POST", body: "demo" }).catch(() => {});
+    </script>
+  </body>
+</html>

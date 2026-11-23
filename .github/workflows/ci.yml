@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PORT: "4310"
+      BASE_URL: http://127.0.0.1:4310
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Start preview server
+        run: |
+          node scripts/preview.mjs > "$RUNNER_TEMP/preview.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/preview.pid"
+          for i in $(seq 1 30); do
+            curl -sf "$BASE_URL/" > /dev/null && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/preview.log"
+          exit 1
+      - run: npm test
+      - run: npm run test:a11y
+      - run: npm run test:sites
+      - run: npm run test:smoke-selftest
+      - run: npm run build
+      - name: Stop preview server
+        if: always()
+        run: kill "$(cat "$RUNNER_TEMP/preview.pid")" 2>/dev/null || true

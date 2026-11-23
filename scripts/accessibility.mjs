@@ -3,13 +3,17 @@ import { createRequire } from "node:module";
 import { mkdir, writeFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 const require = createRequire(import.meta.url);
+const baseUrl = (process.env.BASE_URL || "http://127.0.0.1:4173").replace(
+  /\/+$/,
+  "",
+);
 const browser = await chromium.launch();
 const report = [];
 try {
   for (const site of ["gpt-nagi", "gpt-umi"])
     for (const width of [390, 1440]) {
       const page = await browser.newPage({ viewport: { width, height: 1000 } });
-      await page.goto(`http://127.0.0.1:4173/${site}/`, {
+      await page.goto(`${baseUrl}/${site}/`, {
         waitUntil: "networkidle",
       });
       await page.evaluate(() => document.fonts.ready);

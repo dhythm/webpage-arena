@@ -4,6 +4,10 @@ import { resolve } from "node:path";
 import assert from "node:assert/strict";
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_PATH || "playwright");
+const baseUrl = (process.env.BASE_URL || "http://127.0.0.1:4173").replace(
+  /\/+$/,
+  "",
+);
 const out = resolve(import.meta.dirname, "..", "qa");
 await mkdir(`${out}/screenshots`, { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -38,7 +42,7 @@ async function open(
   page.on("request", (r) =>
     requests.push({ url: r.url(), method: r.method() }),
   );
-  await page.goto(`http://127.0.0.1:4173/${site}/`, {
+  await page.goto(`${baseUrl}/${site}/`, {
     waitUntil: "networkidle",
   });
   await page.evaluate(() => document.fonts.ready);
@@ -432,7 +436,7 @@ try {
     viewport: { width: 375, height: 812 },
   });
   const noJsPage = await noJs.newPage();
-  await noJsPage.goto("http://127.0.0.1:4173/grok-corporate/", {
+  await noJsPage.goto(`${baseUrl}/grok-corporate/`, {
     waitUntil: "networkidle",
   });
   await check("grok-corporate menu works without JavaScript", async () => {
@@ -447,7 +451,7 @@ try {
       assert.deepEqual(errors, []);
       assert.ok(
         requests.every(
-          (r) => r.method === "GET" && new URL(r.url).hostname === "127.0.0.1",
+          (r) => r.method === "GET" && new URL(r.url).hostname === new URL(baseUrl).hostname,
         ),
       );
       assert.ok(report.pageWeights.every((p) => p.external.length === 0));
