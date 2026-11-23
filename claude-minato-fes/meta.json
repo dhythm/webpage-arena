@@ -1,0 +1,15 @@
+{
+  "id": "claude-minato-fes",
+  "title": "港暮らしフェス 2027",
+  "tagline": "架空の港町で開く、食と音楽の1日限りのフェス",
+  "type": "event",
+  "model": "Claude",
+  "tool": "Claude Code",
+  "modelVersion": "Opus 5.5",
+  "promptPath": "prompts/event.md",
+  "promptNotes": "お題のプロンプトをそのまま使用",
+  "created": "2026-11-24",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": []
+}
