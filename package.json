@@ -9,7 +9,9 @@
     "preview": "node scripts/preview.mjs --dist",
     "test": "node scripts/verify.mjs",
     "test:a11y": "node scripts/accessibility.mjs",
-    "screenshots:webp": "node scripts/optimize-screenshots.mjs"
+    "screenshots:webp": "node scripts/optimize-screenshots.mjs",
+    "test:sites": "node scripts/smoke.mjs",
+    "test:smoke-selftest": "node scripts/smoke-selftest.mjs"
   },
   "engines": {
     "node": ">=20"
