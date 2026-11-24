@@ -3,7 +3,7 @@ type: corporate-hp
 requiredSections: []
 ---
 
-# 企業HP
+# 企業HP（corporate-hp）
 
 ## 当時のお題
 

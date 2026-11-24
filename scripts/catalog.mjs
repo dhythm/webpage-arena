@@ -32,8 +32,14 @@ function splitPrompt(text) {
   const front = text.match(/^---\n([\s\S]*?)\n---\n/);
   const body = front ? text.slice(front[0].length) : text;
   const type = front?.[1].match(/^type:\s*(\S+)\s*$/m)?.[1] ?? null;
-  const title = body.match(/^#\s+(.+?)\s*$/m)?.[1] ?? null;
-  return { type, title };
+  const heading = body.match(/^#\s+(.+?)\s*$/m)?.[1] ?? null;
+  return { type, title: heading && type ? withoutTypeId(heading, type) : heading };
+}
+function withoutTypeId(heading, type) {
+  const id = new RegExp(`\\s*（${type.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}）\\s*(—)?\\s*`);
+  const match = heading.match(id);
+  if (!match) return heading;
+  return heading.replace(id, match[1] ? " — " : " ").trim();
 }
 export async function listPrompts(root) {
   const entries = await readdir(join(root, "prompts")).catch(() => []);

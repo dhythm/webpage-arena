@@ -3,7 +3,7 @@ type: saas-lp
 requiredSections: [problem, product, features, pricing, faq, demo]
 ---
 
-# SaaS — カケハシ
+# SaaS（saas-lp）— カケハシ
 
 [_template.md](_template.md) の共通の制約を守ったうえで、次のページを1つ作ってください。ブランド・地名・人物はすべて架空です。
 

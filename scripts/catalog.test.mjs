@@ -7,6 +7,7 @@ import { checkSites } from "./check-sites.mjs";
 import { readMeta, siteCoverage } from "./sites.mjs";
 import {
   buildDist,
+  escapeHtml,
   loadCatalog,
   renderIndex,
   renderRequest,
@@ -483,7 +484,22 @@ test("repository: headings, row aria-labels and filter options carry no type id 
   assert.ok(!html.match(/<select\b[^>]*\bname="prompt"[^>]*>[\s\S]*?<\/select>/)[0].includes(longMissing));
 });
 
-test("prompt pages: every page baked by writeGallery has <title>, <h1> and the first # line in <pre> without a type id, and no （元のプロンプトは残っていません）; the hub has it only inside cards", async (t) => {
+const promptFiles = ["app-lp", "corporate-hp", "event", "inn", "product-lp", "restaurant", "saas-lp"];
+const frontType = (text) => text.match(/^---\n[\s\S]*?^type:\s*(\S+)\s*$/m)[1];
+const firstHeading = (text) => text.match(/^#\s+(.+?)\s*$/m)[1];
+
+test("source: every prompts/<type>.md keeps its type id in the # line, and the fixture keeps SaaS（saas-lp）— フィクスチャ", async () => {
+  for (const name of promptFiles) {
+    const text = await readFile(resolve(repo, "prompts", `${name}.md`), "utf8");
+    const type = frontType(text);
+    assert.equal(type, name);
+    assert.ok(firstHeading(text).includes(`（${type}）`), `prompts/${name}.md: ${firstHeading(text)}`);
+  }
+  const fixtureText = await readFile(join(fixture("catalog-basic"), "prompts", "saas-lp.md"), "utf8");
+  assert.equal(firstHeading(fixtureText), "SaaS（saas-lp）— フィクスチャ");
+});
+
+test("prompt pages: <title> and <h1> drop the type id, the first <pre> is the escaped markdown as is (type id kept), and no （元のプロンプトは残っていません）; the hub has it only inside cards", async (t) => {
   for (const root of [fixture("catalog-basic"), repo]) {
     const out = await mkdtemp(join(tmpdir(), "catalog-prompt-pages-"));
     t.after(() => rm(out, { recursive: true, force: true }));
@@ -492,13 +508,14 @@ test("prompt pages: every page baked by writeGallery has <title>, <h1> and the f
     assert.ok(!withoutCards(index).includes(longMissing), `${root} index outside cards`);
     for (const name of names) {
       const page = await readFile(join(out, "prompts", `${name}.html`), "utf8");
+      const source = await readFile(join(root, "prompts", `${name}.md`), "utf8");
       const title = page.match(/<title>([^<]*)<\/title>/)[1];
       const h1 = page.match(/<h1>([^<]*)<\/h1>/)[1];
       const pre = page.match(/<pre>([\s\S]*?)<\/pre>/)[1];
-      const head = pre.match(/^#\s+(.+?)\s*$/m)[1];
       assert.equal(title, `${h1} — webpage-arena`, `${root} ${name}`);
-      assert.equal(head, h1, `${root} ${name}`);
-      for (const text of [title, h1, head]) assert.doesNotMatch(text, typeIdParen, `${root} ${name}: ${text}`);
+      assert.equal(pre, escapeHtml(source), `${root} ${name}: <pre> is the markdown as is`);
+      for (const text of [title, h1]) assert.doesNotMatch(text, typeIdParen, `${root} ${name}: ${text}`);
+      if (name !== "_template") assert.ok(firstHeading(pre).includes(`（${frontType(source)}）`), `${root} ${name}: ${firstHeading(pre)}`);
       assert.ok(!page.includes(longMissing), `${root} ${name}`);
     }
   }
@@ -513,6 +530,27 @@ test("prompt pages: every page baked by writeGallery has <title>, <h1> and the f
   assert.equal(await h1("inn"), "宿 — 岸ねの宿");
   assert.equal(await h1("product-lp"), "商品LP");
   assert.equal(await h1("corporate-hp"), "企業HP");
+  const fixtureOut = await mkdtemp(join(tmpdir(), "catalog-prompt-h1-fixture-"));
+  t.after(() => rm(fixtureOut, { recursive: true, force: true }));
+  await writeGallery(fixture("catalog-basic"), fixtureOut);
+  const page = await readFile(join(fixtureOut, "prompts", "saas-lp.html"), "utf8");
+  assert.equal(page.match(/<h1>([^<]*)<\/h1>/)[1], "SaaS — フィクスチャ");
+  assert.equal(page.match(/<title>([^<]*)<\/title>/)[1], "SaaS — フィクスチャ — webpage-arena");
+  assert.ok(page.match(/<pre>([\s\S]*?)<\/pre>/)[1].includes("# SaaS（saas-lp）— フィクスチャ"));
+});
+
+test("display: only a （…） equal to the front matter type is dropped, so readings like （あおどき） and other ids stay", async (t) => {
+  const root = await tempCopy(t, "catalog-basic");
+  const path = join(root, "prompts", "saas-lp.md");
+  const text = await readFile(path, "utf8");
+  await writeFile(path, text.replace(/^#\s+.+$/m, "# SaaS（saas-lp）— フィクスチャ（beta-1）"));
+  const saas = groupsOf(await hub(root)).find((g) => g.key === "prompts/saas-lp.md").html;
+  assert.match(saas, /<h2[^>]*>SaaS — フィクスチャ（beta-1）<\/h2>/);
+  const out = await mkdtemp(join(tmpdir(), "catalog-prompt-other-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  await writeGallery(root, out);
+  const page = await readFile(join(out, "prompts", "saas-lp.html"), "utf8");
+  assert.equal(page.match(/<h1>([^<]*)<\/h1>/)[1], "SaaS — フィクスチャ（beta-1）");
 });
 
 test("build: buildDist bakes the cards into index.html and writes escaped prompt pages with the common constraints", async (t) => {
