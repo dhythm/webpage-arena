@@ -829,19 +829,22 @@ test("genre pages: every work of the genre is listed in orderSites order, the sa
   assert.deepEqual(idsOf(await promptPage(out, "saas-lp")), saasOrder);
 });
 
-test("genre pages: cards are renderCard output with ../../ links, identical to the top card once the prefix is removed, with 制作 and no モデル", async (t) => {
+test("genre pages: cards are renderCard output with ../../ links, identical to the top card once the prefix and the sibling count are removed, with 制作 and no モデル", async (t) => {
   const root = await genreFixture(t);
   const out = await built(t, root);
   const loaded = await loadCatalog(root);
   const index = await readFile(join(out, "index.html"), "utf8");
   for (const site of loaded.sites) {
     const genre = await genrePage(out, site.type);
-    const deep = catalog.renderCard(site, "../../");
+    const deep = catalog.renderCard(site, "../../", { siblings: false });
     assert.ok(genre.includes(deep), site.id);
+    assert.equal(deep, catalog.renderCard({ ...site, others: 0 }, "../../"), site.id);
     assert.ok(index.includes(catalog.renderCard(site)), site.id);
     const topCard = cardsOf(index).find((card) => card.includes(`data-id="${site.id}"`));
     const genreCard = cardsOf(genre).find((card) => card.includes(`data-id="${site.id}"`));
-    assert.equal(genreCard.replaceAll('="../../', '="'), topCard, site.id);
+    const sibling = /<span class="siblings">同じ(?:種別|お題)のほかの作品 \d+ 件<\/span>/;
+    assert.equal(sibling.test(topCard), site.others > 0, site.id);
+    assert.equal(genreCard.replaceAll('="../../', '="'), topCard.replace(sibling, ""), site.id);
     assert.match(genreCard, new RegExp(`href="\\.\\./\\.\\./${site.id}/"`), site.id);
     if (site.promptPath) assert.ok((await promptPage(out, site.promptPath.slice(8, -3))).includes(catalog.renderCard(site, "../")), site.id);
   }
@@ -865,7 +868,8 @@ test("genre pages: heading and title use the type label, links back to the top a
     const label = types.find((item) => item.id === type).label;
     assert.equal(page.match(/<title>([^<]*)<\/title>/)[1], `${label} — webpage-arena`, type);
     assert.equal(page.match(/<h1\b[^>]*>([^<]*)<\/h1>/)[1], label, type);
-    assert.ok(page.includes(`aria-label="${label}の作品、横にスクロール"`), type);
+    assert.ok(page.includes(`aria-label="${label}の作品"`), type);
+    assert.doesNotMatch(page, /横にスクロール/, type);
     assert.match(page, /<a href="\.\.\/\.\.\/">ギャラリーに戻る<\/a>/, type);
     assert.ok(page.includes(`<a href="../../prompts/${type}.html">お題を読む</a>`), type);
     assert.doesNotMatch(page, /<form\b|data-filters|data-capped/, type);
@@ -875,6 +879,62 @@ test("genre pages: heading and title use the type label, links back to the top a
       assert.match(ref, /^\.\.\/\.\.\//, `${type}: ${ref}`);
     }
   }
+});
+
+test("genre pages: works are a wrapping grid without data-capped, scroll-snap or 横にスクロール, while the top keeps the capped scroll row", async (t) => {
+  const root = await genreFixture(t);
+  const out = await built(t, root);
+  const index = await readFile(join(out, "index.html"), "utf8");
+  for (const group of groupsOf(index)) {
+    const row = group.html.match(/<ul\b[^>]*>/)[0];
+    assert.match(row, /\bclass="row"/, group.key);
+    assert.match(row, /\bdata-capped\b/, group.key);
+    assert.match(row, /aria-label="[^"]*横にスクロール"/, group.key);
+  }
+  for (const slug of ["product-lp", "saas-lp", "corporate-hp"]) {
+    const page = await genrePage(out, slug);
+    const lists = [...page.matchAll(/<ul\b[^>]*>/g)].map((m) => m[0]);
+    assert.equal(lists.length, 1, slug);
+    assert.match(lists[0], /\bclass="grid"/, slug);
+    assert.doesNotMatch(lists[0], /\bclass="row"|data-capped|tabindex|横にスクロール/, slug);
+    assert.match(lists[0], /aria-label="[^"]+の作品"/, slug);
+    assert.doesNotMatch(page, /横にスクロール|data-capped/, slug);
+  }
+  const css = (await readFile(resolve(repo, "index.html"), "utf8")).match(/<style>([\s\S]*?)<\/style>/)[1];
+  const rule = (selector) => {
+    const m = css.match(new RegExp(`(?:^|\\n)\\s*${selector.replace(/[.*+?^${}()|[\]\\>]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
+    return m && m[1];
+  };
+  const grid = rule(".grid");
+  assert.ok(grid, "no .grid rule");
+  assert.match(grid, /display:\s*grid/);
+  assert.match(grid, /grid-template-columns:[^;]*minmax\(/);
+  assert.doesNotMatch(grid, /overflow-x|scroll-snap/);
+  for (const [, selector, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (/scroll-snap|overflow-x|flex:\s*0 0/.test(body)) assert.match(selector.trim(), /^\.row\b/, `${selector.trim()} { ${body.trim()} }`);
+  }
+  assert.match(rule(".row") ?? "", /scroll-snap-type:\s*x mandatory/);
+  assert.match(rule(".row > .card") ?? "", /scroll-snap-align:\s*start/);
+});
+
+test("genre pages: no 同じ種別/お題のほかの作品 sibling count, while the top still shows it for genres with 2+ works", async (t) => {
+  const root = await genreFixture(t);
+  const out = await built(t, root);
+  const index = await readFile(join(out, "index.html"), "utf8");
+  for (const slug of ["product-lp", "saas-lp"]) {
+    const group = groupsOf(index).find((item) => item.key === slug);
+    assert.match(group.html, /class="siblings"[^>]*>同じ(?:種別|お題)のほかの作品 \d+ 件/, slug);
+  }
+  for (const slug of ["product-lp", "saas-lp", "corporate-hp"]) {
+    const page = await genrePage(out, slug);
+    assert.ok(cardsOf(page).length > 0, slug);
+    assert.doesNotMatch(page, /class="siblings"|ほかの作品/, slug);
+  }
+  const repoOut = await mkdtemp(join(tmpdir(), "catalog-genre-siblings-"));
+  t.after(() => rm(repoOut, { recursive: true, force: true }));
+  await writeGallery(repo, repoOut);
+  for (const type of new Set((await metas(repo)).map((meta) => meta.type)))
+    assert.doesNotMatch(await genrePage(repoOut, type), /class="siblings"|ほかの作品/, type);
 });
 
 test("prompt pages: このお題の作品 lists the works whose promptPath matches below the body, shows 0 件 when there are none, and _template.html has no list", async (t) => {

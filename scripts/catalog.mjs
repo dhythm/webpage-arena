@@ -167,7 +167,7 @@ export async function loadCatalog(root, options = {}) {
     },
   };
 }
-export function renderCard(site, base = "") {
+export function renderCard(site, base = "", { siblings: showSiblings = true } = {}) {
   const e = escapeHtml;
   site = {
     ...site,
@@ -184,7 +184,7 @@ export function renderCard(site, base = "") {
   const tool = present(site.model) ? "" : `
                 <div><dt>ツール</dt><dd>${e(recorded(site.tool))}</dd></div>`;
   const kind = site.promptHref ? "お題" : "種別";
-  const siblings = site.others > 0 ? `<span class="siblings">同じ${kind}のほかの作品 ${site.others} 件</span>` : "";
+  const siblings = showSiblings && site.others > 0 ? `<span class="siblings">同じ${kind}のほかの作品 ${site.others} 件</span>` : "";
   return `<li class="card" data-card data-id="${e(site.id)}" data-prompt="${e(site.group)}" data-type="${e(site.type)}" data-model="${e(site.model)}" data-tool="${e(site.tool)}">
             ${thumb}
             <div class="card-body">
@@ -203,6 +203,12 @@ function renderRow(genre, base, capped) {
   const e = escapeHtml;
   return `<ul class="row" role="list" tabindex="0"${capped ? " data-capped" : ""} aria-label="${e(genre.label)}の作品、横にスクロール">
           ${genre.sites.map((site) => renderCard(site, base)).join("\n          ")}
+        </ul>`;
+}
+function renderGrid(genre, base) {
+  const e = escapeHtml;
+  return `<ul class="grid" role="list" aria-label="${e(genre.label)}の作品">
+          ${genre.sites.map((site) => renderCard(site, base, { siblings: false })).join("\n          ")}
         </ul>`;
 }
 function renderGroups(catalog) {
@@ -281,7 +287,7 @@ export function renderGenre(catalog, template, id) {
           <h2 id="genre-title">${e(genre.label)}のすべての作品</h2>
           <p class="group-note">新しい順${prompt}</p>
         </div>
-        ${renderRow(genre, "../../", false)}
+        ${renderGrid(genre, "../../")}
       </section>
       </main>
       <footer>
