@@ -88,9 +88,7 @@ export async function loadCatalog(root, options = {}) {
         promptHref: site.promptHref,
         type,
         label: site.promptPath ? prompt?.title ?? site.promptPath : site.typeLabel,
-        filterLabel: site.promptPath
-          ? prompt?.title ?? site.promptPath
-          : `${site.typeLabel}（プロンプト未収録）`,
+        filterLabel: site.promptPath ? prompt?.title ?? site.promptPath : site.typeLabel,
         sites: [],
       });
     }
@@ -143,10 +141,11 @@ function renderCard(site) {
     : `<div class="thumb thumb-none" aria-hidden="true">サムネイルなし</div>`;
   const prompt = site.promptHref
     ? `<a href="${e(site.promptHref)}">プロンプトを読む</a>`
-    : `<span>プロンプト未収録（元のプロンプトは残っていません）</span>`;
+    : `<span>プロンプト未収録</span>`;
   const tool = present(site.model) ? "" : `
                 <div><dt>ツール</dt><dd>${e(recorded(site.tool))}</dd></div>`;
   const kind = site.promptHref ? "お題" : "種別";
+  const siblings = site.others > 0 ? `<span class="siblings">同じ${kind}のほかの作品 ${site.others} 件</span>` : "";
   return `<li class="card" data-card data-id="${e(site.id)}" data-prompt="${e(site.group)}" data-type="${e(site.type)}" data-model="${e(site.model)}" data-tool="${e(site.tool)}">
             ${thumb}
             <div class="card-body">
@@ -157,7 +156,7 @@ function renderCard(site) {
                 <div><dt>${kind}</dt><dd>${e(site.typeLabel)}</dd></div>
                 <div><dt>作成日</dt><dd><time datetime="${e(site.created)}">${e(site.created)}</time></dd></div>
               </dl>
-              <p class="card-foot">${prompt}<span class="siblings">同じ${kind}のほかの作品 ${site.others} 件</span></p>
+              <p class="card-foot">${prompt}${siblings}</p>
             </div>
           </li>`;
 }

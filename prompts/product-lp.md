@@ -3,7 +3,7 @@ type: product-lp
 requiredSections: []
 ---
 
-# 商品LP（product-lp）
+# 商品LP
 
 ## 当時のお題
 

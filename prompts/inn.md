@@ -3,7 +3,7 @@ type: inn
 requiredSections: [rooms, meals, around, pricing, reserve]
 ---
 
-# 宿（inn）— 岸ねの宿
+# 宿 — 岸ねの宿
 
 [_template.md](_template.md) の共通の制約を守ったうえで、次のページを1つ作ってください。ブランド・地名・人物はすべて架空です。
 

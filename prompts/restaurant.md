@@ -3,7 +3,7 @@ type: restaurant
 requiredSections: [menu, seats, hours, access, reserve]
 ---
 
-# 飲食（restaurant）— 青時（あおどき）
+# 飲食 — 青時（あおどき）
 
 [_template.md](_template.md) の共通の制約を守ったうえで、次のページを1つ作ってください。ブランド・地名・人物はすべて架空です。
 

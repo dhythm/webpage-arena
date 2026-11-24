@@ -3,7 +3,7 @@ type: event
 requiredSections: [overview, timetable, vendors, access, notes, tickets]
 ---
 
-# イベント（event）— 港暮らしフェス 2027
+# イベント — 港暮らしフェス 2027
 
 [_template.md](_template.md) の共通の制約を守ったうえで、次のページを1つ作ってください。ブランド・地名・人物はすべて架空です。
 
