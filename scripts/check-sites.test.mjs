@@ -221,7 +221,7 @@ test("promptPath: a missing prompts/*.md file fails and an existing one passes",
   assertError(
     await checkSample(t, { promptPath: "grok-sample/index.html" }),
     "grok-sample",
-    /promptPath must be null or prompts\/<name>\.md/,
+    /promptPath must be null, prompts\/<name>\.md or briefs\/<name>\.md/,
   );
   assert.deepEqual(
     await checkSample(
@@ -459,4 +459,50 @@ test("docs: CONTRIBUTING, prompts/README and AGENTS describe 作り方の残し�
   const agents = await readFile(resolve(repo, "AGENTS.md"), "utf8");
   assert.ok(agents.includes("CONTRIBUTING.md#作り方の残し方"));
   assert.ok(agents.includes("原文は貼らない"));
+});
+
+const accountingBrief = { "briefs/accounting-saas.md": "---\ntype: saas-lp\nrequiredSections: []\n---\n\n# 経理系SaaS\n" };
+const briefRecord = (steps, first = "1. [お題「経理系SaaS」](../briefs/accounting-saas.html)を渡した。\n   - 変わったこと：LP を作った。") => recordOf(steps, first);
+
+test("promptPath: briefs/<name>.md is accepted when the file exists and fails when it does not", async (t) => {
+  assert.deepEqual(await checkSample(t, { type: "saas-lp", promptPath: "briefs/accounting-saas.md" }, accountingBrief), []);
+  assertError(
+    await checkSample(t, { promptPath: "briefs/nope.md" }),
+    "grok-sample",
+    /promptPath "briefs\/nope\.md" does not exist/,
+  );
+});
+
+test("promptPath: other folders, nested paths, non-md files and .. are rejected", async (t) => {
+  for (const promptPath of ["notes/a.md", "briefs/sub/a.md", "briefs/a.txt", "briefs/../prompts/saas-lp.md", "briefs/..md", "/briefs/a.md", "briefs/.md"])
+    assertError(
+      await checkSample(t, { promptPath }, { ...accountingBrief, ...saasPrompt, "briefs/..md": "x", "briefs/.md": "x" }),
+      "grok-sample",
+      /promptPath must be null, prompts\/<name>\.md or briefs\/<name>\.md/,
+    );
+});
+
+test("making: a briefs/ promptPath needs the first step to link to ../briefs/<name>.html, not ../prompts/", async (t) => {
+  const brief = { type: "saas-lp", promptPath: "briefs/accounting-saas.md" };
+  const extra = (record) => ({ ...accountingBrief, "grok-sample/making.md": record });
+  assert.deepEqual(await checkSample(t, { ...brief, making: "oneshot" }, extra(briefRecord(1))), []);
+  assert.deepEqual(await checkSample(t, { ...brief, making: "refined" }, extra(briefRecord(3))), []);
+  assertError(
+    await checkSample(t, { ...brief, making: "oneshot" }, extra(recordOf(1))),
+    "grok-sample",
+    /first step of making\.md must link to \.\.\/briefs\/accounting-saas\.html/,
+  );
+  assertError(
+    await checkMaking(t, { making: "oneshot" }, briefRecord(1)),
+    "grok-sample",
+    /first step of making\.md must link to \.\.\/prompts\/saas-lp\.html/,
+  );
+});
+
+test("briefs: a brief with empty requiredSections in the repository passes checkSites for a new work that has no section ids", async (t) => {
+  const text = await readFile(resolve(repo, "briefs/recruiting-saas.md"), "utf8");
+  assert.deepEqual(
+    await checkSample(t, { type: "saas-lp", promptPath: "briefs/recruiting-saas.md" }, { "briefs/recruiting-saas.md": text }),
+    [],
+  );
 });

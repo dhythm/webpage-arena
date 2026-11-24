@@ -120,8 +120,8 @@ async function checkMeta(root, site, meta, types) {
   if ("created" in meta && !(isString(meta.created) && validDate(meta.created)))
     errors.push("created must be YYYY-MM-DD");
   if ("promptPath" in meta && meta.promptPath !== null) {
-    if (!isString(meta.promptPath) || !/^prompts\/[^/\\]+\.md$/.test(meta.promptPath))
-      errors.push("promptPath must be null or prompts/<name>.md");
+    if (!isString(meta.promptPath) || !/^(?:prompts|briefs)\/[A-Za-z0-9_-]+\.md$/.test(meta.promptPath))
+      errors.push("promptPath must be null, prompts/<name>.md or briefs/<name>.md");
     else if (!(await exists(join(root, meta.promptPath))))
       errors.push(`promptPath "${meta.promptPath}" does not exist`);
   }
@@ -154,7 +154,8 @@ async function checkMaking(root, site, meta) {
   if (making === "refined" && steps.length < 2)
     errors.push(`making "refined" needs 2 or more steps in making.md, found ${steps.length}`);
   if (isString(meta.promptPath)) {
-    const href = `../prompts/${meta.promptPath.slice("prompts/".length, -".md".length)}.html`;
+    const [dir, file] = meta.promptPath.split("/");
+    const href = `../${dir}/${file.slice(0, -".md".length)}.html`;
     if (!steps[0]?.includes(`](${href})`)) errors.push(`first step of making.md must link to ${href}`);
   }
   return errors;

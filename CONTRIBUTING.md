@@ -4,10 +4,17 @@
 
 ## フォルダ名
 
-- 形は `<model の小文字>-<slug>` です（例：`claude-kakehashi`）。
-- 同じお題を別の制作で作るときは、prefix だけ変えます（例：`grok-kakehashi`）。
+- 形は `<model の小文字>-<作品独自の slug>` です（例：`grok-ledgerline`）。slug は作品の名前などから自分で決めます。
+- 同じジャンルのお題を別の制作で作るときも、slug を揃えて比べる運用はしません。作品ごとに独自の slug にします。
 - Grok で作った作品は必ず `grok-` で始めます。
 - 既存のフォルダ名は変えません。
+
+## お題
+
+- 新しい作品は、[briefs/](briefs/) のジャンルのお題（例：`briefs/accounting-saas.md`）から作ります。ジャンルのお題にはジャンル名・ざっくりした領域・想定する読み手の幅・任意の観点だけが書いてあり、商品名・コンセプト・構成は作る側が自由に決めます。
+- ジャンルのお題は `requiredSections` が空です。決まったセクションの `id` は求めません。
+- 全お題に共通の制約は [prompts/_template.md](prompts/_template.md) です。ジャンルのお題と一緒に渡します。
+- `prompts/<type>.md` は旧お題（固定）です。既存作品の記録として残し、文言は変えません。
 
 ## 必須ファイル
 
@@ -27,14 +34,14 @@
 
 ```json
 {
-  "id": "grok-kakehashi",
-  "title": "KAKEHASHI",
+  "id": "grok-ledgerline",
+  "title": "Ledgerline",
   "tagline": "ページの一行目に置くコピー。",
   "type": "saas-lp",
   "model": "Grok",
   "tool": "Cursor",
-  "promptPath": "prompts/saas-lp.md",
-  "promptNotes": "お題のプロンプトをそのまま使用",
+  "promptPath": "briefs/accounting-saas.md",
+  "promptNotes": "ジャンルのお題と共通の制約をそのまま使用",
   "created": "2026-12-01",
   "thumbnail": "thumb.webp",
   "legacy": false,
@@ -51,7 +58,7 @@
 | `type` | 必須 | [`site-types.json`](site-types.json) にある種別 |
 | `model` | 必須 | 制作。ギャラリーの「制作」欄に出る値。モデル名かツール名。例：Claude / GPT / Cursor / DeepSeek / GLM。決まった一覧はない |
 | `tool` | 必須 | 使ったツール。分からなければ推測せず `"unknown"` |
-| `promptPath` | 必須 | `null` か、実在する `prompts/*.md` |
+| `promptPath` | 必須 | `null` か、実在する `briefs/*.md`（ジャンルのお題。新規作品はこちら）か `prompts/*.md`（旧お題（固定）） |
 | `promptNotes` | 必須 | プロンプトについての補足 |
 | `created` | 必須 | `YYYY-MM-DD` |
 | `thumbnail` | 必須 | `"thumb.webp"`（640×400・60KB 以下。`npm run thumbs` で作る）。全作品で必須 |
@@ -77,7 +84,7 @@
 - プロンプトの原文は貼りません。原文には誤字があり、同じ文を渡しても同じページになるとは限らないためです。
 - 1 ステップは、最上位の番号付きの項目 1 つです。「頼んだこと（要旨）」と「変わったこと」を合わせて 1〜2 行で書きます。
 - 誤字は直します。意味は変えません。再現手順ではなく、作ったときの筋道として書きます。
-- 最初のステップは、お題ページへのリンク付きで「お題「○○」を渡した」と書きます（リンク先は `../prompts/<type>.html`）。
+- 最初のステップは、お題ページへのリンク付きで「お題「○○」を渡した」と書きます。リンク先は `promptPath` に合わせ、ジャンルのお題なら `../briefs/<slug>.html`、旧お題（固定）なら `../prompts/<type>.html` です。
 - 根拠（issue・PR・コミット）は HTML コメントで残します。ページには出ません。
 - 断り書きはページのテンプレートが出します。`making.md` には書きません。
 

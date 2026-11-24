@@ -132,14 +132,21 @@ test("CONTRIBUTING: the meta.json example passes checkSites with a real type, pr
   assert.ok(block, "CONTRIBUTING.md has a json example under ## meta.json");
   const meta = JSON.parse(block[1]);
   assert.equal(meta.type, "saas-lp");
-  assert.equal(meta.promptPath, "prompts/saas-lp.md");
+  assert.match(meta.promptPath, /^briefs\/[a-z0-9-]+\.md$/);
+  assert.ok(!meta.id.endsWith("-kakehashi"), meta.id);
   assert.equal(meta.thumbnail, "thumb.webp");
   const types = JSON.parse(await readFile(resolve(repo, "site-types.json"), "utf8"));
   assert.ok(types.some((type) => type.id === meta.type), `${meta.type} in site-types.json`);
   await readFile(resolve(repo, meta.promptPath), "utf8");
   const root = await tempCopy(t, "catalog-contributing");
-  await mkdir(join(root, "prompts"), { recursive: true });
+  await mkdir(join(root, "briefs"), { recursive: true });
   await cp(resolve(repo, meta.promptPath), join(root, meta.promptPath));
+  if (meta.id !== "grok-kakehashi") {
+    await cp(join(root, "grok-kakehashi"), join(root, meta.id), { recursive: true });
+    await rm(join(root, "grok-kakehashi"), { recursive: true });
+  }
+  const name = meta.promptPath.slice("briefs/".length, -".md".length);
+  await writeFile(join(root, meta.id, "making.md"), `# 作り方\n1. [お題](../briefs/${name}.html)を渡した。\n   - 変わったこと：LP を作った。\n`);
   await writeFile(join(root, meta.id, "meta.json"), JSON.stringify(meta));
   const { sites, errors } = await checkSites(root, { tracked: [] });
   assert.deepEqual(errors, []);
@@ -347,22 +354,24 @@ test("prompt: each card without a prompt shows only the short プロンプト未
         assert.doesNotMatch(card, /\btitle="[^"]*未収録/, meta.id);
         assert.doesNotMatch(foot, new RegExp(`<a\\b[^>]*>[^<]*${missingPrompt}`), meta.id);
         assert.doesNotMatch(card, /href="prompts\//, meta.id);
-        assert.doesNotMatch(card, /プロンプトを読む/, meta.id);
+        assert.doesNotMatch(card, /プロンプトを読む|旧お題/, meta.id);
       } else {
         const name = meta.promptPath.slice("prompts/".length, -".md".length);
+        const old = `<a href="prompts/${name}.html">旧お題（固定）</a>`;
         if (meta.making === "oneshot" || meta.making === "refined")
-          assert.equal(foot, `<a href="making/${meta.id}.html">作り方を読む</a>`, meta.id);
-        else assert.match(foot, new RegExp(`<a href="prompts/${name}\\.html">プロンプトを読む</a>`), meta.id);
+          assert.equal(foot, `<a href="making/${meta.id}.html">作り方を読む</a>${old}`, meta.id);
+        else assert.ok(foot.startsWith(old), `${meta.id}: ${foot}`);
+        assert.doesNotMatch(card, /プロンプトを読む/, meta.id);
         assert.doesNotMatch(card, /プロンプト未収録/, meta.id);
       }
     }
   }
 });
 
-test("group note: every genre links すべて見る（N件） to genre/<slug>/ with its total, plus お題を読む only when prompts/<slug>.md exists", async (t) => {
+test("group note: every genre links すべて見る（N件） to genre/<slug>/ with its total, plus お題を読む only when the type has a genre brief", async (t) => {
   for (const root of [fixture("catalog-basic"), repo, await genreFixture(t)]) {
     const list = await metas(root);
-    const prompts = new Set(await catalog.listPrompts(root));
+    const prompts = new Map((await catalog.listBriefs(root)).map((brief) => [brief.type, brief]));
     const groups = groupsOf(await hub(root));
     assert.ok(groups.some((group) => !prompts.has(group.key)) || root === repo, root);
     for (const group of groups) {
@@ -372,7 +381,7 @@ test("group note: every genre links すべて見る（N件） to genre/<slug>/ w
       const note = head.match(/<p class="group-note">([\s\S]*?)<\/p>/)[1];
       assert.doesNotMatch(head, /プロンプト未収録/, group.key);
       const all = `<a href="genre/${group.key}/">すべて見る（${total}件）</a>`;
-      if (prompts.has(group.key)) assert.equal(note, `${all}・<a href="prompts/${group.key}.html">お題を読む</a>`, `${root} ${group.key}`);
+      if (prompts.has(group.key)) assert.match(note, new RegExp(`^${all.replace(/[()（）]/g, "\\$&")}・<a href="briefs/[^"]+">お題を読む</a>$`), `${root} ${group.key}`);
       else assert.equal(note, all, `${root} ${group.key}`);
     }
   }
@@ -873,7 +882,8 @@ test("genre pages: heading and title use the type label, links back to the top a
     assert.ok(page.includes(`aria-label="${label}の作品"`), type);
     assert.doesNotMatch(page, /横にスクロール/, type);
     assert.match(page, /<a href="\.\.\/\.\.\/">ギャラリーに戻る<\/a>/, type);
-    assert.ok(page.includes(`<a href="../../prompts/${type}.html">お題を読む</a>`), type);
+    assert.match(page, /<a href="\.\.\/\.\.\/briefs\/[^"]+">お題を読む<\/a>/, type);
+    assert.doesNotMatch(page, /<a href="[^"]*prompts\/[^"]*">お題を読む<\/a>/, type);
     assert.doesNotMatch(page, /<form\b|data-filters|data-capped/, type);
     assert.doesNotMatch(page, typeIdParen, type);
     for (const [, ref] of page.matchAll(/\b(?:href|src)="([^"]*)"/g)) {
@@ -1004,13 +1014,14 @@ function assertMakingCard(card, id, badge, prefix) {
   assert.equal(foot.match(/<a\b[^>]*>作り方を読む<\/a>/g)?.length ?? 0, 1, `${id}: ${foot}`);
   assert.ok(foot.includes(`<a href="${prefix}making/${id}.html">作り方を読む</a>`), `${id}: ${foot}`);
   assert.doesNotMatch(foot, /プロンプトを読む|プロンプト未収録/, id);
+  assert.match(foot, /<a href="[^"]*prompts\/[a-z-]+\.html">旧お題（固定）<\/a>/, id);
 }
 function assertPlainCard(card, id, prompt) {
   assert.ok(card, id);
   assert.equal(makingRow(card), null, id);
   assert.doesNotMatch(card, /作り方|ワンショット|ブラッシュアップ/, id);
   const foot = footOf(card);
-  if (prompt) assert.match(foot, /<a href="[^"]*prompts\/[a-z-]+\.html">プロンプトを読む<\/a>/, id);
+  if (prompt) assert.match(foot, /<a href="[^"]*prompts\/[a-z-]+\.html">旧お題（固定）<\/a>/, id);
   else {
     assert.ok(foot.includes(`<span aria-hidden="true">${missingPrompt}</span>`), id);
     assert.ok(foot.includes(`<span class="sr-only">${fullMissing}</span>`), id);
@@ -1257,4 +1268,198 @@ test("making pages: link style — links use color: inherit with text-underline-
     const hover = styleRules(html).filter((rule) => rule.selector === "a:hover");
     assert.ok(hover.length, path);
   }
+});
+
+const briefSlugs = {
+  "accounting-saas": ["経理系SaaS", "saas-lp"],
+  "recruiting-saas": ["採用系SaaS", "saas-lp"],
+  restaurant: ["飲食店", "restaurant"],
+  "lifestyle-app": ["生活・移動アプリ", "app-lp"],
+  "local-event": ["地域イベント", "event"],
+  inn: ["宿・旅館", "inn"],
+  corporate: ["企業コーポレート", "corporate-hp"],
+  product: ["物販・プロダクト", "product-lp"],
+};
+const headerOf = (html) => html.match(/<header>([\s\S]*?)<\/header>/)?.[1] ?? html.match(/<main>\s*<p>([\s\S]*?)<\/p>/)?.[1] ?? "";
+const odaiHref = (html) => html.match(/<a href="([^"]*)">お題を読む<\/a>/)?.[1] ?? null;
+const sectionById = (html, id) => html.match(new RegExp(`<section\\b[^>]*\\bid="${id}"[^>]*>([\\s\\S]*?)</section>`))?.[1] ?? null;
+const briefPage = (out, name) => readFile(join(out, "briefs", `${name}.html`), "utf8");
+async function briefFixture(t) {
+  const root = await tempCopy(t, "catalog-basic");
+  await mkdir(join(root, "briefs"));
+  for (const slug of ["accounting-saas", "recruiting-saas", "product"]) await cp(resolve(repo, "briefs", `${slug}.md`), join(root, "briefs", `${slug}.md`));
+  await cp(join(root, "claude-kakehashi"), join(root, "grok-ledgerline"), { recursive: true });
+  const meta = JSON.parse(await readFile(join(root, "claude-kakehashi", "meta.json"), "utf8"));
+  await writeFile(
+    join(root, "grok-ledgerline", "meta.json"),
+    JSON.stringify({ ...meta, id: "grok-ledgerline", title: "Ledgerline", model: "Grok", tool: "Cursor", promptPath: "briefs/accounting-saas.md", created: "2026-12-09", making: "oneshot" }),
+  );
+  await writeFile(join(root, "grok-ledgerline", "making.md"), "# 作り方：Ledgerline\n1. [お題「経理系SaaS」](../briefs/accounting-saas.html)を渡した。\n   - 変わったこと：LP を作った。\n");
+  return root;
+}
+
+test("briefs: お題を読む on every top row and genre page of the repository opens a genre brief under briefs/, never prompts/", async (t) => {
+  const out = await mkdtemp(join(tmpdir(), "catalog-briefs-odai-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  await writeGallery(repo, out);
+  const top = await readFile(join(out, "index.html"), "utf8");
+  const types = new Set((await metas(repo)).map((meta) => meta.type));
+  for (const group of groupsOf(top)) {
+    const href = odaiHref(group.html.match(/<p class="group-note">([\s\S]*?)<\/p>/)[1]);
+    assert.ok(href, group.key);
+    assert.match(href, /^briefs\//, group.key);
+    const page = await genrePage(out, group.key);
+    assert.equal(odaiHref(page), `../../${href}`, group.key);
+  }
+  assert.equal(groupsOf(top).length, types.size);
+  assert.doesNotMatch(withoutCards(top), /href="prompts\/[a-z-]+\.html"/);
+  for (const [slug, [, type]] of Object.entries(briefSlugs)) {
+    const href = odaiHref(groupsOf(top).find((group) => group.key === type).html);
+    if (type === "saas-lp") assert.match(href, /^briefs\/index\.html#type-saas-lp$/);
+    else assert.equal(href, `briefs/${slug}.html`, type);
+  }
+});
+
+test("briefs: the saas-lp destination lists both 経理系SaaS and 採用系SaaS, and the index lists all eight briefs with relative links", async (t) => {
+  const out = await mkdtemp(join(tmpdir(), "catalog-briefs-index-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  await writeGallery(repo, out);
+  const index = await briefPage(out, "index");
+  const saas = sectionById(index, "type-saas-lp");
+  assert.ok(saas, "section#type-saas-lp");
+  assert.ok(saas.includes('<a href="accounting-saas.html">経理系SaaS</a>'), saas);
+  assert.ok(saas.includes('<a href="recruiting-saas.html">採用系SaaS</a>'), saas);
+  for (const [slug, [label, type]] of Object.entries(briefSlugs)) {
+    assert.ok(sectionById(index, `type-${type}`).includes(`<a href="${slug}.html">${label}</a>`), slug);
+    const page = await briefPage(out, slug);
+    assert.equal(page.match(/<h1>([^<]*)<\/h1>/)[1], label, slug);
+    assert.ok(page.includes("作る側が自由に決める"), slug);
+    assert.ok(page.includes("全お題に共通の制約"), slug);
+  }
+  for (const [, ref] of index.matchAll(/\b(?:href|src)="([^"]*)"/g)) assert.doesNotMatch(ref, /^\/|^[a-z]+:/i, ref);
+});
+
+test("briefs: a type without a genre brief shows no お題を読む and never falls back to prompts/", async (t) => {
+  const root = await briefFixture(t);
+  const top = await hub(root);
+  for (const group of groupsOf(top)) {
+    const note = group.html.match(/<p class="group-note">([\s\S]*?)<\/p>/)[1];
+    if (group.key === "corporate-hp") assert.doesNotMatch(note, /お題を読む/);
+    else assert.match(odaiHref(note), /^briefs\//, group.key);
+    assert.doesNotMatch(note, /prompts\//, group.key);
+  }
+  const plain = await hub(fixture("catalog-basic"));
+  assert.doesNotMatch(plain, /お題を読む/);
+});
+
+test("briefs: the header links to the genre-brief list on the top, genre, brief, old prompt and making pages", async (t) => {
+  const out = await mkdtemp(join(tmpdir(), "catalog-briefs-header-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  await writeGallery(repo, out);
+  const link = (base) => `<a href="${base}briefs/index.html">ジャンルのお題を見る</a>`;
+  assert.ok(headerOf(await readFile(join(out, "index.html"), "utf8")).includes(link("")));
+  assert.ok(headerOf(await genrePage(out, "saas-lp")).includes(link("../../")));
+  for (const page of ["briefs/index.html", "briefs/accounting-saas.html", "prompts/saas-lp.html", "prompts/_template.html", "making/claude-kakehashi.html"]) {
+    const html = await readFile(join(out, page), "utf8");
+    assert.ok(headerOf(html).includes(link("../")), `${page}: ${headerOf(html)}`);
+    assert.doesNotMatch(headerOf(html), /お題を読む/, page);
+  }
+});
+
+test("briefs: old-prompt cards show 旧お題（固定） to prompts/<name>.html on top, genre and prompt pages while keeping 作り方を読む", async (t) => {
+  const out = await mkdtemp(join(tmpdir(), "catalog-briefs-old-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  await writeGallery(repo, out);
+  const old = (await metas(repo)).filter((meta) => typeof meta.promptPath === "string" && meta.promptPath.startsWith("prompts/"));
+  assert.equal(old.length, 5);
+  const top = await readFile(join(out, "index.html"), "utf8");
+  for (const meta of old) {
+    const name = meta.promptPath.slice("prompts/".length, -".md".length);
+    for (const [html, base] of [[top, ""], [await genrePage(out, meta.type), "../../"], [await promptPage(out, name), "../"]]) {
+      const foot = footOf(cardIn(html, meta.id));
+      assert.ok(foot.includes(`<a href="${base}prompts/${name}.html">旧お題（固定）</a>`), `${meta.id} ${base}: ${foot}`);
+      assert.ok(foot.includes(`<a href="${base}making/${meta.id}.html">作り方を読む</a>`), `${meta.id} ${base}: ${foot}`);
+      assert.doesNotMatch(foot, /プロンプトを読む/, meta.id);
+    }
+  }
+});
+
+test("briefs: a work whose promptPath is briefs/<slug>.md passes checkSites and links its card to the brief, not 旧お題", async (t) => {
+  const root = await briefFixture(t);
+  assert.deepEqual((await checkSites(root, { tracked: [] })).errors, []);
+  const out = await built(t, root, "catalog-briefs-work-");
+  const top = await readFile(join(out, "index.html"), "utf8");
+  const brief = await briefPage(out, "accounting-saas");
+  for (const [html, base] of [[top, ""], [await genrePage(out, "saas-lp"), "../../"], [brief, "../"]]) {
+    const card = cardIn(html, "grok-ledgerline");
+    assert.ok(card, base);
+    const foot = footOf(card);
+    assert.ok(foot.includes(`<a href="${base}briefs/accounting-saas.html">お題を読む</a>`), `${base}: ${foot}`);
+    assert.ok(foot.includes(`<a href="${base}making/grok-ledgerline.html">作り方を読む</a>`), `${base}: ${foot}`);
+    assert.doesNotMatch(card, /旧お題|prompts\//, base);
+  }
+  assert.ok(sectionById(brief, "works") === null || brief.includes("このお題の作品"));
+  assert.ok(brief.includes("このお題の作品"));
+  assert.deepEqual(idsOf(brief), ["grok-ledgerline"]);
+  const making = await readFile(join(out, "making", "grok-ledgerline.html"), "utf8");
+  assert.ok(making.includes('<a href="../briefs/accounting-saas.html">お題「経理系SaaS」</a>'));
+  const labels = new Map(optionLabelsOf(top, "prompt"));
+  assert.match(labels.get("briefs/accounting-saas.md"), /^経理系SaaS（1）$/);
+});
+
+test("briefs: build writes dist/briefs/<slug>.html and index.html, and a second build into the same dist gives identical files", async (t) => {
+  const out = await mkdtemp(join(tmpdir(), "catalog-briefs-twice-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  const first = await buildDist(repo, out);
+  const before = await hashTree(join(out, "briefs"));
+  const all = await hashTree(out);
+  const second = await buildDist(repo, out);
+  assert.deepEqual(before.files, ["index.html", ...Object.keys(briefSlugs).map((slug) => `${slug}.html`)].sort());
+  assert.equal((await hashTree(join(out, "briefs"))).hash, before.hash);
+  assert.equal((await hashTree(out)).hash, all.hash);
+  assert.deepEqual(first.briefs, second.briefs);
+  assert.deepEqual(first.briefs, Object.keys(briefSlugs).sort());
+});
+
+test("briefs: dev renderRequest serves /briefs/ pages with the same output as the build and null for unknown paths", async (t) => {
+  const root = await briefFixture(t);
+  const out = await built(t, root, "catalog-briefs-dev-");
+  for (const [path, file] of [["/briefs/index.html", "briefs/index.html"], ["/briefs/", "briefs/index.html"], ["/briefs/accounting-saas.html", "briefs/accounting-saas.html"], ["/briefs/product.html", "briefs/product.html"]]) {
+    const page = await renderRequest(root, path);
+    assert.ok(page, path);
+    assert.equal(page.type, "text/html; charset=utf-8");
+    assert.equal(page.body, await readFile(join(out, file), "utf8"), path);
+  }
+  for (const path of ["/briefs/README.html", "/briefs/nope.html", "/briefs/../index.html", "/briefs/accounting-saas.md", "/briefs/_template.html"])
+    assert.equal(await renderRequest(root, path), null, path);
+});
+
+test("briefs: crawling the built repository and a briefs fixture under /webpage-arena/ finds 0 broken links across briefs, old prompts and making pages", async (t) => {
+  for (const root of [repo, await briefFixture(t)]) {
+    const out = await built(t, root, "catalog-briefs-crawl-");
+    const { pages, missing } = await missingRefs(out, "/webpage-arena/");
+    assert.deepEqual(missing, [], root);
+    assert.ok(pages.includes("briefs/index.html"), root);
+    assert.ok(pages.includes("briefs/accounting-saas.html"), root);
+    assert.ok(pages.includes("prompts/saas-lp.html"), root);
+    const server = fileServer(out, "/webpage-arena/", false);
+    const origin = await listen(server);
+    const { pages: crawled, broken } = await crawl(origin, "/webpage-arena/", ["", "briefs/index.html"]);
+    await close(server);
+    assert.deepEqual(broken, [], root);
+    assert.ok(crawled.includes(`${origin}/webpage-arena/briefs/recruiting-saas.html`), root);
+  }
+});
+
+test("docs: README and CONTRIBUTING add a work from a genre brief in briefs/ with a <model>-<own slug> folder, and keep prompts/ as 旧お題（固定）", async () => {
+  const readme = await readFile(resolve(repo, "README.md"), "utf8");
+  const contributing = await readFile(resolve(repo, "CONTRIBUTING.md"), "utf8");
+  for (const [name, text] of [["README", readme], ["CONTRIBUTING", contributing]]) {
+    assert.ok(text.includes("briefs/"), name);
+    assert.ok(text.includes("ジャンルのお題"), name);
+    assert.ok(text.includes("旧お題（固定）"), name);
+    assert.ok(text.includes("作品独自の slug"), name);
+    assert.doesNotMatch(text, /prefix だけ変え/, name);
+  }
+  assert.match(contributing, /`promptPath` \| 必須 \| `null`[^|\n]*`briefs\/\*\.md`/);
 });

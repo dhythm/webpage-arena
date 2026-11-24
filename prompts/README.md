@@ -1,10 +1,12 @@
-# お題（prompts）
+# 旧お題（固定）と共通の制約（prompts）
 
-同じお題を別の AI・ツールに渡して、見比べられる作品を増やすためのフォルダです。お題（`meta.json` の `promptPath`）は、ギャラリーで「お題別」に並べるときの軸になります。
+新しい作品のお題は、ジャンルのお題（[`briefs/`](../briefs/)）です。ジャンル名とざっくりした領域だけを決め、商品名・コンセプト・構成は作る側が自由に決めます。`requiredSections` は空です。
+
+このフォルダには、全お題に共通の制約（`_template.md`）と、商品名や構成まで固定していた以前のお題を「旧お題（固定）」として残しています。旧お題で作った作品のカードには「旧お題（固定）」のリンクが出ます。お題（`meta.json` の `promptPath`）は、ギャラリーで「お題別」に絞り込むときの軸になります。
 
 | ファイル | 中身 |
 | --- | --- |
-| [_template.md](_template.md) | 全お題に共通の制約 |
+| [_template.md](_template.md) | 全お題に共通の制約（ジャンルのお題にも使う） |
 | [product-lp.md](product-lp.md) | 商品LP。当時のゆるいお題（`requiredSections: []`） |
 | [corporate-hp.md](corporate-hp.md) | 企業HP。当時のゆるいお題（`requiredSections: []`） |
 | [saas-lp.md](saas-lp.md) | SaaS — カケハシ |
@@ -15,35 +17,33 @@
 
 ファイル名は [`site-types.json`](../site-types.json) の種別の id と同じです。
 
-## 同じお題で作品を足す（比較の手順）
+## 作品を足す（ジャンルのお題から）
 
-1. `_template.md` と `prompts/<type>.md` を、作る AI・ツールにそのまま渡す。文言は言い換えない。
-2. フォルダは `<model の小文字>-<slug>` にする。同じお題なら slug は揃え、フォルダの prefix だけ変える（例：`claude-kakehashi` と `grok-kakehashi`）。
-3. `meta.json` の `promptPath` に同じパス（例：`prompts/saas-lp.md`）を書く。プロンプトに手を加えたら、その内容を `promptNotes` に書く。
-4. `npm run check` を通す。`legacy: false` で `promptPath` を持つ作品は、`index.html` にお題の `requiredSections` の id がすべて無いと失敗します（`scripts/prompts.test.mjs`）。
-
-同じ `promptPath` の作品どうしが、同じ条件で作った比較対象になります。
+1. `briefs/<slug>.md` から 1 つ選び、`_template.md` と一緒に作る AI・ツールに渡す。
+2. フォルダは `<model の小文字>-<作品独自の slug>` にする（例：`grok-ledgerline`）。同じお題でも slug を揃えて prefix だけ変える運用はしない。
+3. `meta.json` の `promptPath` に使ったお題（例：`briefs/accounting-saas.md`）を書く。お題に手を加えたら、その内容を `promptNotes` に書く。
+4. `npm run check` を通す。`promptPath` は `null`・`prompts/<name>.md`・`briefs/<name>.md` のどれかです。旧お題（`prompts/`）を使う `legacy: false` の作品は、`index.html` にお題の `requiredSections` の id がすべて無いと失敗します（`scripts/prompts.test.mjs`）。ジャンルのお題は `requiredSections` が空なので、id は求めません。
 
 ## 作り方の残し方
 
 お題ページは、各モデルに共通して渡した仕様です。作品ごとの指示の流れは、お題ページではなく作品フォルダの `making.md` に残します。書き方は [CONTRIBUTING.md の「作り方の残し方」](../CONTRIBUTING.md#作り方の残し方) にあります。
 
 - プロンプトの原文は貼らない。各ステップは、頼んだこと（要旨）と変わったことを 1〜2 行で書く。誤字は直し、意味は変えない。
-- 最初のステップは、お題ページへのリンク付きで「お題「○○」を渡した」と書く。例：`1. [お題「SaaS」](../prompts/saas-lp.html)を渡した。`
+- 最初のステップは、お題ページへのリンク付きで「お題「○○」を渡した」と書く。例：`1. [お題「経理系SaaS」](../briefs/accounting-saas.html)を渡した。` 旧お題（固定）なら `../prompts/<type>.html` へのリンクにする。
 - 2 つ目以降のステップが追加指示です（最初の生成のあとに制作側へ渡し、ページの中身を変えた指示。merge やリード・CI だけの作業は数えない）。
 - `meta.json` の `making`（`oneshot`・`refined`・`unknown`）と `making.md` が合っているかは `npm run check` が見る。
 
 ## 種別（お題）を足す
 
 1. [`site-types.json`](../site-types.json) に種別を足す。
-2. 同じ PR で `prompts/<type>.md` を足す。先頭の front matter に `requiredSections`（必須セクションの id の一覧）を書く。
-3. ブランド名・一文・対象・CTA・必須セクションまで固定する。
+2. 同じ PR で `briefs/<slug>.md` を足す。先頭の front matter に `type`（種別の id）と `requiredSections: []` を書く。1 つの種別にジャンルのお題が複数あってもよい。
+3. 商品名・会社名・構成は書かず、ジャンル名・ざっくりした領域・想定する読み手の幅・任意の観点だけにする。「作る側が自由に決める」と明記する。
 
-`site-types.json` の全種別にお題ファイルがあることは `npm run check` が検査します。
+`site-types.json` の全種別に `prompts/<type>.md` があることは、いまも `npm run check` が検査します。新しい種別を足すときは、この検査をどうするかも同じ PR で決めます。
 
-## お題の文言を変えない
+## 旧お題の文言を変えない
 
-作品を作り始めたあとにお題の文言を変えると、比較の条件がずれます。変えるときは別の PR にして、理由を書きます。
+旧お題（固定）は、それで作った作品の記録です。文言は変えません。
 
 ## このフォルダに置かないもの
 
