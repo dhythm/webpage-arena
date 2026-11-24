@@ -10,7 +10,7 @@ if (coverage.problems.length > 0 || coverage.sites.length !== coverage.expected)
   process.exit(1);
 }
 const dist = join(root, "dist");
-const { sites, prompts, genres } = await buildDist(root, dist);
+const { sites, prompts, genres, making } = await buildDist(root, dist);
 for (const site of sites) {
   const path = join(dist, site);
   const html = await readFile(join(path, "index.html"), "utf8");
@@ -34,6 +34,11 @@ for (const genre of genres) {
   for (const [, reference] of page.matchAll(/(?:src|href)="([^"#]+)"/g)) await stat(resolve(path, reference));
 }
 console.log(`Built ${genres.length} genre pages in dist/genre/ with ${genreCards} cards (local references verified)`);
+for (const page of making) {
+  const text = await readFile(join(dist, "making", page), "utf8");
+  for (const [, reference] of text.matchAll(/(?:src|href)="([^"#]+)"/g)) await stat(resolve(dist, "making", reference));
+}
+console.log(`Built ${making.length} making pages in dist/making/ (local references verified)`);
 console.log(`Built ${sites.length} sites`);
 if (cards !== sites.length || genreCards !== sites.length) {
   console.error(`FAIL gallery has ${cards} cards and genre pages ${genreCards} cards for ${sites.length} sites`);

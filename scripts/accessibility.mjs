@@ -11,6 +11,7 @@ const targets = [
   { site: "hub", path: "/", states: ["page"] },
   { site: "genre product-lp", path: "/genre/product-lp/", states: ["page"] },
   { site: "genre saas-lp", path: "/genre/saas-lp/", states: ["page"] },
+  { site: "making claude-kakehashi", path: "/making/claude-kakehashi.html", states: ["page"] },
   { site: "gpt-nagi", path: "/gpt-nagi/", states: ["page", "dialog"], dialog: ".header [data-reserve]" },
   { site: "gpt-umi", path: "/gpt-umi/", states: ["page", "dialog"], dialog: ".header-contact" },
 ];

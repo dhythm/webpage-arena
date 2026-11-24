@@ -1,0 +1,15 @@
+{
+  "id": "grok-twostep",
+  "title": "二段",
+  "tagline": "区分の表示を確かめる作品。",
+  "type": "saas-lp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": "prompts/saas-lp.md",
+  "promptNotes": "フィクスチャ",
+  "created": "2026-12-04",
+  "thumbnail": null,
+  "legacy": false,
+  "externalOrigins": [],
+  "making": "refined"
+}

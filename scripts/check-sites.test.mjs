@@ -25,6 +25,7 @@ const baseMeta = {
   thumbnail: null,
   legacy: false,
   externalOrigins: [],
+  making: "unknown",
 };
 const page = "<!doctype html>\n<title>fixture</title>\n";
 const legacySites = [
@@ -333,8 +334,129 @@ test("repository: adding one valid new LP to the legacy sites still passes check
   assert.ok(!sites.includes("prompts") && !sites.includes("tests"), sites.join(", "));
 });
 
+const saasPrompt = { "prompts/saas-lp.md": "---\ntype: saas-lp\n---\n\n# SaaS（saas-lp）\n" };
+const recordOf = (steps, first = "1. [お題「SaaS」](../prompts/saas-lp.html)を渡した。\n   - 変わったこと：LP を作った。") =>
+  [
+    "# 作り方：Fixture（grok-sample）",
+    "<!-- 根拠：fixture -->",
+    first,
+    ...Array.from({ length: steps - 1 }, (_, i) => `${i + 2}. 修正 ${i + 1} を頼んだ。\n   - 変わったこと：直った。`),
+    "",
+  ].join("\n");
+async function checkMaking(t, meta, record) {
+  const extra = { ...saasPrompt };
+  if (record !== undefined) extra["grok-sample/making.md"] = record;
+  return checkSample(t, { promptPath: "prompts/saas-lp.md", ...meta }, extra);
+}
+
+test("making: oneshot with exactly one step and refined with two or more steps pass", async (t) => {
+  assert.deepEqual(await checkMaking(t, { making: "oneshot" }, recordOf(1)), []);
+  assert.deepEqual(await checkMaking(t, { making: "refined" }, recordOf(2)), []);
+  assert.deepEqual(await checkMaking(t, { making: "refined" }, recordOf(4)), []);
+  assert.deepEqual(await checkMaking(t, { making: "unknown" }), []);
+  assert.deepEqual(await checkMaking(t, { legacy: true, making: undefined }), []);
+});
+
+test("making: oneshot with two steps fails", async (t) => {
+  assertError(await checkMaking(t, { making: "oneshot" }, recordOf(2)), "grok-sample", /making "oneshot" needs exactly 1 step in making\.md, found 2/);
+});
+
+test("making: refined with one step fails", async (t) => {
+  assertError(await checkMaking(t, { making: "refined" }, recordOf(1)), "grok-sample", /making "refined" needs 2 or more steps in making\.md, found 1/);
+});
+
+test("making: oneshot or refined without making.md fails", async (t) => {
+  assertError(await checkMaking(t, { making: "oneshot" }), "grok-sample", /making "oneshot" needs making\.md/);
+  assertError(await checkMaking(t, { making: "refined" }), "grok-sample", /making "refined" needs making\.md/);
+});
+
+test("making: making.md with making unknown or no making key fails", async (t) => {
+  assertError(await checkMaking(t, { making: "unknown" }, recordOf(2)), "grok-sample", /making\.md exists but making is "unknown"/);
+  assertError(await checkMaking(t, { legacy: true, making: undefined }, recordOf(2)), "grok-sample", /making\.md exists but making is "unknown"/);
+});
+
+test("making: promptPath null allows only unknown", async (t) => {
+  const errors = await checkSample(t, { making: "oneshot" }, { "grok-sample/making.md": recordOf(1) });
+  assertError(errors, "grok-sample", /promptPath null allows only making "unknown"/);
+  assertError(await checkSample(t, { making: "refined" }), "grok-sample", /promptPath null allows only making "unknown"/);
+  assert.deepEqual(await checkSample(t, { making: "unknown" }), []);
+});
+
+test("making: the first step must link to the prompt page of promptPath", async (t) => {
+  assertError(
+    await checkMaking(t, { making: "refined" }, recordOf(2, "1. お題を渡した。\n   - 変わったこと：LP を作った。")),
+    "grok-sample",
+    /first step of making\.md must link to \.\.\/prompts\/saas-lp\.html/,
+  );
+  assertError(
+    await checkMaking(t, { making: "oneshot" }, recordOf(1, "1. [お題「飲食」](../prompts/restaurant.html)を渡した。")),
+    "grok-sample",
+    /first step of making\.md must link to \.\.\/prompts\/saas-lp\.html/,
+  );
+  assertError(
+    await checkMaking(t, { making: "refined" }, recordOf(2, "1. LP を作った。").replace("2. 修正 1", "2. [お題「SaaS」](../prompts/saas-lp.html) と修正 1")),
+    "grok-sample",
+    /first step of making\.md must link to/,
+  );
+});
+
+test("making: legacy false requires the making key and the value must be oneshot, refined or unknown", async (t) => {
+  assertError(await checkMaking(t, { making: undefined }), "grok-sample", /missing required field "making" \(legacy: false\)/);
+  assertError(await checkMaking(t, { making: "twice" }), "grok-sample", /making must be "oneshot", "refined" or "unknown"/);
+  assertError(await checkMaking(t, { legacy: true, making: 2 }), "grok-sample", /making must be "oneshot", "refined" or "unknown"/);
+});
+
+test("making: HTML comments and indented lines are not steps", async (t) => {
+  const record = recordOf(1) + "<!--\n2. これはコメントの中\n-->\n   3. 字下げした行\n";
+  assert.deepEqual(await checkMaking(t, { making: "oneshot" }, record), []);
+});
+
+const madeWorks = {
+  "claude-kakehashi": ["saas-lp", 2],
+  "claude-aodoki": ["restaurant", 2],
+  "claude-nomamichi": ["app-lp", 1],
+  "claude-minato-fes": ["event", 1],
+  "claude-kishine": ["inn", 1],
+};
+
+test("repository: the five new works are refined with making.md and the right step counts, and the twelve legacy works have no making key and no making.md", async () => {
+  const { stepsOf } = await import("./sites.mjs");
+  for (const [site, [type, extra]] of Object.entries(madeWorks)) {
+    const meta = JSON.parse(await readFile(resolve(repo, site, "meta.json"), "utf8"));
+    assert.equal(meta.making, "refined", site);
+    assert.equal(meta.promptPath, `prompts/${type}.md`, site);
+    const steps = stepsOf(await readFile(resolve(repo, site, "making.md"), "utf8"));
+    assert.equal(steps.length - 1, extra, site);
+    assert.match(steps[0], new RegExp(`\\]\\(\\.\\./prompts/${type}\\.html\\)`), site);
+  }
+  for (const site of legacySites) {
+    const meta = JSON.parse(await readFile(resolve(repo, site, "meta.json"), "utf8"));
+    assert.ok(!("making" in meta), site);
+    await assert.rejects(readFile(resolve(repo, site, "making.md")), site);
+  }
+});
+
 test('README: has the "LP の追加手順" section', async () => {
   const readme = await readFile(resolve(repo, "README.md"), "utf8");
   assert.match(readme, /^## LP の追加手順$/m);
   assert.match(readme, /\(CONTRIBUTING\.md\)/);
+});
+
+test("docs: CONTRIBUTING, prompts/README and AGENTS describe 作り方の残し方, and the CONTRIBUTING example is a valid two-step record", async () => {
+  const { stepsOf } = await import("./sites.mjs");
+  const contributing = await readFile(resolve(repo, "CONTRIBUTING.md"), "utf8");
+  assert.match(contributing, /^## 作り方の残し方$/m);
+  for (const word of ["原文は貼りません", "1〜2 行", "誤字は直します。意味は変えません", "お題「○○」を渡した", "追加指示", "npm run check"])
+    assert.ok(contributing.includes(word), word);
+  const example = contributing.match(/^## 作り方の残し方$[\s\S]*?```md\n([\s\S]*?)\n```/m);
+  assert.ok(example, "md example under 作り方の残し方");
+  const steps = stepsOf(example[1]);
+  assert.equal(steps.length, 2);
+  assert.ok(steps[0].includes("](../prompts/saas-lp.html)"));
+  const readme = await readFile(resolve(repo, "prompts/README.md"), "utf8");
+  assert.match(readme, /^## 作り方の残し方$/m);
+  assert.ok(readme.includes("CONTRIBUTING.md#作り方の残し方"));
+  const agents = await readFile(resolve(repo, "AGENTS.md"), "utf8");
+  assert.ok(agents.includes("CONTRIBUTING.md#作り方の残し方"));
+  assert.ok(agents.includes("原文は貼らない"));
 });

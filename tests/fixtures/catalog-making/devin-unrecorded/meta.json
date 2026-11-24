@@ -1,0 +1,14 @@
+{
+  "id": "devin-unrecorded",
+  "title": "未収録",
+  "tagline": "区分の表示を確かめる作品。",
+  "type": "product-lp",
+  "model": "Devin",
+  "tool": "Devin",
+  "promptPath": null,
+  "promptNotes": "フィクスチャ",
+  "created": "2026-11-01",
+  "thumbnail": null,
+  "legacy": true,
+  "externalOrigins": []
+}
