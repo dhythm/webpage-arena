@@ -1,12 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { cp, mkdtemp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { checkSites } from "./check-sites.mjs";
 import { readMeta, siteCoverage } from "./sites.mjs";
+import * as catalog from "./catalog.mjs";
+import { close, crawl, fileServer, htmlFiles, listen, missingRefs } from "./crawl.mjs";
 import {
   buildDist,
+  renderHub,
   escapeHtml,
   loadCatalog,
   renderIndex,
@@ -61,6 +65,67 @@ async function tempCopy(t, name) {
   return root;
 }
 
+const lamps = [
+  ["lamp-a", "2026-11-03"],
+  ["lamp-b", "2026-11-05"],
+  ["lamp-c", "2026-11-05"],
+  ["lamp-d", "2026-11-02"],
+  ["lamp-e", undefined],
+  ["lamp-f", "2026-02-30"],
+  ["lamp-g", "2026-11-04"],
+  ["lamp-h", "yesterday"],
+];
+const productOrder = ["lamp-b", "lamp-c", "lamp-g", "lamp-a", "lamp-d", "gpt-lamp", "grok-lamp", "lamp-e", "lamp-f", "lamp-h"];
+const saasOrder = ["claude-kakehashi", "grok-kakehashi", "a-kakehashi"];
+async function genreFixture(t) {
+  const root = await tempCopy(t, "catalog-basic");
+  const clone = async (from, id, patch) => {
+    await cp(join(root, from), join(root, id), { recursive: true });
+    const meta = JSON.parse(await readFile(join(root, from, "meta.json"), "utf8"));
+    await writeFile(join(root, id, "meta.json"), JSON.stringify({ ...meta, id, title: `${meta.title} ${id}`, ...patch }));
+  };
+  for (const [id, created] of lamps) await clone("grok-lamp", id, { created });
+  await clone("claude-kakehashi", "a-kakehashi", { created: "2026-11-30", model: "Gemini", tool: "Gemini CLI" });
+  await writeFile(join(root, "prompts", "inn.md"), "---\ntype: inn\n---\n\n# 宿（inn）— フィクスチャ\n\n作品のないお題。\n");
+  return root;
+}
+async function built(t, root, name = "catalog-built-") {
+  const out = await mkdtemp(join(tmpdir(), name));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  await buildDist(root, out);
+  return out;
+}
+const idsOf = (html) => [...html.matchAll(/<li\b[^>]*\bdata-card\b[^>]*\bdata-id="([^"]+)"/g)].map((m) => m[1]);
+const genrePage = (out, slug) => readFile(join(out, "genre", slug, "index.html"), "utf8");
+const promptPage = (out, name) => readFile(join(out, "prompts", `${name}.html`), "utf8");
+const capOf = (html) => {
+  const rule = html.match(/body:not\(\[data-filtering\]\) \.row\[data-capped\] > \[data-card\]:nth-child\(n \+ (\d+)\)\s*\{\s*display:\s*none;?\s*\}/);
+  return rule ? Number(rule[1]) - 1 : null;
+};
+async function hashTree(root, skip = new Set()) {
+  const files = [];
+  const walk = async (dir) => {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      const rel = relative(root, path).split("\\").join("/");
+      if ([...skip].some((name) => rel === name || rel.startsWith(`${name}/`))) continue;
+      if (entry.isDirectory()) await walk(path);
+      else files.push(rel);
+    }
+  };
+  await walk(root);
+  files.sort();
+  const hash = createHash("sha256");
+  for (const rel of files) {
+    hash.update(rel);
+    hash.update("\0");
+    hash.update(await readFile(join(root, rel)));
+    hash.update("\0");
+  }
+  return { hash: hash.digest("hex"), files };
+}
+
+
 test("CONTRIBUTING: the meta.json example passes checkSites with a real type, promptPath and thumb.webp", async (t) => {
   const text = await readFile(resolve(repo, "CONTRIBUTING.md"), "utf8");
   const block = text.match(/^## meta\.json\n+```json\n([\s\S]*?)\n```/m);
@@ -94,37 +159,41 @@ test("fixture: catalog-basic is a valid set of sites for checkSites", async () =
   assert.deepEqual(errors, []);
 });
 
-test("order: shared-prompt groups come first, then untracked groups in site-types order, sites by id", async () => {
+test("order: one section per genre in site-types order, each holding every work of the type, newest first", async () => {
   const groups = groupsOf(await hub(fixture("catalog-basic")));
   assert.deepEqual(
     groups.map((group) => [group.key, group.ids]),
     [
-      ["prompts/saas-lp.md", ["claude-kakehashi", "grok-kakehashi"]],
-      ["type:product-lp", ["gpt-lamp", "grok-lamp"]],
-      ["type:corporate-hp", ["devin-firm"]],
+      ["product-lp", ["gpt-lamp", "grok-lamp"]],
+      ["corporate-hp", ["devin-firm"]],
+      ["saas-lp", ["claude-kakehashi", "grok-kakehashi"]],
     ],
   );
 });
 
-test("grouping: sites with the same promptPath share one row and untracked sites group by type label", async () => {
-  const root = fixture("catalog-basic");
-  const list = await metas(root);
-  const groups = groupsOf(await hub(root));
-  const expected = tally(list, groupKey);
-  assert.deepEqual(new Set(groups.map((group) => group.key)), new Set(expected.keys()));
-  for (const group of groups) {
-    assert.equal(group.ids.length, expected.get(group.key), group.key);
-    const rows = group.html.match(/<ul\b[^>]*\bclass="row"/g) ?? [];
-    assert.equal(rows.length, 1, `${group.key} has exactly one row`);
-    for (const id of group.ids) assert.equal(groupKey(list.find((meta) => meta.id === id)), group.key);
+test("grouping: sites of the same type (genre) share one row headed by the type label, recorded prompt or not", async () => {
+  for (const root of [fixture("catalog-basic"), repo]) {
+    const list = await metas(root);
+    const groups = groupsOf(await hub(root));
+    const expected = tally(list, (meta) => meta.type);
+    assert.deepEqual(new Set(groups.map((group) => group.key)), new Set(expected.keys()), root);
+    const types = JSON.parse(await readFile(resolve(repo, "site-types.json"), "utf8"));
+    assert.deepEqual(
+      groups.map((group) => group.key),
+      types.map((type) => type.id).filter((id) => expected.has(id)),
+      root,
+    );
+    for (const group of groups) {
+      assert.equal(group.ids.length, expected.get(group.key), `${root} ${group.key}`);
+      const rows = group.html.match(/<ul\b[^>]*\bclass="row"/g) ?? [];
+      assert.equal(rows.length, 1, `${group.key} has exactly one row`);
+      for (const id of group.ids) assert.equal(list.find((meta) => meta.id === id).type, group.key);
+      const label = types.find((type) => type.id === group.key).label;
+      assert.match(group.html, new RegExp(`<h2[^>]*>${label}</h2>`), `${root} ${group.key}`);
+      assert.ok(group.html.includes(`aria-label="${label}の作品、横にスクロール"`), `${root} ${group.key}`);
+    }
   }
-  const types = JSON.parse(await readFile(resolve(repo, "site-types.json"), "utf8"));
-  const label = (id) => types.find((type) => type.id === id).label;
-  assert.match(groups.find((g) => g.key === "type:product-lp").html, new RegExp(`<h2[^>]*>[^<]*${label("product-lp")}`));
-  assert.match(groups.find((g) => g.key === "type:corporate-hp").html, new RegExp(`<h2[^>]*>[^<]*${label("corporate-hp")}`));
-  const saas = groups.find((g) => g.key === "prompts/saas-lp.md").html;
-  assert.match(saas, /<h2[^>]*>SaaS — フィクスチャ<\/h2>/);
-  assert.ok(saas.includes('aria-label="SaaS — フィクスチャの作品、横にスクロール"'), saas);
+  const saas = groupsOf(await hub(fixture("catalog-basic"))).find((g) => g.key === "saas-lp").html;
   assert.doesNotMatch(saas, /（saas-lp）/);
 });
 
@@ -248,7 +317,7 @@ test("new values: DeepSeek, GLM and Claude Code appear as is in the 制作 row a
   assert.deepEqual(optionsOf(html, "model").sort(), ["Claude Code", "DeepSeek", "GLM"]);
   for (const model of ["DeepSeek", "GLM", "Claude Code"])
     assert.ok(html.includes(`<option value="${model}">${model}（1）</option>`), model);
-  assert.ok(html.includes('<p class="total">3 作品・制作 3 種・1 グループ</p>'));
+  assert.ok(html.includes('<p class="total">3 作品・制作 3 種・1 ジャンル</p>'));
 });
 
 test("filters: the form is hidden until JS runs and the no-match message exists but starts hidden", async () => {
@@ -288,19 +357,21 @@ test("prompt: each card without a prompt shows only the short プロンプト未
   }
 });
 
-test("group note: type groups show only 'N 作品' without プロンプト未収録; prompt groups keep 'N 作品・お題を読む'", async () => {
-  for (const root of [fixture("catalog-basic"), repo]) {
+test("group note: every genre links すべて見る（N件） to genre/<slug>/ with its total, plus お題を読む only when prompts/<slug>.md exists", async (t) => {
+  for (const root of [fixture("catalog-basic"), repo, await genreFixture(t)]) {
+    const list = await metas(root);
+    const prompts = new Set(await catalog.listPrompts(root));
     const groups = groupsOf(await hub(root));
-    assert.ok(groups.some((group) => group.key.startsWith("type:")), root);
+    assert.ok(groups.some((group) => !prompts.has(group.key)) || root === repo, root);
     for (const group of groups) {
+      const total = list.filter((meta) => meta.type === group.key).length;
+      assert.equal(group.ids.length, total, `${root} ${group.key} keeps every card in the DOM`);
       const head = group.html.match(/<div class="group-head">([\s\S]*?)<\/div>/)[1];
       const note = head.match(/<p class="group-note">([\s\S]*?)<\/p>/)[1];
       assert.doesNotMatch(head, /プロンプト未収録/, group.key);
-      if (group.key.startsWith("type:")) assert.equal(note, `${group.ids.length} 作品`, group.key);
-      else {
-        const name = group.key.slice("prompts/".length, -".md".length);
-        assert.equal(note, `${group.ids.length} 作品・<a href="prompts/${name}.html">お題を読む</a>`, group.key);
-      }
+      const all = `<a href="genre/${group.key}/">すべて見る（${total}件）</a>`;
+      if (prompts.has(group.key)) assert.equal(note, `${all}・<a href="prompts/${group.key}.html">お題を読む</a>`, `${root} ${group.key}`);
+      else assert.equal(note, all, `${root} ${group.key}`);
     }
   }
 });
@@ -373,14 +444,15 @@ test("rows: every scroll row is keyboard-focusable and says it scrolls sideways"
   assert.match(css, /scroll-snap-align:\s*start/);
 });
 
-test("lead and counts: the intro covers prompt rows and type rows, and the filter count starts empty", async () => {
+test("lead and counts: the intro covers genre rows and すべて見る, and the filter count starts empty", async () => {
   for (const root of [fixture("catalog-basic"), repo]) {
     const list = await metas(root);
     const html = await hub(root);
-    assert.match(html, /<p class="lead">[\s\S]*お題ごとに1行に並べます。プロンプトが残っていない作品は種別ごとにまとめています。[\s\S]*?<\/p>/);
-    const groups = new Set(list.map(groupKey)).size;
+    assert.match(html, /<p class="lead">[\s\S]*ジャンルごとに1行に、新しい作品から並べます。[\s\S]*「すべて見る」[\s\S]*?<\/p>/);
+    assert.doesNotMatch(html, /お題ごとに1行/);
+    const genres = new Set(list.map((m) => m.type)).size;
     const models = new Set(list.map((m) => m.model)).size;
-    assert.ok(html.includes(`<p class="total">${list.length} 作品・制作 ${models} 種・${groups} グループ</p>`), root);
+    assert.ok(html.includes(`<p class="total">${list.length} 作品・制作 ${models} 種・${genres} ジャンル</p>`), root);
     assert.match(html, /<p class="status" data-count aria-live="polite"><\/p>/, root);
   }
 });
@@ -398,12 +470,45 @@ test("folder add: one new site folder adds one card and joins its prompt row wit
   const html = await hub(root);
   assert.equal(beforeCards, before.length);
   assert.equal(cardsOf(html).length, before.length + 1);
-  const row = groupsOf(html).find((group) => group.key === "prompts/saas-lp.md");
+  const row = groupsOf(html).find((group) => group.key === "saas-lp");
   assert.ok(row.ids.includes("gemini-kakehashi"), row.ids.join(", "));
   assert.ok(optionsOf(html, "model").includes("Gemini"));
   assert.ok(optionsOf(html, "tool").includes("Gemini CLI"));
   const size = before.filter((m) => m.promptPath === "prompts/saas-lp.md").length + 1;
   assert.ok(html.includes(`同じお題のほかの作品 ${size - 1} 件`));
+});
+
+
+test("folder add: adding one site folder updates the top row, すべて見る count, genre page and prompt page, and leaves every other source file unchanged", async (t) => {
+  const root = await tempCopy(t, "catalog-basic");
+  const beforeSources = await hashTree(root);
+  const beforeOut = await built(t, root, "catalog-folder-before-");
+  const beforeHub = await readFile(join(beforeOut, "index.html"), "utf8");
+  const beforeRow = groupsOf(beforeHub).find((group) => group.key === "saas-lp");
+  const beforeCount = Number(beforeRow.html.match(/すべて見る（(\d+)件）/)[1]);
+  const beforeGenre = idsOf(await genrePage(beforeOut, "saas-lp"));
+  const beforePrompt = idsOf(await promptPage(beforeOut, "saas-lp"));
+  const id = "gemini-kakehashi";
+  await cp(join(root, "claude-kakehashi"), join(root, id), { recursive: true });
+  const meta = JSON.parse(await readFile(join(root, id, "meta.json"), "utf8"));
+  await writeFile(
+    join(root, id, "meta.json"),
+    JSON.stringify({ ...meta, id, title: "カケハシ Gemini", created: "2026-12-10", model: "Gemini", tool: "Gemini CLI" }),
+  );
+  const afterSources = await hashTree(root, new Set([id]));
+  assert.equal(afterSources.hash, beforeSources.hash);
+  assert.deepEqual(afterSources.files, beforeSources.files);
+  const afterOut = await built(t, root, "catalog-folder-after-");
+  const afterHub = await readFile(join(afterOut, "index.html"), "utf8");
+  const afterRow = groupsOf(afterHub).find((group) => group.key === "saas-lp");
+  assert.equal(Number(afterRow.html.match(/すべて見る（(\d+)件）/)[1]), beforeCount + 1);
+  assert.equal(afterRow.ids[0], id);
+  const afterGenre = idsOf(await genrePage(afterOut, "saas-lp"));
+  const afterPrompt = idsOf(await promptPage(afterOut, "saas-lp"));
+  assert.ok(afterGenre.includes(id));
+  assert.equal(afterGenre.length, beforeGenre.length + 1);
+  assert.ok(afterPrompt.includes(id));
+  assert.equal(afterPrompt.length, beforePrompt.length + 1);
 });
 
 test("folder add: a row of one shows no 'ほかの作品 0 件' line for お題 or 種別, and a second site turns on '1 件' for both", async (t) => {
@@ -464,10 +569,13 @@ test("prompt filter: type groups are labelled 商品LP / 企業HP without （プ
 test("repository: headings, row aria-labels and filter options carry no type id like （saas-lp） and no （プロンプト未収録）, and （元のプロンプトは残っていません） appears only inside cards", async () => {
   const html = await hub(repo);
   const groups = groupsOf(html);
-  const saas = groups.find((g) => g.key === "prompts/saas-lp.md");
-  assert.match(saas.html, /<h2[^>]*>SaaS — カケハシ<\/h2>/);
-  const restaurant = groups.find((g) => g.key === "prompts/restaurant.md");
-  assert.match(restaurant.html, /<h2[^>]*>飲食 — 青時（あおどき）<\/h2>/);
+  const saas = groups.find((g) => g.key === "saas-lp");
+  assert.match(saas.html, /<h2[^>]*>SaaS<\/h2>/);
+  const restaurant = groups.find((g) => g.key === "restaurant");
+  assert.match(restaurant.html, /<h2[^>]*>飲食<\/h2>/);
+  const promptLabels = new Map(optionLabelsOf(html, "prompt"));
+  assert.match(promptLabels.get("prompts/saas-lp.md"), /^SaaS — カケハシ（\d+）$/);
+  assert.match(promptLabels.get("prompts/restaurant.md"), /^飲食 — 青時（あおどき）（\d+）$/);
   for (const group of groups) {
     const heading = group.html.match(/<h2\b[^>]*>([^<]*)<\/h2>/)[1];
     const row = group.html.match(/<ul\b[^>]*\bclass="row"[^>]*>/)[0];
@@ -544,8 +652,8 @@ test("display: only a （…） equal to the front matter type is dropped, so re
   const path = join(root, "prompts", "saas-lp.md");
   const text = await readFile(path, "utf8");
   await writeFile(path, text.replace(/^#\s+.+$/m, "# SaaS（saas-lp）— フィクスチャ（beta-1）"));
-  const saas = groupsOf(await hub(root)).find((g) => g.key === "prompts/saas-lp.md").html;
-  assert.match(saas, /<h2[^>]*>SaaS — フィクスチャ（beta-1）<\/h2>/);
+  const label = new Map(optionLabelsOf(await hub(root), "prompt")).get("prompts/saas-lp.md");
+  assert.equal(label, "SaaS — フィクスチャ（beta-1）（2）");
   const out = await mkdtemp(join(tmpdir(), "catalog-prompt-other-"));
   t.after(() => rm(out, { recursive: true, force: true }));
   await writeGallery(root, out);
@@ -583,13 +691,16 @@ test("dev: renderRequest renders / and prompt pages with the same output as the 
     ["/index.html", "index.html"],
     ["/prompts/saas-lp.html", "prompts/saas-lp.html"],
     ["/prompts/_template.html", "prompts/_template.html"],
+    ["/genre/saas-lp/", "genre/saas-lp/index.html"],
+    ["/genre/saas-lp/index.html", "genre/saas-lp/index.html"],
+    ["/genre/product-lp/", "genre/product-lp/index.html"],
   ]) {
     const page = await renderRequest(root, path);
     assert.ok(page, path);
     assert.match(page.type, /^text\/html/);
     assert.equal(page.body, await readFile(join(out, file), "utf8"), path);
   }
-  for (const path of ["/prompts/README.html", "/prompts/nope.html", "/prompts/../index.html", "/claude-kakehashi/", "/prompts/saas-lp.md"])
+  for (const path of ["/prompts/README.html", "/prompts/nope.html", "/prompts/../index.html", "/claude-kakehashi/", "/prompts/saas-lp.md", "/genre/inn/", "/genre/nope/", "/genre/saas-lp", "/genre/../index.html", "/genre/"])
     assert.equal(await renderRequest(root, path), null, path);
 });
 
@@ -617,4 +728,192 @@ test("repository: every link and resource in the hub is relative and no external
   }
   assert.doesNotMatch(html, /fonts\.googleapis|fonts\.gstatic|@import|<link\b[^>]*stylesheet/);
   assert.match(html, /:focus-visible/);
+});
+
+test("sort: orderSites puts the newest created first and does not mutate its input", () => {
+  const input = [
+    { id: "a", created: "2026-11-01" },
+    { id: "b", created: "2026-11-24" },
+    { id: "c", created: "2026-11-10" },
+    { id: "d", created: "2025-12-31" },
+  ];
+  assert.deepEqual(catalog.orderSites(input).map((site) => site.id), ["b", "c", "a", "d"]);
+  assert.deepEqual(input.map((site) => site.id), ["a", "b", "c", "d"]);
+});
+
+test("sort: orderSites breaks a created tie by the site slug (id) ascending", () => {
+  const input = [
+    { id: "zeta", created: "2026-11-01" },
+    { id: "mid", created: "2026-11-01" },
+    { id: "alpha", created: "2026-11-01" },
+    { id: "newest", created: "2026-11-24" },
+  ];
+  assert.deepEqual(catalog.orderSites(input).map((site) => site.id), ["newest", "alpha", "mid", "zeta"]);
+});
+
+test("sort: orderSites puts missing or invalid created last, then slug ascending, in code and in a built fixture", async (t) => {
+  const input = [
+    { id: "x" },
+    { id: "b", created: "2026-02-30" },
+    { id: "a", created: "yesterday" },
+    { id: "c", created: null },
+    { id: "d", created: "2026-1-05" },
+    { id: "z", created: "2020-01-01" },
+    { id: "e", created: "" },
+  ];
+  assert.deepEqual(catalog.orderSites(input).map((site) => site.id), ["z", "a", "b", "c", "d", "e", "x"]);
+  const out = await built(t, await genreFixture(t));
+  assert.deepEqual(idsOf(await genrePage(out, "product-lp")), productOrder);
+});
+
+test("top: TOP_LIMIT is 6, each genre keeps all works in the DOM in orderSites order, and only the first TOP_LIMIT show until a filter is set", async (t) => {
+  assert.equal(catalog.TOP_LIMIT, 6);
+  const root = await genreFixture(t);
+  const html = await hub(root);
+  const product = groupsOf(html).find((group) => group.key === "product-lp");
+  assert.ok(product.ids.length >= 7, product.ids.join(", "));
+  assert.deepEqual(product.ids, productOrder);
+  assert.equal(capOf(html), catalog.TOP_LIMIT);
+  for (const group of groupsOf(html))
+    assert.match(group.html, /<ul\b[^>]*\bclass="row"[^>]*\bdata-capped\b/, group.key);
+  const visible = product.ids.slice(0, capOf(html));
+  assert.deepEqual(visible, ["lamp-b", "lamp-c", "lamp-g", "lamp-a", "lamp-d", "gpt-lamp"]);
+  assert.match(html, /document\.body\.toggleAttribute\("data-filtering", chosen\.length > 0\)/);
+});
+
+test("top: options.topLimit changes how many cards the default view shows", async () => {
+  const root = fixture("catalog-basic");
+  assert.equal(capOf(await renderHub(root)), catalog.TOP_LIMIT);
+  assert.equal(capOf(await renderHub(root, { topLimit: 3 })), 3);
+  assert.equal(capOf(await renderHub(root, { topLimit: 1 })), 1);
+});
+
+test("genre pages: build writes dist/genre/<slug>/index.html only for genres with at least one work", async (t) => {
+  const out = await built(t, await genreFixture(t));
+  assert.deepEqual((await readdir(join(out, "genre"))).sort(), ["corporate-hp", "product-lp", "saas-lp"]);
+  const repoOut = await mkdtemp(join(tmpdir(), "catalog-genre-repo-"));
+  t.after(() => rm(repoOut, { recursive: true, force: true }));
+  await writeGallery(repo, repoOut);
+  const types = new Set((await metas(repo)).map((meta) => meta.type));
+  assert.equal(types.size, 7);
+  assert.deepEqual((await readdir(join(repoOut, "genre"))).sort(), [...types].sort());
+  for (const type of types) await genrePage(repoOut, type);
+});
+
+test("genre pages: every work of the genre is listed in orderSites order, the same order as the top row and the prompt page", async (t) => {
+  for (const root of [await genreFixture(t), repo]) {
+    const out = await mkdtemp(join(tmpdir(), "catalog-genre-order-"));
+    t.after(() => rm(out, { recursive: true, force: true }));
+    await writeGallery(root, out);
+    const list = await metas(root);
+    const { sites } = await loadCatalog(root);
+    const top = groupsOf(await readFile(join(out, "index.html"), "utf8"));
+    for (const group of top) {
+      const ids = idsOf(await genrePage(out, group.key));
+      const expected = catalog.orderSites(sites.filter((site) => site.type === group.key)).map((site) => site.id);
+      assert.equal(ids.length, list.filter((meta) => meta.type === group.key).length, `${root} ${group.key}`);
+      assert.deepEqual(ids, expected, `${root} ${group.key}`);
+      assert.deepEqual(group.ids.slice(0, catalog.TOP_LIMIT), ids.slice(0, catalog.TOP_LIMIT), `${root} ${group.key} top`);
+    }
+    for (const name of (await catalog.listPrompts(root)).filter((name) => name !== "_template")) {
+      const path = `prompts/${name}.md`;
+      const ids = idsOf(await promptPage(out, name));
+      assert.equal(ids.length, list.filter((meta) => meta.promptPath === path).length, `${root} ${name}`);
+      const subset = new Set(ids);
+      const genre = top.find((group) => group.key === name);
+      assert.deepEqual(ids, genre ? genre.ids.filter((id) => subset.has(id)) : [], `${root} ${name}`);
+    }
+  }
+  const out = await built(t, await genreFixture(t));
+  assert.deepEqual(idsOf(await genrePage(out, "saas-lp")), saasOrder);
+  assert.deepEqual(idsOf(await promptPage(out, "saas-lp")), saasOrder);
+});
+
+test("genre pages: cards are renderCard output with ../../ links, identical to the top card once the prefix is removed, with 制作 and no モデル", async (t) => {
+  const root = await genreFixture(t);
+  const out = await built(t, root);
+  const loaded = await loadCatalog(root);
+  const index = await readFile(join(out, "index.html"), "utf8");
+  for (const site of loaded.sites) {
+    const genre = await genrePage(out, site.type);
+    const deep = catalog.renderCard(site, "../../");
+    assert.ok(genre.includes(deep), site.id);
+    assert.ok(index.includes(catalog.renderCard(site)), site.id);
+    const topCard = cardsOf(index).find((card) => card.includes(`data-id="${site.id}"`));
+    const genreCard = cardsOf(genre).find((card) => card.includes(`data-id="${site.id}"`));
+    assert.equal(genreCard.replaceAll('="../../', '="'), topCard, site.id);
+    assert.match(genreCard, new RegExp(`href="\\.\\./\\.\\./${site.id}/"`), site.id);
+    if (site.promptPath) assert.ok((await promptPage(out, site.promptPath.slice(8, -3))).includes(catalog.renderCard(site, "../")), site.id);
+  }
+  const repoOut = await mkdtemp(join(tmpdir(), "catalog-genre-label-"));
+  t.after(() => rm(repoOut, { recursive: true, force: true }));
+  await writeGallery(repo, repoOut);
+  for (const type of new Set((await metas(repo)).map((meta) => meta.type))) {
+    const page = await genrePage(repoOut, type);
+    assert.match(page, /<dt>制作<\/dt>/, type);
+    assert.equal(page.split("モデル").length - 1, 0, `モデル in genre/${type}`);
+  }
+});
+
+test("genre pages: heading and title use the type label, links back to the top and the prompt are relative, and there is no filter form", async (t) => {
+  const out = await mkdtemp(join(tmpdir(), "catalog-genre-head-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  await writeGallery(repo, out);
+  const types = JSON.parse(await readFile(resolve(repo, "site-types.json"), "utf8"));
+  for (const type of new Set((await metas(repo)).map((meta) => meta.type))) {
+    const page = await genrePage(out, type);
+    const label = types.find((item) => item.id === type).label;
+    assert.equal(page.match(/<title>([^<]*)<\/title>/)[1], `${label} — webpage-arena`, type);
+    assert.equal(page.match(/<h1\b[^>]*>([^<]*)<\/h1>/)[1], label, type);
+    assert.ok(page.includes(`aria-label="${label}の作品、横にスクロール"`), type);
+    assert.match(page, /<a href="\.\.\/\.\.\/">ギャラリーに戻る<\/a>/, type);
+    assert.ok(page.includes(`<a href="../../prompts/${type}.html">お題を読む</a>`), type);
+    assert.doesNotMatch(page, /<form\b|data-filters|data-capped/, type);
+    assert.doesNotMatch(page, typeIdParen, type);
+    for (const [, ref] of page.matchAll(/\b(?:href|src)="([^"]*)"/g)) {
+      assert.doesNotMatch(ref, /^\/|^[a-z]+:/i, `${type}: ${ref}`);
+      assert.match(ref, /^\.\.\/\.\.\//, `${type}: ${ref}`);
+    }
+  }
+});
+
+test("prompt pages: このお題の作品 lists the works whose promptPath matches below the body, shows 0 件 when there are none, and _template.html has no list", async (t) => {
+  const out = await built(t, await genreFixture(t));
+  const saas = await promptPage(out, "saas-lp");
+  assert.ok(saas.indexOf("このお題の作品") > saas.indexOf("</pre>"), "below the body");
+  assert.match(saas, /<h2 id="works">このお題の作品<\/h2>\s*<p>3 件<\/p>/);
+  assert.deepEqual(idsOf(saas), saasOrder);
+  assert.match(saas, /<pre>[\s\S]*# SaaS（saas-lp）— フィクスチャ/);
+  const inn = await promptPage(out, "inn");
+  assert.match(inn, /<h2 id="works">このお題の作品<\/h2>\s*<p>0 件<\/p>/);
+  assert.equal(cardsOf(inn).length, 0);
+  assert.match(inn, /<pre>[\s\S]*作品のないお題。/);
+  assert.match(inn, /<a href="\.\.\/">ギャラリーに戻る<\/a>/);
+  assert.ok(inn.includes('<a href="_template.html">単独のページ</a>'));
+  const common = await promptPage(out, "_template");
+  assert.doesNotMatch(common, /このお題の作品|data-card/);
+});
+
+
+test("links: every href and src in the built HTML resolves to an existing file when served under /webpage-arena/", async (t) => {
+  const out = await built(t, await genreFixture(t));
+  const { pages, links, missing } = await missingRefs(out, "/webpage-arena/");
+  assert.deepEqual(missing, []);
+  assert.ok(pages.includes("index.html"));
+  assert.ok(pages.includes("genre/saas-lp/index.html"));
+  assert.ok(pages.includes("prompts/saas-lp.html"));
+  assert.ok(links > pages.length, `${links} links in ${pages.length} pages`);
+});
+
+test("subpath: serving the built dist under /webpage-arena/ and crawling every page's href and src finds 0 broken links", async (t) => {
+  const out = await built(t, await genreFixture(t));
+  const server = fileServer(out, "/webpage-arena/", false);
+  const origin = await listen(server);
+  t.after(() => close(server));
+  const seeds = [...new Set([...(await htmlFiles(out)), "genre/product-lp/", "genre/saas-lp/", "genre/corporate-hp/"])];
+  const { pages, links, broken } = await crawl(origin, "/webpage-arena/", seeds);
+  assert.deepEqual(broken, []);
+  for (const path of ["", "genre/product-lp/", "genre/saas-lp/", "prompts/saas-lp.html", "prompts/inn.html", "lamp-a/"])
+    assert.ok(pages.includes(`${origin}/webpage-arena/${path}`), path);
+  assert.ok(links > pages.length, `${links} links`);
 });

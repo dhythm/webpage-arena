@@ -6,7 +6,7 @@
 
 ## ギャラリー
 
-作品の一覧は、各フォルダの `meta.json` から自動で作るギャラリーで見ます（作品表は手で書きません）。同じお題（`promptPath`）の作品が 1 行に並び、お題・種別・制作・ツールで絞り込めます。元のプロンプトが残っていない既存作品は、種別（商品LP・企業HP）ごとにまとめています。
+作品の一覧は、各フォルダの `meta.json` から自動で作るギャラリーで見ます（作品表は手で書きません）。トップはジャンル（`meta.type`）ごとに 1 行で、作成日の新しい順に最大 6 件（`scripts/catalog.mjs` の `TOP_LIMIT`）を並べます。各行の「すべて見る（N件）」から、そのジャンルの全作品を並べたジャンルページ（`genre/<ジャンル>/`）へ移れます。お題・種別・制作・ツールで絞り込むと、6 件の上限を外して全作品から絞ります。
 
 - ローカルでは `npm run dev` を起動して http://127.0.0.1:4173/ を開きます。
 - GitHub Pages はまだ有効化されていません。有効化はユーザーの操作です（Settings → Pages → Source：GitHub Actions）。有効化後の公開 URL は https://dhythm.github.io/webpage-arena/ で、有効化して main への push（か main での手動実行）があるまでは、この URL では見られません。
@@ -37,7 +37,7 @@ npm run build      # dist/ に全作品とギャラリーを出力し、HTML の
 npm run preview    # dist/ をプレビュー
 ```
 
-`npm run build` は、ギャラリーのカードを `dist/index.html` に HTML として焼き込みます（JavaScript なしでも一覧が見えます）。お題は `dist/prompts/<お題のファイル名>.html`（例：`prompts/saas-lp.md` → `dist/prompts/saas-lp.html`）に、全お題に共通の制約と一緒に書き出します。`dist/` は生成物なのでコミットしません。
+`npm run build` は、ギャラリーのカードを `dist/index.html` に HTML として焼き込みます（JavaScript なしでも一覧が見えます）。お題は `dist/prompts/<お題のファイル名>.html`（例：`prompts/saas-lp.md` → `dist/prompts/saas-lp.html`）に、全お題に共通の制約と、そのお題の作品の一覧と一緒に書き出します。ジャンルページは `dist/genre/<ジャンル>/index.html` に、作品が 1 件以上あるジャンルだけ書き出します。`dist/` は生成物なのでコミットしません。
 
 `npm run dev` と `npm run build` は、どちらも `scripts/catalog.mjs` の同じ関数でギャラリーを描きます。
 
@@ -54,8 +54,8 @@ npm run test:a11y
 いまテストの対象になっているのは一部の作品だけです。
 
 - `npm test`：gpt-nagi・gpt-umi のレイアウト（320〜1920px）、画像の出し分け、主要操作、キーボード操作、reduced-motion、外部通信がないこと。grok-lp・grok-corporate の同じ6幅でのレイアウトと画像の読み込み。
-- `npm run test:a11y`：ギャラリー・gpt-nagi・gpt-umi を axe-core（WCAG 2.2 AA までのルール）で検査。
-- `npm run test:sites`：全作品のスモークテスト（375px・1280px で横はみ出し・外部通信・エラーがないこと）。ギャラリーについては、カード数が作品数と同じこと、絞り込みの件数が `meta.json` から数えた件数と同じこと、該当なしの文言、`dist/` を `/webpage-arena/` の下で配信したときのリンク切れ 0 も確かめます。
+- `npm run test:a11y`：ギャラリー・ジャンルページ（商品LP・SaaS）・gpt-nagi・gpt-umi を axe-core（WCAG 2.2 AA までのルール）で検査。
+- `npm run test:sites`：全作品のスモークテスト（375px・1280px で横はみ出し・外部通信・エラーがないこと）。ギャラリーについては、カード数が作品数と同じこと、絞り込みの件数が `meta.json` から数えた件数と同じこと、該当なしの文言、`dist/` を `/webpage-arena/` の下で配信し、トップ・ジャンルページ・お題ページ・各作品の全 HTML の `href` と `src` をたどってリンク切れが 0 件であることも確かめます。
 
 結果は `qa/` に書き出されます。`qa/` は実行のたびに作り直される生成物なので、Git の管理対象から外しています。
 

@@ -9,6 +9,8 @@ const baseUrl = (process.env.BASE_URL || "http://127.0.0.1:4173").replace(
 );
 const targets = [
   { site: "hub", path: "/", states: ["page"] },
+  { site: "genre product-lp", path: "/genre/product-lp/", states: ["page"] },
+  { site: "genre saas-lp", path: "/genre/saas-lp/", states: ["page"] },
   { site: "gpt-nagi", path: "/gpt-nagi/", states: ["page", "dialog"], dialog: ".header [data-reserve]" },
   { site: "gpt-umi", path: "/gpt-umi/", states: ["page", "dialog"], dialog: ".header-contact" },
 ];
