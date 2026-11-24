@@ -55,6 +55,7 @@ npm run test:a11y
 
 - `npm test`：gpt-nagi・gpt-umi のレイアウト（320〜1920px）、画像の出し分け、主要操作、キーボード操作、reduced-motion、外部通信がないこと。grok-lp・grok-corporate の同じ6幅でのレイアウトと画像の読み込み。
 - `npm run test:a11y`：ギャラリー・ジャンルページ（商品LP・SaaS）・gpt-nagi・gpt-umi を axe-core（WCAG 2.2 AA までのルール）で検査。
+- CI で回すのは `npm run check`・`npm run build` だけです。Playwright を使う `npm test`・`npm run test:a11y`・`npm run test:sites`・`npm run test:smoke-selftest` は、作品追加時や見た目を大きく変えたときに手元で回します。ジャンルページ・並び順・リンク切れの受け入れ条件は `npm run check` の node テストで見ます。
 - `npm run test:sites`：全作品のスモークテスト（375px・1280px で横はみ出し・外部通信・エラーがないこと）。ギャラリーについては、カード数が作品数と同じこと、絞り込みの件数が `meta.json` から数えた件数と同じこと、該当なしの文言、`dist/` を `/webpage-arena/` の下で配信し、トップ・ジャンルページ・お題ページ・各作品の全 HTML の `href` と `src` をたどってリンク切れが 0 件であることも確かめます。
 
 結果は `qa/` に書き出されます。`qa/` は実行のたびに作り直される生成物なので、Git の管理対象から外しています。
