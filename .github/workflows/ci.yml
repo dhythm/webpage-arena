@@ -29,22 +29,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
-      - run: npx playwright install --with-deps chromium
-      - name: Start preview server
-        run: |
-          node scripts/preview.mjs > "$RUNNER_TEMP/preview.log" 2>&1 &
-          echo $! > "$RUNNER_TEMP/preview.pid"
-          for i in $(seq 1 30); do
-            curl -sf "$BASE_URL/" > /dev/null && exit 0
-            sleep 1
-          done
-          cat "$RUNNER_TEMP/preview.log"
-          exit 1
-      - run: npm test
-      - run: npm run test:a11y
-      - run: npm run test:sites
+      # 静的ギャラリーで業務ロジックがないため、Playwright の E2E（npm test / test:a11y / test:sites）は
+      # CI で毎回は回さない（2026-11-24 ユーザー指示）。作品追加時や見た目を大きく変えたときに手元で回す。
+      # 不具合が出たら、必要な分だけ戻す。
       - run: npm run test:smoke-selftest
       - run: npm run build
-      - name: Stop preview server
-        if: always()
-        run: kill "$(cat "$RUNNER_TEMP/preview.pid")" 2>/dev/null || true
