@@ -1,6 +1,6 @@
 # お題（prompts）
 
-同じお題を別のモデル・ツールに渡して、見比べられる作品を増やすためのフォルダです。お題（`meta.json` の `promptPath`）は、ギャラリーで「お題別」に並べるときの軸になります。
+同じお題を別の AI・ツールに渡して、見比べられる作品を増やすためのフォルダです。お題（`meta.json` の `promptPath`）は、ギャラリーで「お題別」に並べるときの軸になります。
 
 | ファイル | 中身 |
 | --- | --- |
@@ -17,7 +17,7 @@
 
 ## 同じお題で作品を足す（比較の手順）
 
-1. `_template.md` と `prompts/<type>.md` を、作るモデル・ツールにそのまま渡す。文言は言い換えない。
+1. `_template.md` と `prompts/<type>.md` を、作る AI・ツールにそのまま渡す。文言は言い換えない。
 2. フォルダは `<model の小文字>-<slug>` にする。同じお題なら slug は揃え、フォルダの prefix だけ変える（例：`claude-kakehashi` と `grok-kakehashi`）。
 3. `meta.json` の `promptPath` に同じパス（例：`prompts/saas-lp.md`）を書く。プロンプトに手を加えたら、その内容を `promptNotes` に書く。
 4. `npm run check` を通す。`legacy: false` で `promptPath` を持つ作品は、`index.html` にお題の `requiredSections` の id がすべて無いと失敗します（`scripts/prompts.test.mjs`）。

@@ -1,11 +1,11 @@
 # 作品を足すときの規約
 
-新しい LP やモデルを足すのは、リポジトリ直下にフォルダを 1 つ足すだけです。一覧・ビルド・スモークテストは各フォルダの `meta.json` から自動で追従します。規約は `npm run check` が検査します。
+新しい LP や制作（AI・ツール）を足すのは、リポジトリ直下にフォルダを 1 つ足すだけです。一覧・ビルド・スモークテストは各フォルダの `meta.json` から自動で追従します。規約は `npm run check` が検査します。
 
 ## フォルダ名
 
 - 形は `<model の小文字>-<slug>` です（例：`claude-kakehashi`）。
-- 同じお題を別のモデルで作るときは、prefix だけ変えます（例：`grok-kakehashi`）。
+- 同じお題を別の制作で作るときは、prefix だけ変えます（例：`grok-kakehashi`）。
 - Grok で作った作品は必ず `grok-` で始めます。
 - 既存のフォルダ名は変えません。
 
@@ -47,7 +47,7 @@
 | `title` | 必須 | 作品名 |
 | `tagline` | 必須 | 一行のコピー |
 | `type` | 必須 | [`site-types.json`](site-types.json) にある種別 |
-| `model` | 必須 | 作ったモデル（`Claude`、`Grok` など） |
+| `model` | 必須 | 制作。ギャラリーの「制作」欄に出る値。モデル名かツール名。例：Claude / GPT / Cursor / DeepSeek / GLM。決まった一覧はない |
 | `tool` | 必須 | 使ったツール。分からなければ推測せず `"unknown"` |
 | `promptPath` | 必須 | `null` か、実在する `prompts/*.md` |
 | `promptNotes` | 必須 | プロンプトについての補足 |
@@ -55,7 +55,7 @@
 | `thumbnail` | 必須 | `"thumb.webp"`（640×400・60KB 以下。`npm run thumbs` で作る）。全作品で必須 |
 | `legacy` | 必須 | 新規作品は `false` |
 | `externalOrigins` | 必須 | 読み込みを許す外部オリジン。新規作品は `[]` |
-| `modelVersion` | 任意 | モデルの版 |
+| `modelVersion` | 任意 | 制作（model）の版 |
 | `thumbWait` | 任意 | サムネイル撮影前に待つセレクタ |
 
 `type` の語彙は `site-types.json` だけに置きます。種別を増やすときは、そのファイルを変える PR を別に出します。

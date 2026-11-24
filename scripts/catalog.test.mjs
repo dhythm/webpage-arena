@@ -10,6 +10,7 @@ import {
   loadCatalog,
   renderIndex,
   renderRequest,
+  writeGallery,
 } from "./catalog.mjs";
 const repo = resolve(import.meta.dirname, "..");
 const fixture = (name) => resolve(repo, "tests/fixtures", name);
@@ -38,6 +39,8 @@ function tally(list, key) {
   for (const meta of list) counts.set(key(meta), (counts.get(key(meta)) ?? 0) + 1);
   return counts;
 }
+const missingPrompt = "プロンプト未収録（元のプロンプトは残っていません）";
+const hasModel = (meta) => typeof meta.model === "string" && meta.model.trim() !== "" && meta.model !== "unknown";
 async function hub(root) {
   return renderIndex(await loadCatalog(root), await template());
 }
@@ -138,6 +141,103 @@ test("filters: prompt, type, model and tool options are derived from meta", asyn
   }
 });
 
+test("tool row: cards whose 制作 (model) has a value show no ツール row, while data-tool and the tool filter stay", async () => {
+  for (const root of [fixture("catalog-basic"), repo]) {
+    const list = await metas(root);
+    assert.ok(list.every(hasModel), root);
+    const html = await hub(root);
+    const cards = cardsOf(html);
+    assert.equal(cards.length, list.length, root);
+    for (const meta of list) {
+      const card = cards.find((c) => c.includes(`data-id="${meta.id}"`));
+      assert.doesNotMatch(card, /<dt>ツール<\/dt>/, `${root} ${meta.id}`);
+      assert.match(card, /<dt>制作<\/dt>/, `${root} ${meta.id}`);
+      const escaped = meta.tool.replaceAll("&", "&amp;").replaceAll('"', "&quot;");
+      assert.ok(card.match(/<li[^>]*>/)[0].includes(`data-tool="${escaped}"`), `${root} ${meta.id} data-tool`);
+    }
+    const select = html.match(/<select\b[^>]*\bname="tool"[^>]*>([\s\S]*?)<\/select>/)[1];
+    for (const [value, count] of tally(list, (m) => m.tool)) {
+      const label = value === "unknown" ? "記録なし" : value;
+      assert.ok(select.includes(`<option value="${value}">${label}（${count}）</option>`), `${root} tool=${value}`);
+    }
+  }
+});
+
+test("tool row: cards without 制作 (model absent, null, empty, blank or unknown) show <dt>ツール</dt><dd>tool</dd> and never print undefined or null", async () => {
+  const root = fixture("catalog-no-model");
+  const list = await metas(root);
+  const html = await hub(root);
+  const cards = cardsOf(html);
+  assert.deepEqual(
+    list.filter((meta) => !hasModel(meta)).map((meta) => meta.id).sort(),
+    ["nomodel-absent", "nomodel-blank", "nomodel-empty", "nomodel-null", "nomodel-unknown"],
+  );
+  for (const meta of list) {
+    const card = cards.find((c) => c.includes(`data-id="${meta.id}"`));
+    assert.ok(card, meta.id);
+    if (hasModel(meta)) {
+      assert.ok(card.includes(`<dt>制作</dt><dd>${meta.model}</dd>`), meta.id);
+      assert.doesNotMatch(card, /<dt>ツール<\/dt>/, meta.id);
+    } else {
+      assert.ok(card.includes(`<dt>制作</dt><dd>記録なし</dd>`), `${meta.id} 制作 row stays`);
+      assert.ok(card.includes(`<dt>ツール</dt><dd>${meta.tool}</dd>`), `${meta.id} ツール row`);
+    }
+    assert.ok(card.match(/<li[^>]*>/)[0].includes(`data-tool="${meta.tool}"`), `${meta.id} data-tool`);
+  }
+  assert.doesNotMatch(html, /undefined|>null<|="null"|<dd>\s*<\/dd>/);
+  assert.ok(optionsOf(html, "model").includes("Grok"));
+  assert.match(html, /<select\b[^>]*\bname="model"[^>]*>[\s\S]*?>記録なし（5）<\/option>/);
+});
+
+test("label: the 制作 filter keeps select[name=model] and the empty option すべて", async () => {
+  for (const root of [fixture("catalog-basic"), repo]) {
+    const html = await hub(root);
+    assert.match(html, /<label for="filter-model">制作<\/label>\s*<select id="filter-model" name="model"><option value="">すべて<\/option>/, root);
+    assert.match(html, /<label for="filter-tool">ツール<\/label>/, root);
+  }
+});
+
+test("label: the hub and every prompt page baked by writeGallery show 制作 and contain no モデル", async (t) => {
+  const out = await mkdtemp(join(tmpdir(), "catalog-label-"));
+  t.after(() => rm(out, { recursive: true, force: true }));
+  const names = await writeGallery(repo, out);
+  assert.ok(names.length > 1, names.join(", "));
+  const index = await readFile(join(out, "index.html"), "utf8");
+  assert.match(index, /<dt>制作<\/dt>/);
+  assert.match(index, /<label for="filter-model">制作<\/label>/);
+  assert.match(index, /いろいろな AI・ツールで/);
+  for (const file of ["index.html", ...names.map((name) => `prompts/${name}.html`)]) {
+    const page = await readFile(join(out, file), "utf8");
+    assert.equal(page.split("モデル").length - 1, 0, `モデル in ${file}`);
+  }
+  for (const name of names.filter((name) => name !== "_template")) {
+    const page = await readFile(join(out, "prompts", `${name}.html`), "utf8");
+    assert.ok(page.includes("作る側の AI・ツール"), name);
+    assert.ok(page.includes("別の制作で"), name);
+  }
+});
+
+test("new values: DeepSeek, GLM and Claude Code appear as is in the 制作 row and the model filter", async () => {
+  const root = fixture("catalog-new-models");
+  const html = await hub(root);
+  const cards = cardsOf(html);
+  for (const [id, model] of [
+    ["deepseek-lamp", "DeepSeek"],
+    ["glm-lamp", "GLM"],
+    ["claude-code-lamp", "Claude Code"],
+  ]) {
+    const card = cards.find((c) => c.includes(`data-id="${id}"`));
+    assert.ok(card, id);
+    assert.ok(card.includes(`<dt>制作</dt><dd>${model}</dd>`), id);
+    assert.ok(card.includes(`data-model="${model}"`), id);
+    assert.doesNotMatch(card, /<dt>ツール<\/dt>/, id);
+  }
+  assert.deepEqual(optionsOf(html, "model").sort(), ["Claude Code", "DeepSeek", "GLM"]);
+  for (const model of ["DeepSeek", "GLM", "Claude Code"])
+    assert.ok(html.includes(`<option value="${model}">${model}（1）</option>`), model);
+  assert.ok(html.includes('<p class="total">3 作品・制作 3 種・1 グループ</p>'));
+});
+
 test("filters: the form is hidden until JS runs and the no-match message exists but starts hidden", async () => {
   const html = await hub(fixture("catalog-basic"));
   assert.match(html, /<form\b[^>]*\bdata-filters\b[^>]*\bhidden\b/);
@@ -145,34 +245,47 @@ test("filters: the form is hidden until JS runs and the no-match message exists 
   for (const card of cardsOf(html)) assert.doesNotMatch(card.match(/<li[^>]*>/)[0], /\bhidden\b/);
 });
 
-test("prompt: プロンプト未収録 appears only in the group note; only cards with a prompt link to prompts/<name>.html", async () => {
-  const root = fixture("catalog-basic");
-  const list = await metas(root);
-  const html = await hub(root);
-  const cards = cardsOf(html);
-  for (const meta of list) {
-    const card = cards.find((c) => c.includes(`data-id="${meta.id}"`));
-    assert.ok(card, meta.id);
-    assert.doesNotMatch(card, /プロンプト未収録/, meta.id);
-    if (meta.promptPath === null) {
-      assert.doesNotMatch(card, /href="prompts\//, meta.id);
-      assert.doesNotMatch(card, /プロンプトを読む/, meta.id);
-    } else {
-      const name = meta.promptPath.slice("prompts/".length, -".md".length);
-      assert.match(card, new RegExp(`<a href="prompts/${name}\\.html">プロンプトを読む</a>`), meta.id);
+test("prompt: each card without a prompt says プロンプト未収録 once in .card-foot; cards with a prompt link to prompts/<name>.html instead", async () => {
+  for (const root of [fixture("catalog-basic"), repo]) {
+    const list = await metas(root);
+    const cards = cardsOf(await hub(root));
+    for (const meta of list) {
+      const card = cards.find((c) => c.includes(`data-id="${meta.id}"`));
+      assert.ok(card, meta.id);
+      const foot = card.match(/<p class="card-foot">([\s\S]*?)<\/p>/)[1];
+      if (meta.promptPath === null) {
+        assert.equal(card.split(missingPrompt).length - 1, 1, `${root} ${meta.id}`);
+        assert.ok(foot.includes(missingPrompt), `${root} ${meta.id} foot`);
+        assert.doesNotMatch(foot, new RegExp(`<a\\b[^>]*>[^<]*${missingPrompt}`), meta.id);
+        assert.doesNotMatch(card, /href="prompts\//, meta.id);
+        assert.doesNotMatch(card, /プロンプトを読む/, meta.id);
+      } else {
+        const name = meta.promptPath.slice("prompts/".length, -".md".length);
+        assert.match(foot, new RegExp(`<a href="prompts/${name}\\.html">プロンプトを読む</a>`), meta.id);
+        assert.doesNotMatch(card, /プロンプト未収録/, meta.id);
+      }
     }
-  }
-  for (const group of groupsOf(html)) {
-    const heading = group.html.match(/<h2\b[^>]*>([^<]*)<\/h2>/)[1];
-    const note = group.html.match(/<p class="group-note">([\s\S]*?)<\/p>/)[1];
-    assert.doesNotMatch(heading, /プロンプト未収録/, group.key);
-    if (group.key.startsWith("type:")) assert.match(note, /プロンプト未収録/, group.key);
-    else assert.doesNotMatch(note, /プロンプト未収録/, group.key);
-    assert.equal((group.html.match(/プロンプト未収録/g) ?? []).length, group.key.startsWith("type:") ? 1 : 0, group.key);
   }
 });
 
-test("cards: lazy 640x400 thumb, title, tagline, type, model, tool, created and the count of other works in the same row", async () => {
+test("group note: type groups show only 'N 作品' without プロンプト未収録; prompt groups keep 'N 作品・お題を読む'", async () => {
+  for (const root of [fixture("catalog-basic"), repo]) {
+    const groups = groupsOf(await hub(root));
+    assert.ok(groups.some((group) => group.key.startsWith("type:")), root);
+    for (const group of groups) {
+      const head = group.html.match(/<div class="group-head">([\s\S]*?)<\/div>/)[1];
+      const note = head.match(/<p class="group-note">([\s\S]*?)<\/p>/)[1];
+      assert.doesNotMatch(head, /プロンプト未収録/, group.key);
+      if (group.key.startsWith("type:")) assert.equal(note, `${group.ids.length} 作品`, group.key);
+      else {
+        const name = group.key.slice("prompts/".length, -".md".length);
+        assert.equal(note, `${group.ids.length} 作品・<a href="prompts/${name}.html">お題を読む</a>`, group.key);
+      }
+    }
+  }
+});
+
+test("cards: lazy 640x400 thumb, title, tagline, type, 制作 (model), created and the count of other works in the same row", async () => {
   const root = fixture("catalog-basic");
   const list = await metas(root);
   const types = JSON.parse(await readFile(resolve(repo, "site-types.json"), "utf8"));
@@ -187,8 +300,8 @@ test("cards: lazy 640x400 thumb, title, tagline, type, model, tool, created and 
     assert.match(card, new RegExp(`<a href="${meta.id}/">${esc(meta.title)}</a>`), meta.id);
     for (const text of [meta.tagline, meta.created])
       assert.ok(card.includes(esc(text)), `${meta.id} shows ${text}`);
-    assert.ok(card.includes(`<dt>モデル</dt><dd>${esc(shown(meta.model))}</dd>`), `${meta.id} model`);
-    assert.ok(card.includes(`<dt>ツール</dt><dd>${esc(shown(meta.tool))}</dd>`), `${meta.id} tool`);
+    assert.ok(card.includes(`<dt>制作</dt><dd>${esc(shown(meta.model))}</dd>`), `${meta.id} 制作`);
+    assert.doesNotMatch(card, /<dt>ツール<\/dt>/, `${meta.id} has 制作, so no ツール row`);
     const facts = card.match(/<dl\b[\s\S]*?<\/dl>/)[0];
     assert.doesNotMatch(facts, /<dd>unknown<\/dd>/, meta.id);
     const label = types.find((t) => t.id === meta.type).label;
@@ -245,7 +358,7 @@ test("lead and counts: the intro covers prompt rows and type rows, and the filte
     assert.match(html, /<p class="lead">[\s\S]*お題ごとに1行に並べます。プロンプトが残っていない作品は種別ごとにまとめています。[\s\S]*?<\/p>/);
     const groups = new Set(list.map(groupKey)).size;
     const models = new Set(list.map((m) => m.model)).size;
-    assert.ok(html.includes(`<p class="total">${list.length} 作品・${models} モデル・${groups} グループ</p>`), root);
+    assert.ok(html.includes(`<p class="total">${list.length} 作品・制作 ${models} 種・${groups} グループ</p>`), root);
     assert.match(html, /<p class="status" data-count aria-live="polite"><\/p>/, root);
   }
 });

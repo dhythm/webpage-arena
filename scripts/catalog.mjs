@@ -11,7 +11,7 @@ const promptName = /^[A-Za-z0-9_-]+$/;
 const dimensions = [
   ["prompt", "お題"],
   ["type", "種別"],
-  ["model", "モデル"],
+  ["model", "制作"],
   ["tool", "ツール"],
 ];
 export function escapeHtml(value) {
@@ -23,6 +23,7 @@ export function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 const recorded = (value) => (value === "unknown" ? "記録なし" : value);
+const present = (value) => typeof value === "string" && value.trim() !== "" && value !== "unknown";
 const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 async function isFile(path) {
   return (await stat(path).catch(() => null))?.isFile() ?? false;
@@ -66,7 +67,7 @@ export async function loadCatalog(root, options = {}) {
       tagline: meta.tagline,
       type: meta.type,
       typeLabel: typeLabel.get(meta.type) ?? meta.type,
-      model: meta.model,
+      model: present(meta.model) ? meta.model : "unknown",
       tool: meta.tool,
       created: meta.created,
       promptPath,
@@ -140,7 +141,11 @@ function renderCard(site) {
   const thumb = site.thumb
     ? `<a class="thumb" href="${e(site.href)}" tabindex="-1" aria-hidden="true"><img src="${e(site.thumb)}" alt="" loading="lazy" decoding="async" width="640" height="400" /></a>`
     : `<div class="thumb thumb-none" aria-hidden="true">サムネイルなし</div>`;
-  const prompt = site.promptHref ? `<a href="${e(site.promptHref)}">プロンプトを読む</a>` : "";
+  const prompt = site.promptHref
+    ? `<a href="${e(site.promptHref)}">プロンプトを読む</a>`
+    : `<span>プロンプト未収録（元のプロンプトは残っていません）</span>`;
+  const tool = present(site.model) ? "" : `
+                <div><dt>ツール</dt><dd>${e(recorded(site.tool))}</dd></div>`;
   const kind = site.promptHref ? "お題" : "種別";
   return `<li class="card" data-card data-id="${e(site.id)}" data-prompt="${e(site.group)}" data-type="${e(site.type)}" data-model="${e(site.model)}" data-tool="${e(site.tool)}">
             ${thumb}
@@ -148,8 +153,7 @@ function renderCard(site) {
               <h3 class="card-title"><a href="${e(site.href)}">${e(site.title)}</a></h3>
               <p class="tagline">${e(site.tagline)}</p>
               <dl class="facts">
-                <div><dt>モデル</dt><dd>${e(recorded(site.model))}</dd></div>
-                <div><dt>ツール</dt><dd>${e(recorded(site.tool))}</dd></div>
+                <div><dt>制作</dt><dd>${e(recorded(site.model))}</dd></div>${tool}
                 <div><dt>${kind}</dt><dd>${e(site.typeLabel)}</dd></div>
                 <div><dt>作成日</dt><dd><time datetime="${e(site.created)}">${e(site.created)}</time></dd></div>
               </dl>
@@ -162,13 +166,11 @@ function renderGroups(catalog) {
   return catalog.groups
     .map((group, index) => {
       const id = `group-${index + 1}`;
-      const note = group.promptHref
-        ? `<a href="${e(group.promptHref)}">お題を読む</a>`
-        : "プロンプト未収録（元のプロンプトは残っていません）";
+      const note = group.promptHref ? `・<a href="${e(group.promptHref)}">お題を読む</a>` : "";
       return `<section class="group" data-group="${e(group.key)}" aria-labelledby="${id}">
         <div class="group-head">
           <h2 id="${id}">${e(group.label)}</h2>
-          <p class="group-note">${group.sites.length} 作品・${note}</p>
+          <p class="group-note">${group.sites.length} 作品${note}</p>
         </div>
         <ul class="row" role="list" tabindex="0" aria-label="${e(group.label)}の作品、横にスクロール">
           ${group.sites.map(renderCard).join("\n          ")}
@@ -199,7 +201,7 @@ function renderFilters(catalog) {
 }
 function renderTotal(catalog) {
   const models = catalog.filters.model.length;
-  return `${catalog.sites.length} 作品・${models} モデル・${catalog.groups.length} グループ`;
+  return `${catalog.sites.length} 作品・制作 ${models} 種・${catalog.groups.length} グループ`;
 }
 export function renderIndex(catalog, template) {
   const parts = {

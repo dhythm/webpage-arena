@@ -6,7 +6,7 @@
 
 ## ギャラリー
 
-作品の一覧は、各フォルダの `meta.json` から自動で作るギャラリーで見ます（作品表は手で書きません）。同じお題（`promptPath`）の作品が 1 行に並び、お題・種別・モデル・ツールで絞り込めます。元のプロンプトが残っていない既存作品は、種別（商品LP・企業HP）ごとにまとめています。
+作品の一覧は、各フォルダの `meta.json` から自動で作るギャラリーで見ます（作品表は手で書きません）。同じお題（`promptPath`）の作品が 1 行に並び、お題・種別・制作・ツールで絞り込めます。元のプロンプトが残っていない既存作品は、種別（商品LP・企業HP）ごとにまとめています。
 
 - ローカルでは `npm run dev` を起動して http://127.0.0.1:4173/ を開きます。
 - GitHub Pages はまだ有効化されていません。有効化はユーザーの操作です（Settings → Pages → Source：GitHub Actions）。有効化後の公開 URL は https://dhythm.github.io/webpage-arena/ で、有効化して main への push（か main での手動実行）があるまでは、この URL では見られません。
@@ -68,7 +68,7 @@ npm run test:a11y
 
 ## LP の追加手順
 
-新しい LP やモデルを足すのは、フォルダを 1 つ足すだけです。詳しい規約は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
+新しい LP や制作（AI・ツール）を足すのは、フォルダを 1 つ足すだけです。詳しい規約は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
 
 1. リポジトリ直下に `<model の小文字>-<slug>` のフォルダを作り、`index.html` を置く（例：`claude-kakehashi`）。
 2. 同じフォルダに `meta.json` を書く。
@@ -77,4 +77,4 @@ npm run test:a11y
 5. `npm run test:sites` で全作品のスモークテストを回す。
 6. 自分のフォルダだけを変更した PR を出す。
 
-同じお題を別のモデルで作るときは、同じ `promptPath` を使い、フォルダの prefix だけ変えます（例：`claude-kakehashi` と `grok-kakehashi`）。
+同じお題を別の制作で作るときは、同じ `promptPath` を使い、フォルダの prefix だけ変えます（例：`claude-kakehashi` と `grok-kakehashi`）。
