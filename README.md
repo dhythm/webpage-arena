@@ -1,8 +1,8 @@
 # webpage-arena
 
-同じお題を、いろいろな AI に作らせて見比べるためのリポジトリです。お題は「架空の商品のランディングページ」と「架空の企業のホームページ」の2つで、AI ごとに1組ずつ作っています。
+いろいろな LP・ウェブページを、いろいろな AI・ツールで作って並べるギャラリーのリポジトリです。お題は「経理系SaaS」「飲食店」のようなジャンルのお題（[briefs/](briefs/)）で、商品名・コンセプト・構成は作る側が自由に決めます。
 
-フォルダ名は `<作った AI>-<ページ>` の形です。各フォルダは独立していて、共通のフレームワークやビルドを必要としません。商品・企業・人物・価格・数値はすべて架空です。
+フォルダ名は `<作った AI>-<作品独自の slug>` の形です。各フォルダは独立していて、共通のフレームワークやビルドを必要としません。商品・企業・人物・価格・数値はすべて架空です。
 
 ## ギャラリー
 
@@ -12,7 +12,8 @@
 - GitHub Pages はまだ有効化されていません。有効化はユーザーの操作です（Settings → Pages → Source：GitHub Actions）。有効化後の公開 URL は https://dhythm.github.io/webpage-arena/ で、有効化して main への push（か main での手動実行）があるまでは、この URL では見られません。
 - 有効化後は、`.github/workflows/pages.yml` が main への push（と手動実行）のたびに `npm run build` の `dist/` だけを公開します。PR では動きません。
 - 有効化されるまでは、pages workflow は「Pages 未有効のためスキップ」と notice を出して緑で終わり、何も公開しません。Source が「Deploy from a branch」のままだと、「Source を GitHub Actions に」という error で失敗し、何も公開しません。
-- お題の本文は [prompts/](prompts/) にあります。ギャラリーの「プロンプトを読む」から、本文と全お題に共通の制約を読めます。
+- ジャンルのお題は [briefs/](briefs/) にあります。ギャラリーの各行の「お題を読む」と、ページ上部の「ジャンルのお題を見る」から読めます。1 つのジャンルにお題が複数あるとき（SaaS は経理系と採用系）は、お題の一覧のそのジャンルの部分を開きます。
+- 以前の、商品名や構成まで固定したお題は旧お題（固定）として [prompts/](prompts/) に残しています。旧お題で作った作品のカードには「旧お題（固定）」のリンクが出ます。全お題に共通の制約は [prompts/_template.md](prompts/_template.md) です。
 - 作品の足し方と `meta.json` の規約は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
 
 デザインの意図は [DESIGN.md](DESIGN.md) と各フォルダの README に、画像・フォントの出典は [ASSETS.md](ASSETS.md) にあります。
@@ -37,7 +38,7 @@ npm run build      # dist/ に全作品とギャラリーを出力し、HTML の
 npm run preview    # dist/ をプレビュー
 ```
 
-`npm run build` は、ギャラリーのカードを `dist/index.html` に HTML として焼き込みます（JavaScript なしでも一覧が見えます）。お題は `dist/prompts/<お題のファイル名>.html`（例：`prompts/saas-lp.md` → `dist/prompts/saas-lp.html`）に、全お題に共通の制約と、そのお題の作品の一覧と一緒に書き出します。ジャンルページは `dist/genre/<ジャンル>/index.html` に、作品が 1 件以上あるジャンルだけ書き出します。`dist/` は生成物なのでコミットしません。
+`npm run build` は、ギャラリーのカードを `dist/index.html` に HTML として焼き込みます（JavaScript なしでも一覧が見えます）。ジャンルのお題は `dist/briefs/<slug>.html`（例：`briefs/accounting-saas.md` → `dist/briefs/accounting-saas.html`）に、一覧は `dist/briefs/index.html` に書き出します。旧お題（固定）は `dist/prompts/<お題のファイル名>.html`（例：`prompts/saas-lp.md` → `dist/prompts/saas-lp.html`）です。どちらも全お題に共通の制約と、そのお題の作品の一覧と一緒に書き出します。ジャンルページは `dist/genre/<ジャンル>/index.html` に、作品が 1 件以上あるジャンルだけ書き出します。`dist/` は生成物なのでコミットしません。
 
 `npm run dev` と `npm run build` は、どちらも `scripts/catalog.mjs` の同じ関数でギャラリーを描きます。
 
@@ -71,11 +72,12 @@ npm run test:a11y
 
 新しい LP や制作（AI・ツール）を足すのは、フォルダを 1 つ足すだけです。詳しい規約は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
 
-1. リポジトリ直下に `<model の小文字>-<slug>` のフォルダを作り、`index.html` を置く（例：`claude-kakehashi`）。
-2. 同じフォルダに `meta.json` を書く。
-3. `npm run thumbs -- <id>` でサムネイルを撮る。
-4. `npm run check` で規約を検査する。
-5. `npm run test:sites` で全作品のスモークテストを回す。
-6. 自分のフォルダだけを変更した PR を出す。
+1. [briefs/](briefs/) からジャンルのお題を 1 つ選び、`prompts/_template.md` の共通の制約と一緒に作る AI・ツールへ渡す。商品名・コンセプト・構成は作る側が決める。
+2. リポジトリ直下に `<model の小文字>-<作品独自の slug>` のフォルダを作り、`index.html` を置く（例：`grok-ledgerline`）。
+3. 同じフォルダに `meta.json` を書く。`promptPath` は使ったジャンルのお題（例：`briefs/accounting-saas.md`）。
+4. `npm run thumbs -- <id>` でサムネイルを撮る。
+5. `npm run check` で規約を検査する。
+6. `npm run test:sites` で全作品のスモークテストを回す。
+7. 自分のフォルダだけを変更した PR を出す。
 
-同じお題を別の制作で作るときは、同じ `promptPath` を使い、フォルダの prefix だけ変えます（例：`claude-kakehashi` と `grok-kakehashi`）。
+同じジャンルのお題を別の制作で作るときも、slug は揃えず、作品ごとに独自の slug を付けます。既存の `claude-kakehashi` などは旧お題（固定）で作った作品で、そのまま残します。

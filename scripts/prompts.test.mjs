@@ -195,3 +195,99 @@ test("requiredSections gate: prompt-ok with every required id passes", async () 
   assert.deepEqual(checked, ["grok-sample"]);
   assert.deepEqual(errors, []);
 });
+
+const briefTable = {
+  "accounting-saas": ["経理系SaaS", "saas-lp"],
+  "recruiting-saas": ["採用系SaaS", "saas-lp"],
+  restaurant: ["飲食店", "restaurant"],
+  "lifestyle-app": ["生活・移動アプリ", "app-lp"],
+  "local-event": ["地域イベント", "event"],
+  inn: ["宿・旅館", "inn"],
+  corporate: ["企業コーポレート", "corporate-hp"],
+  product: ["物販・プロダクト", "product-lp"],
+};
+async function oldBrandNames() {
+  const names = new Set(["カケハシ", "KAKEHASHI"]);
+  for (const site of await listSites(repo)) names.add((await readMeta(repo, site)).title);
+  for (const type of await siteTypes()) {
+    const brand = /^- ブランド:\s*(.+?)\s*$/m.exec(await readFile(join(repo, `prompts/${type}.md`), "utf8"));
+    if (brand) names.add(brand[1]);
+  }
+  return [...names];
+}
+
+test("briefs: the eight genre briefs exist with the agreed type and empty requiredSections", async () => {
+  const types = await siteTypes();
+  for (const [slug, [label, type]] of Object.entries(briefTable)) {
+    const text = await readFile(join(repo, `briefs/${slug}.md`), "utf8");
+    const front = /^---\n([\s\S]*?)\n---\n/.exec(text);
+    assert.ok(front, `briefs/${slug}.md has front matter`);
+    assert.equal(/^type:\s*(\S+)\s*$/m.exec(front[1])?.[1], type, slug);
+    assert.ok(types.includes(type), slug);
+    assert.deepEqual(requiredSections(text), [], slug);
+    assert.match(text, new RegExp(`^# ${label}\\s*$`, "m"), slug);
+  }
+});
+
+test("briefs: every brief leaves product, concept and structure to the maker and names no fixed brand", async () => {
+  const brands = await oldBrandNames();
+  for (const slug of Object.keys(briefTable)) {
+    const text = await readFile(join(repo, `briefs/${slug}.md`), "utf8");
+    assert.ok(text.includes("作る側が自由に決める"), slug);
+    assert.ok(text.includes("prompts/_template.md"), slug);
+    assert.doesNotMatch(text, /^- (?:ブランド|一文|CTA|必須)\s*[:：]/m, slug);
+    assert.doesNotMatch(text, /id`?\s*を(?:それぞれ)?付け/, slug);
+    for (const brand of brands) assert.ok(!text.includes(brand), `${slug} mentions ${brand}`);
+  }
+});
+
+test("briefs: the seven old prompts stay as 旧お題 with their requiredSections and README points to briefs/", async () => {
+  for (const [type, ids] of Object.entries(fixedSections))
+    assert.deepEqual(await promptSections(repo, `prompts/${type}.md`), ids, type);
+  const readme = await readFile(join(repo, "prompts/README.md"), "utf8");
+  assert.ok(readme.includes("旧お題（固定）"));
+  assert.ok(readme.includes("briefs/"));
+  const template = await readFile(join(repo, "prompts/_template.md"), "utf8");
+  assert.ok(template.includes("briefs/"));
+  assert.doesNotMatch(template, /prefix だけ変える/);
+});
+
+async function withBriefSite(t, makingRecord) {
+  const root = await legacyPlusNewLp(t);
+  await mkdir(join(root, "briefs"));
+  await cp(join(repo, "briefs/accounting-saas.md"), join(root, "briefs/accounting-saas.md"));
+  await mkdir(join(root, "grok-ledgerline"));
+  await writeFile(
+    join(root, "grok-ledgerline/meta.json"),
+    JSON.stringify({
+      id: "grok-ledgerline",
+      title: "Ledgerline",
+      tagline: "検査用の作品。",
+      type: "saas-lp",
+      model: "Grok",
+      tool: "Cursor",
+      promptPath: "briefs/accounting-saas.md",
+      promptNotes: "検査用",
+      created: "2026-11-24",
+      thumbnail: null,
+      legacy: false,
+      externalOrigins: [],
+    }),
+  );
+  await writeFile(join(root, "grok-ledgerline/index.html"), "<!doctype html><title>x</title><section id=\"top\"></section>");
+  return root;
+}
+
+test("requiredSections gate: a new site with a briefs/ promptPath is not required to carry section ids", async (t) => {
+  const root = await withBriefSite(t);
+  const { errors } = await sectionGaps(root);
+  assert.deepEqual(errors, []);
+});
+
+test("requiredSections gate: a prompts/ work missing a required id still fails next to a briefs/ work", async (t) => {
+  const root = await withBriefSite(t);
+  await writeFile(join(root, "claude-zzsample/index.html"), '<section id="problem"></section>');
+  const { errors } = await sectionGaps(root);
+  assert.ok(errors.includes('claude-zzsample: missing id="pricing" required by prompts/saas-lp.md'), errors.join("\n"));
+  assert.ok(!errors.some((error) => error.startsWith("grok-ledgerline")), errors.join("\n"));
+});

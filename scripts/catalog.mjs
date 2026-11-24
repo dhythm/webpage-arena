@@ -68,8 +68,28 @@ export async function listPrompts(root) {
     .filter((name) => promptName.test(name))
     .sort(compare);
 }
-const promptHref = (promptPath) =>
-  `prompts/${promptPath.slice("prompts/".length, -".md".length)}.html`;
+export async function listBriefs(root) {
+  const entries = await readdir(join(root, "briefs")).catch(() => []);
+  const briefs = [];
+  for (const file of entries.sort(compare)) {
+    if (!file.endsWith(".md") || file === "README.md") continue;
+    const slug = file.slice(0, -".md".length);
+    if (!promptName.test(slug)) continue;
+    const { type, title } = splitPrompt(await readFile(join(root, "briefs", file), "utf8"));
+    briefs.push({ slug, type, title: title ?? `briefs/${file}`, href: `briefs/${slug}.html` });
+  }
+  return briefs;
+}
+const promptHref = (promptPath) => {
+  const [dir, file] = promptPath.split("/");
+  return `${dir}/${file.slice(0, -".md".length)}.html`;
+};
+const isOld = (promptPath) => typeof promptPath === "string" && promptPath.startsWith("prompts/");
+const briefsHref = (briefs, type) => {
+  const own = briefs.filter((brief) => brief.type === type);
+  if (own.length === 1) return own[0].href;
+  return own.length ? `briefs/index.html#type-${type}` : null;
+};
 async function readMaking(root, id, meta) {
   if (typeof meta.promptPath !== "string" || !["oneshot", "refined"].includes(meta.making)) return null;
   const text = await readFile(join(root, id, "making.md"), "utf8").catch(() => null);
@@ -135,14 +155,14 @@ export async function loadCatalog(root, options = {}) {
       compare(a.key, b.key),
   );
   for (const group of ordered) for (const site of group.sites) site.others = group.sites.length - 1;
-  const promptNames = new Set(await listPrompts(root));
+  const briefs = await listBriefs(root);
   const genreIds = [...new Set(sites.map((site) => site.type))].sort(
     (a, b) => rank(a) - rank(b) || compare(a, b),
   );
   const genres = genreIds.map((id) => ({
     id,
     label: typeLabel.get(id) ?? id,
-    promptHref: promptNames.has(id) ? `prompts/${id}.html` : null,
+    promptHref: briefsHref(briefs, id),
     sites: orderSites(sites.filter((site) => site.type === id)),
   }));
   const count = (key) => {
@@ -160,6 +180,8 @@ export async function loadCatalog(root, options = {}) {
     sites: genres.flatMap((genre) => genre.sites),
     groups: ordered,
     genres,
+    briefs,
+    types,
     topLimit: options.topLimit ?? TOP_LIMIT,
     filters: {
       prompt: choices(
@@ -192,10 +214,11 @@ export function renderCard(site, base = "", { siblings: showSiblings = true } = 
   const thumb = site.thumb
     ? `<a class="thumb" href="${e(site.href)}" tabindex="-1" aria-hidden="true"><img src="${e(site.thumb)}" alt="" loading="lazy" decoding="async" width="640" height="400" /></a>`
     : `<div class="thumb thumb-none" aria-hidden="true">サムネイルなし</div>`;
+  const promptLink = site.promptHref ? `<a href="${e(site.promptHref)}">${isOld(site.promptPath) ? "旧お題（固定）" : "お題を読む"}</a>` : "";
   const prompt = site.making
-    ? `<a href="${e(base + site.making.href)}">作り方を読む</a>`
+    ? `<a href="${e(base + site.making.href)}">作り方を読む</a>${promptLink}`
     : site.promptHref
-    ? `<a href="${e(site.promptHref)}">プロンプトを読む</a>`
+    ? promptLink
     : `<span><span aria-hidden="true">プロンプト未収録</span><span class="sr-only">プロンプト未収録（元のプロンプトは残っていません）</span></span>`;
   const tool = present(site.model) ? "" : `
                 <div><dt>ツール</dt><dd>${e(recorded(site.tool))}</dd></div>`;
@@ -294,7 +317,7 @@ export function renderGenre(catalog, template, id) {
     <div class="page">
       <header>
         <h1>${e(genre.label)}</h1>
-        <p class="lead"><a href="../../">ギャラリーに戻る</a></p>
+        <p class="lead"><a href="../../">ギャラリーに戻る</a>・<a href="../../briefs/index.html">ジャンルのお題を見る</a></p>
         <p class="total">${genre.sites.length} 作品</p>
       </header>
       <main>
@@ -424,7 +447,7 @@ function promptPage(title, sections, works, style) {
   </head>
   <body>
     <main>
-      <p><a href="../">ギャラリーに戻る</a></p>
+      <p><a href="../">ギャラリーに戻る</a>・<a href="../briefs/index.html">ジャンルのお題を見る</a></p>
       ${sections
         .map(
           (section, index) => `${index === 0 ? `<h1>${e(section.title)}</h1>` : `<h2 id="common">${e(section.title)}</h2>`}${section.lead ? `
@@ -438,32 +461,74 @@ function promptPage(title, sections, works, style) {
 </html>
 `;
 }
-export async function renderPrompt(root, name, options = {}) {
-  if (!promptName.test(name) || name === "README") return null;
-  const path = join(root, "prompts", `${name}.md`);
+async function renderDoc(root, dir, name, options) {
+  if (!promptName.test(name) || name === "README" || (dir === "briefs" && name === "_template")) return null;
+  const path = join(root, dir, `${name}.md`);
   if (!(await isFile(path))) return null;
   const text = await readFile(path, "utf8");
-  const title = splitPrompt(text).title ?? `prompts/${name}.md`;
-  const sections = [{ title, text, note: `<code>prompts/${escapeHtml(name)}.md</code> の本文です。` }];
+  const title = splitPrompt(text).title ?? `${dir}/${name}.md`;
+  const sections = [{ title, text, note: `<code>${dir}/${escapeHtml(name)}.md</code> の本文です。` }];
   const common = join(root, "prompts", "_template.md");
   if (name !== "_template" && (await isFile(common))) {
     const template = await readFile(common, "utf8");
-    sections[0].note += "作品を作るときは、下の共通の制約と一緒にそのまま渡します。";
+    sections[0].note += dir === "briefs" ? "作品を作るときは、下の共通の制約と一緒に渡します。" : "作品を作るときは、下の共通の制約と一緒にそのまま渡します。";
     sections.push({
       title: splitPrompt(template).title ?? "全お題に共通の制約",
       text: template,
-      note: `<code>prompts/_template.md</code> の本文です（<a href="_template.html">単独のページ</a>）。`,
+      note: `<code>prompts/_template.md</code> の本文です（<a href="${dir === "briefs" ? "../prompts/" : ""}_template.html">単独のページ</a>）。`,
     });
   }
   if (name === "_template") return promptPage(title, sections);
   const catalog = options.catalog ?? (await loadCatalog(root, options));
   const template = options.template ?? (await readFile(options.templatePath ?? defaults.templatePath, "utf8"));
-  const source = `prompts/${name}.md`;
+  const source = `${dir}/${name}.md`;
   const works = {
     label: title,
     sites: orderSites(catalog.sites.filter((site) => site.promptPath === source)),
   };
   return promptPage(title, sections, works, styleOf(template).replace(/\s*<!--catalog:limit-->/, ""));
+}
+export async function renderPrompt(root, name, options = {}) {
+  return renderDoc(root, "prompts", name, options);
+}
+export async function renderBrief(root, name, options = {}) {
+  return renderDoc(root, "briefs", name, options);
+}
+export async function renderBriefIndex(root, options = {}) {
+  const e = escapeHtml;
+  const catalog = options.catalog ?? (await loadCatalog(root, options));
+  const label = new Map(catalog.types.map((type) => [type.id, type.label]));
+  const order = new Map(catalog.types.map((type, index) => [type.id, index]));
+  const byType = new Map();
+  for (const brief of catalog.briefs) byType.set(brief.type, [...(byType.get(brief.type) ?? []), brief]);
+  const typeIds = [...byType.keys()].sort((a, b) => (order.get(a) ?? order.size) - (order.get(b) ?? order.size) || compare(a, b));
+  const list = typeIds.length
+    ? typeIds
+        .map(
+          (type) => `<section id="type-${e(type)}">
+        <h2>${e(label.get(type) ?? type)}</h2>
+        <ul>
+          ${byType.get(type).map((brief) => `<li><a href="${e(brief.slug)}.html">${e(brief.title)}</a></li>`).join("\n          ")}
+        </ul>
+      </section>`,
+        )
+        .join("\n      ")
+    : "<p>ジャンルのお題はまだありません。</p>";
+  const old = [];
+  for (const name of await listPrompts(root))
+    if (name !== "_template") old.push({ name, title: splitPrompt(await readFile(join(root, "prompts", `${name}.md`), "utf8")).title ?? name });
+  const legacy = old.length
+    ? `
+      <section id="legacy">
+        <h2>旧お題（固定）</h2>
+        <p>商品名や構成まで固定していた、以前のお題です。これまでの作品の記録として残しています。</p>
+        <ul>
+          ${old.map((prompt) => `<li><a href="../prompts/${e(prompt.name)}.html">${e(prompt.title)}</a></li>`).join("\n          ")}
+        </ul>
+      </section>`
+    : "";
+  const note = "ジャンルとざっくりした領域だけを決めたお題です。商品名・コンセプト・構成は作る側が自由に決めます。<a href=\"../prompts/_template.html\">全お題に共通の制約</a>も一緒に守ります。";
+  return promptPage("ジャンルのお題", [{ title: "ジャンルのお題", note, html: `${list}${legacy}` }]);
 }
 function inline(text) {
   const e = escapeHtml;
@@ -523,6 +588,13 @@ export async function renderHub(root, options = {}) {
 export async function renderRequest(root, pathname, options = {}) {
   if (pathname === "/" || pathname === "/index.html")
     return { type: html, body: await renderHub(root, options) };
+  if (pathname === "/briefs/" || pathname === "/briefs/index.html")
+    return { type: html, body: await renderBriefIndex(root, options) };
+  const brief = pathname.match(/^\/briefs\/([^/]+)\.html$/);
+  if (brief) {
+    const body = await renderBrief(root, brief[1], options);
+    return body === null ? null : { type: html, body };
+  }
   const prompt = pathname.match(/^\/prompts\/([^/]+)\.html$/);
   if (prompt) {
     const body = await renderPrompt(root, prompt[1], options);
@@ -548,6 +620,10 @@ export async function writeGallery(root, out, options = {}) {
   if (names.length) await mkdir(join(out, "prompts"), { recursive: true });
   for (const name of names)
     await writeFile(join(out, "prompts", `${name}.html`), await renderPrompt(root, name, { ...options, catalog, template }));
+  await mkdir(join(out, "briefs"), { recursive: true });
+  await writeFile(join(out, "briefs", "index.html"), await renderBriefIndex(root, { ...options, catalog }));
+  for (const brief of catalog.briefs)
+    await writeFile(join(out, "briefs", `${brief.slug}.html`), await renderBrief(root, brief.slug, { ...options, catalog, template }));
   for (const genre of catalog.genres) {
     await mkdir(join(out, "genre", genre.id), { recursive: true });
     await writeFile(join(out, "genre", genre.id, "index.html"), renderGenre(catalog, template, genre.id));
@@ -567,5 +643,6 @@ export async function buildDist(root, out, options = {}) {
   const prompts = await writeGallery(root, out, options);
   const genres = (await readdir(join(out, "genre")).catch(() => [])).sort(compare);
   const making = (await readdir(join(out, "making")).catch(() => [])).sort(compare);
-  return { sites, prompts, genres, making };
+  const briefs = (await listBriefs(root)).map((brief) => brief.slug);
+  return { sites, prompts, briefs, genres, making };
 }

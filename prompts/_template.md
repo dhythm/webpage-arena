@@ -1,6 +1,6 @@
 # 全お題に共通の制約
 
-この内容は `prompts/<type>.md` のお題と一緒に、作る側の AI・ツールへそのまま渡します。お題ごとの指定とこの制約がぶつかるときは、この制約を優先します。
+この内容は `briefs/<slug>.md` のジャンルのお題（旧お題（固定）なら `prompts/<type>.md`）と一緒に、作る側の AI・ツールへそのまま渡します。お題ごとの指定とこの制約がぶつかるときは、この制約を優先します。
 
 ## 動き方
 
@@ -15,7 +15,7 @@
 - 架空のブランド・店・サービスであることを、ページ上に明記する。
 - 根拠のない受賞・レビュー・利用者数を書かない。
 - フォームはデモのみ。送信・保存・決済はしない。ブラウザの中で結果を見せて終わる。
-- お題の front matter にある `requiredSections` の id を、それぞれのセクションの `id` 属性に使う（例：`<section id="pricing">`）。
+- お題の front matter にある `requiredSections` の id を、それぞれのセクションの `id` 属性に使う（例：`<section id="pricing">`）。ジャンルのお題は `requiredSections` が空なので、セクションの id は自由です。
 
 ## 見た目
 
@@ -30,9 +30,9 @@
 
 ## フォルダとファイル
 
-- フォルダ名は `<制作（meta.json の model）の小文字>-<slug>` にする（例：`claude-kakehashi`）。同じお題を別の制作で作るときは prefix だけ変える（例：`grok-kakehashi`）。
+- フォルダ名は `<制作（meta.json の model）の小文字>-<作品独自の slug>` にする（例：`grok-ledgerline`）。同じジャンルのお題を別の制作で作るときも、slug は作品ごとに決める。
 - Grok で作った作品は必ず `grok-` で始まるフォルダに置く。
 - フォルダには `index.html`・`meta.json`・`thumb.webp` を置く。
-- `meta.json` の `promptPath` には、使ったお題のパス（例：`prompts/saas-lp.md`）を書く。`legacy` は `false`、`externalOrigins` は `[]` にする。
+- `meta.json` の `promptPath` には、使ったお題のパス（例：`briefs/accounting-saas.md`）を書く。`legacy` は `false`、`externalOrigins` は `[]` にする。
 - 変更は自分のフォルダの中だけにする。ルート `README.md` や他の作品には手を入れない。
 - 詳しい規約は [CONTRIBUTING.md](../CONTRIBUTING.md) にあります。

@@ -10,7 +10,7 @@ if (coverage.problems.length > 0 || coverage.sites.length !== coverage.expected)
   process.exit(1);
 }
 const dist = join(root, "dist");
-const { sites, prompts, genres, making } = await buildDist(root, dist);
+const { sites, prompts, briefs, genres, making } = await buildDist(root, dist);
 for (const site of sites) {
   const path = join(dist, site);
   const html = await readFile(join(path, "index.html"), "utf8");
@@ -26,6 +26,11 @@ for (const [, reference] of hub.matchAll(/(?:src|href)="([^"#]+)"/g))
   await stat(resolve(dist, reference));
 console.log(`Built gallery: ${cards} cards baked into dist/index.html (local references verified)`);
 console.log(`Built ${prompts.length} prompt pages in dist/prompts/`);
+for (const page of ["index", ...briefs]) {
+  const text = await readFile(join(dist, "briefs", `${page}.html`), "utf8");
+  for (const [, reference] of text.matchAll(/(?:src|href)="([^"#]+)"/g)) await stat(resolve(dist, "briefs", reference));
+}
+console.log(`Built ${briefs.length} genre brief pages and the list in dist/briefs/ (local references verified)`);
 let genreCards = 0;
 for (const genre of genres) {
   const path = join(dist, "genre", genre);
