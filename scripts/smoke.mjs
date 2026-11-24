@@ -1,11 +1,12 @@
-import { createServer } from "node:http";
-import { cp, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve, extname, sep } from "node:path";
+import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
-import { buildDist, renderRequest } from "./catalog.mjs";
+import * as catalog from "./catalog.mjs";
+import { close, crawl, fileServer, htmlFiles, listen } from "./crawl.mjs";
 import { coverageSummary, readMeta, siteCoverage } from "./sites.mjs";
+const { buildDist } = catalog;
 const repo = resolve(import.meta.dirname, "..");
 const rootFlag = process.argv.indexOf("--root");
 const root = rootFlag === -1 ? repo : resolve(repo, process.argv[rootFlag + 1]);
@@ -16,17 +17,6 @@ const viewports = [
   { width: 1280, height: 800 },
 ];
 const KNOWN_FAILURES = {};
-const types = {
-  ".html": "text/html; charset=utf-8",
-  ".css": "text/css",
-  ".js": "text/javascript",
-  ".svg": "image/svg+xml",
-  ".webp": "image/webp",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".woff2": "font/woff2",
-  ".json": "application/json",
-};
 const coverage = await siteCoverage(root);
 if (coverage.problems.length > 0 || coverage.sites.length !== coverage.expected) {
   for (const problem of coverage.problems) console.log(`FAIL ${problem}`);
@@ -40,43 +30,6 @@ for (const site of sites) {
   const meta = await readMeta(root, site);
   metas.push(meta);
   allowedOrigins[site] = meta.externalOrigins ?? [];
-}
-function fileServer(dir, prefix, dynamic) {
-  return createServer(async (req, res) => {
-    try {
-      const pathname = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
-      if (!pathname.startsWith(prefix)) throw new Error("outside prefix");
-      const local = "/" + pathname.slice(prefix.length);
-      const page = dynamic ? await renderRequest(dir, local) : null;
-      if (page) {
-        res.writeHead(200, { "Content-Type": page.type, "Cache-Control": "no-cache" });
-        res.end(page.body);
-        return;
-      }
-      let file = resolve(dir, "." + local);
-      if (file !== dir && !file.startsWith(dir + sep)) {
-        res.writeHead(403).end();
-        return;
-      }
-      if ((await stat(file)).isDirectory()) file = resolve(file, "index.html");
-      const body = await readFile(file);
-      res.writeHead(200, {
-        "Content-Type": types[extname(file)] || "application/octet-stream",
-        "Cache-Control": "no-cache",
-      });
-      res.end(body);
-    } catch {
-      res.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
-    }
-  });
-}
-async function listen(server) {
-  await new Promise((done) => server.listen(0, "127.0.0.1", done));
-  return `http://127.0.0.1:${server.address().port}`;
-}
-async function close(server) {
-  server.closeAllConnections();
-  await new Promise((done) => server.close(done));
 }
 const server = fileServer(root, "/", withHub);
 const base = await listen(server);
@@ -157,6 +110,11 @@ const matching = (selection) =>
   metas.filter((meta) =>
     Object.entries(selection).every(([name, value]) => dimensions[name](meta) === value),
   ).length;
+const cappedTotal = () => {
+  const sizes = new Map();
+  for (const meta of metas) sizes.set(meta.type, (sizes.get(meta.type) ?? 0) + 1);
+  return [...sizes.values()].reduce((sum, size) => sum + Math.min(size, catalog.TOP_LIMIT), 0);
+};
 const visibleCards = (page) =>
   page.evaluate(
     () => [...document.querySelectorAll("[data-card]")].filter((card) => card.checkVisibility()).length,
@@ -213,8 +171,8 @@ async function checkFilters(page, problems) {
       problems.add(`filter: no-match message not shown for ${JSON.stringify(empty)}`);
   } else console.log("NOTE hub filter: every pair of options matches a site; no-match message checked by catalog.test.mjs");
   await choose(page, {});
-  if ((await visibleCards(page)) !== metas.length)
-    problems.add(`filter: reset shows ${await visibleCards(page)} of ${metas.length}`);
+  if ((await visibleCards(page)) !== cappedTotal())
+    problems.add(`filter: reset shows ${await visibleCards(page)}, want ${cappedTotal()} (TOP_LIMIT per genre)`);
   if ((await countText(page)) !== "")
     problems.add(`filter: count without filters reads "${await countText(page)}"`);
   await page.evaluate(() => document.activeElement?.blur());
@@ -238,6 +196,8 @@ async function hub(browser, viewport) {
     await visit(page, `${base}/`, problems);
     const cards = await page.locator("[data-card]").count();
     if (cards !== metas.length) problems.add(`cards: ${cards} cards, ${metas.length} sites in meta`);
+    const shown = await visibleCards(page);
+    if (shown !== cappedTotal()) problems.add(`cards: ${shown} visible, want ${cappedTotal()} (TOP_LIMIT per genre)`);
     if (viewport.width >= 1280) await checkFilters(page, problems);
   } catch (error) {
     problems.add(`error: ${error.message.split("\n")[0]}`);
@@ -285,6 +245,15 @@ async function hubSubpath(browser) {
         await context.close();
       }
     }
+    const pages = await htmlFiles(out);
+    const genres = [...new Set(metas.map((meta) => `genre/${meta.type}/index.html`))];
+    for (const genre of genres) if (!pages.includes(genre)) problems.add(`crawl: ${genre} was not built`);
+    const result = await crawl(origin, subpath, pages);
+    for (const { url, status, from } of result.broken) problems.add(`crawl: ${status} ${url} (from ${from})`);
+    if (result.pages.length < pages.length) problems.add(`crawl: visited ${result.pages.length} of ${pages.length} pages`);
+    console.log(
+      `Link crawl ${subpath}: ${result.pages.length} pages visited (${pages.length} HTML files in dist: top, ${genres.length} genre, prompt and site pages), ${result.links} links checked, ${result.broken.length} broken`,
+    );
   } catch (error) {
     problems.add(`error: ${error.message.split("\n")[0]}`);
   } finally {
@@ -293,30 +262,54 @@ async function hubSubpath(browser) {
   }
   return [...problems];
 }
-async function checkSevenRow(browser) {
+async function checkGenreRows(browser) {
   const problems = new Set();
-  const root = await mkdtemp(join(tmpdir(), "catalog-seven-root-"));
-  const out = await mkdtemp(join(tmpdir(), "catalog-seven-dist-"));
+  const root = await mkdtemp(join(tmpdir(), "catalog-genre-root-"));
+  const out = await mkdtemp(join(tmpdir(), "catalog-genre-dist-"));
   try {
     await cp(join(repo, "tests/fixtures/catalog-basic"), root, { recursive: true });
     const meta = JSON.parse(await readFile(join(root, "grok-lamp", "meta.json"), "utf8"));
     for (const n of [1, 2, 3, 4, 5, 6]) {
       const id = `lamp-${n}`;
       await cp(join(root, "grok-lamp"), join(root, id), { recursive: true });
-      await writeFile(join(root, id, "meta.json"), JSON.stringify({ ...meta, id, title: `灯り ${n}` }));
+      await writeFile(join(root, id, "meta.json"), JSON.stringify({ ...meta, id, title: `灯り ${n}`, created: `2026-11-0${n + 1}` }));
     }
     await buildDist(root, out);
-    const html = await readFile(join(out, "index.html"), "utf8");
-    const group = html.match(/<section\b[^>]*\bdata-group="type:product-lp"[^>]*>([\s\S]*?)<\/section>/);
-    const ids = group ? [...group[1].matchAll(/\bdata-id="([^"]+)"/g)].map((m) => m[1]) : [];
-    if (ids.length < 7) problems.add(`seven: product-lp row has ${ids.length} cards`);
+    const { sites } = await catalog.loadCatalog(root);
+    const expected = catalog.orderSites(sites.filter((site) => site.type === "product-lp")).map((site) => site.id);
+    const total = expected.length;
+    if (total < 7) problems.add(`genre: fixture has ${total} product-lp works`);
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     try {
       await page.goto(pathToFileURL(join(out, "index.html")).href);
-      const ul = page.locator('[data-group="type:product-lp"] ul.row');
-      const box = await ul.evaluate((el) => {
+      const section = page.locator('[data-group="product-lp"]');
+      const state = () =>
+        section.evaluate((el) =>
+          [...el.querySelectorAll("[data-card]")].map((card) => [card.dataset.id, card.checkVisibility()]),
+        );
+      const top = await state();
+      const ids = top.map(([id]) => id);
+      const shown = top.filter(([, visible]) => visible).map(([id]) => id);
+      if (JSON.stringify(ids) !== JSON.stringify(expected)) problems.add(`top: DOM order ${ids} != ${expected}`);
+      if (JSON.stringify(shown) !== JSON.stringify(expected.slice(0, catalog.TOP_LIMIT)))
+        problems.add(`top: ${shown.length} visible (${shown}), want first ${catalog.TOP_LIMIT}`);
+      const all = section.locator(".group-head a", { hasText: "すべて見る" });
+      const text = (await all.innerText()).trim();
+      if (text !== `すべて見る（${total}件）`) problems.add(`top: link reads "${text}"`);
+      if ((await all.getAttribute("href")) !== "genre/product-lp/")
+        problems.add(`top: すべて見る href is ${await all.getAttribute("href")}`);
+      const count = page.locator("[data-count]");
+      if ((await count.innerText()).trim() !== "") problems.add("top: filter count should start empty");
+      await page.selectOption("select[name=type]", "product-lp");
+      const filtered = (await state()).filter(([, visible]) => visible).length;
+      if (filtered !== total) problems.add(`top: type=product-lp shows ${filtered}, want all ${total}`);
+      const listed = await page.locator("[data-card]").count();
+      const status = (await count.innerText()).trim();
+      if (status !== `${listed} 作品中 ${total} 作品を表示`) problems.add(`top: count reads "${status}"`);
+      const row = section.locator("ul.row");
+      const box = await row.evaluate((el) => {
         const r = el.getBoundingClientRect();
-        const cards = [...el.querySelectorAll("[data-card]")].map((c) => c.getBoundingClientRect());
+        const cards = [...el.querySelectorAll("[data-card]")].filter((c) => c.checkVisibility()).map((c) => c.getBoundingClientRect());
         return {
           right: r.right,
           width: el.clientWidth,
@@ -326,58 +319,98 @@ async function checkSevenRow(browser) {
           cards: cards.map((c) => ({ left: c.left, right: c.right, width: c.width })),
         };
       });
-      if (!(box.scroll > box.width)) problems.add(`seven: row does not overflow ${box.scroll} <= ${box.width}`);
+      if (!(box.scroll > box.width)) problems.add(`top: filtered row does not overflow ${box.scroll} <= ${box.width}`);
       const full = box.cards.filter((c) => c.right <= box.right + 0.5).length;
       const peek = box.cards.find((c) => c.left < box.right && c.right > box.right + 0.5);
-      if (full !== 6) problems.add(`seven: ${full} fully visible cards, want 6`);
-      if (!peek) problems.add("seven: the 7th card does not peek past the right edge");
+      if (full !== 6) problems.add(`top: ${full} fully visible cards, want 6`);
+      if (!peek) problems.add("top: the 7th card does not peek past the right edge");
       else {
         const visible = (box.right - peek.left) / peek.width;
-        if (!(visible > 0.25 && visible < 0.75))
-          problems.add(`seven: 7th card shows ${visible.toFixed(2)} of its width`);
+        if (!(visible > 0.25 && visible < 0.75)) problems.add(`top: 7th card shows ${visible.toFixed(2)} of its width`);
       }
-      if (!/x mandatory/.test(box.snap)) problems.add(`seven: snap is ${box.snap}`);
-      if (box.align !== "start") problems.add(`seven: snap-align is ${box.align}`);
-      await ul.focus();
+      if (!/x mandatory/.test(box.snap)) problems.add(`top: snap is ${box.snap}`);
+      if (box.align !== "start") problems.add(`top: snap-align is ${box.align}`);
+      await row.focus();
       const label = await page.evaluate(() => document.activeElement.getAttribute("aria-label"));
-      if (label !== "商品LPの作品、横にスクロール") problems.add(`seven: aria-label is "${label}"`);
-      if ((await ul.evaluate((el) => getComputedStyle(el).outlineStyle)) === "none")
-        problems.add("seven: no focus outline on the row");
+      if (label !== "商品LPの作品、横にスクロール") problems.add(`top: aria-label is "${label}"`);
+      if ((await row.evaluate((el) => getComputedStyle(el).outlineStyle)) === "none") problems.add("top: no focus outline on the row");
       await page.keyboard.press("ArrowRight");
-      await page.waitForFunction((el) => el.scrollLeft > 0, await ul.elementHandle(), { timeout: 3000 });
-      await ul.evaluate((el) => el.scrollTo({ left: 37, behavior: "instant" }));
+      await page.waitForFunction((el) => el.scrollLeft > 0, await row.elementHandle(), { timeout: 3000 });
+      await row.evaluate((el) => el.scrollTo({ left: 37, behavior: "instant" }));
       await page.waitForTimeout(500);
-      const stop = await ul.evaluate((el) => {
+      const stop = await row.evaluate((el) => {
         const start = el.getBoundingClientRect().left;
-        return [...el.querySelectorAll("[data-card]")].map((c) =>
-          Math.round(c.getBoundingClientRect().left - start),
-        );
+        return [...el.querySelectorAll("[data-card]")].filter((c) => c.checkVisibility()).map((c) => Math.round(c.getBoundingClientRect().left - start));
       });
-      if (!stop.some((x) => Math.abs(x) <= 1))
-        problems.add(`seven: no card edge at the row start after scrolling: ${stop}`);
-      const count = page.locator("[data-count]");
-      if ((await count.innerText()).trim() !== "") problems.add("seven: filter count should start empty");
-      const want = ids.length;
-      await page.selectOption("select[name=type]", "product-lp");
-      const status = (await count.innerText()).trim();
-      const listed = (await page.locator("[data-card]").count());
-      const expect = `${listed} 作品中 ${want} 作品を表示`;
-      if (status !== expect) problems.add(`seven: count reads "${status}", want "${expect}"`);
+      if (!stop.some((x) => Math.abs(x) <= 1)) problems.add(`top: no card edge at the row start after scrolling: ${stop}`);
+      await row.evaluate((el) => el.scrollTo({ left: 0, behavior: "instant" }));
+      await page.selectOption("select[name=model]", "Grok");
+      const grok = (await state()).filter(([, visible]) => visible).length;
+      const wantGrok = sites.filter((site) => site.type === "product-lp" && site.model === "Grok").length;
+      if (grok !== wantGrok) problems.add(`top: type+model shows ${grok}, want ${wantGrok}`);
       await page.click("button[type=reset]");
       await page.waitForFunction(() => document.querySelector("[data-count]").textContent === "");
+      const reset = (await state()).filter(([, visible]) => visible).length;
+      if (reset !== catalog.TOP_LIMIT) problems.add(`top: reset shows ${reset}, want ${catalog.TOP_LIMIT}`);
       await page.setViewportSize({ width: 375, height: 812 });
-      const phone = await ul.evaluate((el) => {
+      const phone = await row.evaluate((el) => {
         const r = el.getBoundingClientRect();
         return [...el.querySelectorAll("[data-card]")]
+          .filter((c) => c.checkVisibility())
           .map((c) => c.getBoundingClientRect())
           .filter((c) => c.left < r.right && c.right > r.right).length;
       });
-      if (phone !== 1) problems.add(`seven: at 375px ${phone} cards peek, want 1`);
+      if (phone !== 1) problems.add(`top: at 375px ${phone} cards peek, want 1`);
+      await page.goto(pathToFileURL(join(out, "genre", "product-lp", "index.html")).href);
+      const ul = page.locator("ul.grid");
+      if ((await page.locator("ul.row").count()) !== 0) problems.add("genre: page still has a ul.row");
+      const layout = () =>
+        ul.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const style = getComputedStyle(el);
+          const cards = [...el.querySelectorAll("[data-card]")];
+          return {
+            ids: cards.filter((card) => card.checkVisibility()).map((card) => card.dataset.id),
+            right: r.right,
+            width: el.clientWidth,
+            scroll: el.scrollWidth,
+            overflow: style.overflowX,
+            snap: style.scrollSnapType,
+            label: el.getAttribute("aria-label"),
+            tabindex: el.getAttribute("tabindex"),
+            capped: el.hasAttribute("data-capped"),
+            tops: cards.map((c) => Math.round(c.getBoundingClientRect().top)),
+            cards: cards.map((c) => { const b = c.getBoundingClientRect(); return { left: b.left, right: b.right }; }),
+            doc: document.documentElement.scrollWidth,
+          };
+        });
+      const wraps = (box, width, want) => {
+        if (JSON.stringify(box.ids) !== JSON.stringify(expected)) problems.add(`genre ${width}px: visible ${box.ids} != ${expected}`);
+        if (box.scroll > box.width) problems.add(`genre ${width}px: list overflows ${box.scroll} > ${box.width}`);
+        if (box.cards.some((c) => c.right > box.right + 0.5)) problems.add(`genre ${width}px: a card sticks out past the right edge`);
+        if (box.doc > width) problems.add(`genre ${width}px: document overflow, scrollWidth ${box.doc}`);
+        const columns = box.tops.filter((top) => top === box.tops[0]).length;
+        if (want === 1 ? columns !== 1 : columns < 2) problems.add(`genre ${width}px: ${columns} cards in the first line, want ${want === 1 ? 1 : "2+"}`);
+        if (want !== 1 && new Set(box.tops).size < 2) problems.add(`genre ${width}px: cards do not wrap to a second line`);
+      };
+      await page.setViewportSize({ width: 375, height: 812 });
+      const narrow = await layout();
+      wraps(narrow, 375, 1);
+      for (let i = 1; i < narrow.tops.length; i++)
+        if (!(narrow.tops[i] > narrow.tops[i - 1])) problems.add(`genre 375px: card ${i + 1} is not below card ${i}`);
+      await page.setViewportSize({ width: 1280, height: 800 });
+      const wide = await layout();
+      wraps(wide, 1280, 2);
+      if (wide.overflow !== "visible") problems.add(`genre: overflow-x is ${wide.overflow}`);
+      if (wide.snap !== "none") problems.add(`genre: snap is ${wide.snap}`);
+      if (wide.label !== "商品LPの作品") problems.add(`genre: aria-label is "${wide.label}"`);
+      if (wide.tabindex !== null) problems.add(`genre: list has tabindex ${wide.tabindex}`);
+      if (wide.capped) problems.add("genre: list has data-capped");
     } finally {
       await page.close();
     }
   } catch (error) {
-    problems.add(`seven: ${error.message.split("\n")[0]}`);
+    problems.add(`genre: ${error.message.split("\n")[0]}`);
   } finally {
     await rm(root, { recursive: true, force: true });
     await rm(out, { recursive: true, force: true });
@@ -391,8 +424,8 @@ try {
   if (withHub) {
     const checks = [
       ...viewports.map((viewport) => [`hub ${viewport.width}px`, () => hub(browser, viewport)]),
-      [`hub subpath ${subpath}`, () => hubSubpath(browser)],
-      ["hub 7-card row peek", () => checkSevenRow(browser)],
+      [`hub subpath ${subpath} and link crawl`, () => hubSubpath(browser)],
+      ["hub top TOP_LIMIT rows and genre page grid", () => checkGenreRows(browser)],
     ];
     for (const [label, run] of checks) {
       const problems = await run();
@@ -437,7 +470,7 @@ console.log(
 );
 if (withHub)
   console.log(
-    `Hub: ${hubCounts.passed + hubCounts.failed} checks (${viewports.map((v) => `${v.width}px`).join(", ")}, subpath ${subpath}, 7-card row): ${hubCounts.passed} passed, ${hubCounts.failed} failed`,
+    `Hub: ${hubCounts.passed + hubCounts.failed} checks (${viewports.map((v) => `${v.width}px`).join(", ")}, subpath ${subpath} link crawl, top TOP_LIMIT=${catalog.TOP_LIMIT} rows and genre page grid): ${hubCounts.passed} passed, ${hubCounts.failed} failed`,
   );
 process.exit(
   total > 0 && total === expectedCases && counts.failed === 0 && hubCounts.failed === 0 ? 0 : 1,

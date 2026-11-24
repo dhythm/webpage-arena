@@ -7,6 +7,7 @@ const defaults = {
   typesPath: join(repo, "site-types.json"),
 };
 const html = "text/html; charset=utf-8";
+export const TOP_LIMIT = 6;
 const promptName = /^[A-Za-z0-9_-]+$/;
 const dimensions = [
   ["prompt", "お題"],
@@ -25,6 +26,23 @@ export function escapeHtml(value) {
 const recorded = (value) => (value === "unknown" ? "記録なし" : value);
 const present = (value) => typeof value === "string" && value.trim() !== "" && value !== "unknown";
 const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const validDate = (value) => {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+};
+export function orderSites(sites) {
+  return [...sites].sort((a, b) => {
+    const x = validDate(a.created) ? a.created : null;
+    const y = validDate(b.created) ? b.created : null;
+    if (x !== y) {
+      if (x === null) return 1;
+      if (y === null) return -1;
+      return compare(y, x);
+    }
+    return compare(a.id, b.id);
+  });
+}
 async function isFile(path) {
   return (await stat(path).catch(() => null))?.isFile() ?? false;
 }
@@ -106,10 +124,17 @@ export async function loadCatalog(root, options = {}) {
       rank(a.type) - rank(b.type) ||
       compare(a.key, b.key),
   );
-  for (const group of ordered) {
-    group.sites.sort((a, b) => compare(a.id, b.id));
-    for (const site of group.sites) site.others = group.sites.length - 1;
-  }
+  for (const group of ordered) for (const site of group.sites) site.others = group.sites.length - 1;
+  const promptNames = new Set(await listPrompts(root));
+  const genreIds = [...new Set(sites.map((site) => site.type))].sort(
+    (a, b) => rank(a) - rank(b) || compare(a, b),
+  );
+  const genres = genreIds.map((id) => ({
+    id,
+    label: typeLabel.get(id) ?? id,
+    promptHref: promptNames.has(id) ? `prompts/${id}.html` : null,
+    sites: orderSites(sites.filter((site) => site.type === id)),
+  }));
   const count = (key) => {
     const counts = new Map();
     for (const site of sites) counts.set(site[key], (counts.get(site[key]) ?? 0) + 1);
@@ -122,8 +147,10 @@ export async function loadCatalog(root, options = {}) {
   const byLabel = (a, b) => a.label.localeCompare(b.label, "ja");
   const groupIndex = new Map(ordered.map((group, index) => [group.key, index]));
   return {
-    sites: ordered.flatMap((group) => group.sites),
+    sites: genres.flatMap((genre) => genre.sites),
     groups: ordered,
+    genres,
+    topLimit: options.topLimit ?? TOP_LIMIT,
     filters: {
       prompt: choices(
         "group",
@@ -140,8 +167,14 @@ export async function loadCatalog(root, options = {}) {
     },
   };
 }
-function renderCard(site) {
+export function renderCard(site, base = "", { siblings: showSiblings = true } = {}) {
   const e = escapeHtml;
+  site = {
+    ...site,
+    href: base + site.href,
+    thumb: site.thumb && base + site.thumb,
+    promptHref: site.promptHref && base + site.promptHref,
+  };
   const thumb = site.thumb
     ? `<a class="thumb" href="${e(site.href)}" tabindex="-1" aria-hidden="true"><img src="${e(site.thumb)}" alt="" loading="lazy" decoding="async" width="640" height="400" /></a>`
     : `<div class="thumb thumb-none" aria-hidden="true">サムネイルなし</div>`;
@@ -151,7 +184,7 @@ function renderCard(site) {
   const tool = present(site.model) ? "" : `
                 <div><dt>ツール</dt><dd>${e(recorded(site.tool))}</dd></div>`;
   const kind = site.promptHref ? "お題" : "種別";
-  const siblings = site.others > 0 ? `<span class="siblings">同じ${kind}のほかの作品 ${site.others} 件</span>` : "";
+  const siblings = showSiblings && site.others > 0 ? `<span class="siblings">同じ${kind}のほかの作品 ${site.others} 件</span>` : "";
   return `<li class="card" data-card data-id="${e(site.id)}" data-prompt="${e(site.group)}" data-type="${e(site.type)}" data-model="${e(site.model)}" data-tool="${e(site.tool)}">
             ${thumb}
             <div class="card-body">
@@ -160,26 +193,36 @@ function renderCard(site) {
               <dl class="facts">
                 <div><dt>制作</dt><dd>${e(recorded(site.model))}</dd></div>${tool}
                 <div><dt>${kind}</dt><dd>${e(site.typeLabel)}</dd></div>
-                <div><dt>作成日</dt><dd><time datetime="${e(site.created)}">${e(site.created)}</time></dd></div>
+                <div><dt>作成日</dt><dd>${present(site.created) ? `<time datetime="${e(site.created)}">${e(site.created)}</time>` : "記録なし"}</dd></div>
               </dl>
               <p class="card-foot">${prompt}${siblings}</p>
             </div>
           </li>`;
 }
+function renderRow(genre, base, capped) {
+  const e = escapeHtml;
+  return `<ul class="row" role="list" tabindex="0"${capped ? " data-capped" : ""} aria-label="${e(genre.label)}の作品、横にスクロール">
+          ${genre.sites.map((site) => renderCard(site, base)).join("\n          ")}
+        </ul>`;
+}
+function renderGrid(genre, base) {
+  const e = escapeHtml;
+  return `<ul class="grid" role="list" aria-label="${e(genre.label)}の作品">
+          ${genre.sites.map((site) => renderCard(site, base, { siblings: false })).join("\n          ")}
+        </ul>`;
+}
 function renderGroups(catalog) {
   const e = escapeHtml;
-  return catalog.groups
-    .map((group, index) => {
+  return catalog.genres
+    .map((genre, index) => {
       const id = `group-${index + 1}`;
-      const note = group.promptHref ? `・<a href="${e(group.promptHref)}">お題を読む</a>` : "";
-      return `<section class="group" data-group="${e(group.key)}" aria-labelledby="${id}">
+      const prompt = genre.promptHref ? `・<a href="${e(genre.promptHref)}">お題を読む</a>` : "";
+      return `<section class="group" data-group="${e(genre.id)}" aria-labelledby="${id}">
         <div class="group-head">
-          <h2 id="${id}">${e(group.label)}</h2>
-          <p class="group-note">${group.sites.length} 作品${note}</p>
+          <h2 id="${id}">${e(genre.label)}</h2>
+          <p class="group-note"><a href="genre/${e(genre.id)}/">すべて見る（${genre.sites.length}件）</a>${prompt}</p>
         </div>
-        <ul class="row" role="list" tabindex="0" aria-label="${e(group.label)}の作品、横にスクロール">
-          ${group.sites.map(renderCard).join("\n          ")}
-        </ul>
+        ${renderRow(genre, "", true)}
       </section>`;
     })
     .join("\n      ");
@@ -206,13 +249,62 @@ function renderFilters(catalog) {
 }
 function renderTotal(catalog) {
   const models = catalog.filters.model.length;
-  return `${catalog.sites.length} 作品・制作 ${models} 種・${catalog.groups.length} グループ`;
+  return `${catalog.sites.length} 作品・制作 ${models} 種・${catalog.genres.length} ジャンル`;
+}
+function renderLimit(catalog) {
+  return `body:not([data-filtering]) .row[data-capped] > [data-card]:nth-child(n + ${catalog.topLimit + 1}) {
+        display: none;
+      }`;
+}
+const styleOf = (template) => {
+  const style = template.match(/<style>[\s\S]*?<\/style>/);
+  if (!style) throw new Error("index.html template has no <style>");
+  return style[0];
+};
+export function renderGenre(catalog, template, id) {
+  const e = escapeHtml;
+  const genre = catalog.genres.find((item) => item.id === id);
+  if (!genre) return null;
+  const prompt = genre.promptHref ? `・<a href="../../${e(genre.promptHref)}">お題を読む</a>` : "";
+  return `<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>${e(genre.label)} — webpage-arena</title>
+    ${styleOf(template).replace(/\s*<!--catalog:limit-->/, "")}
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <h1>${e(genre.label)}</h1>
+        <p class="lead"><a href="../../">ギャラリーに戻る</a></p>
+        <p class="total">${genre.sites.length} 作品</p>
+      </header>
+      <main>
+      <section class="group" aria-labelledby="genre-title">
+        <div class="group-head">
+          <h2 id="genre-title">${e(genre.label)}のすべての作品</h2>
+          <p class="group-note">新しい順${prompt}</p>
+        </div>
+        ${renderGrid(genre, "../../")}
+      </section>
+      </main>
+      <footer>
+        <p>商品・企業・人物・価格・数値はすべて架空です。</p>
+        <p><a href="../../prompts/_template.html">全お題に共通の制約</a></p>
+      </footer>
+    </div>
+  </body>
+</html>
+`;
 }
 export function renderIndex(catalog, template) {
   const parts = {
     total: renderTotal(catalog),
     filters: renderFilters(catalog),
     groups: renderGroups(catalog),
+    limit: renderLimit(catalog),
   };
   let output = template;
   for (const [name, value] of Object.entries(parts)) {
@@ -222,14 +314,21 @@ export function renderIndex(catalog, template) {
   }
   return output;
 }
-function promptPage(title, sections) {
+function promptPage(title, sections, works, style) {
   const e = escapeHtml;
+  const list = works
+    ? `
+      <h2 id="works">このお題の作品</h2>
+      <p>${works.sites.length} 件</p>${works.sites.length ? `
+      ${renderRow(works, "../", false)}` : ""}`
+    : "";
   return `<!doctype html>
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>${e(title)} — webpage-arena</title>
+    <title>${e(title)} — webpage-arena</title>${style ? `
+    ${style}` : ""}
     <style>
       body {
         margin: 0;
@@ -285,13 +384,13 @@ function promptPage(title, sections) {
       <p>${section.note}</p>
       <pre>${e(section.text)}</pre>`,
         )
-        .join("\n      ")}
+        .join("\n      ")}${list}
     </main>
   </body>
 </html>
 `;
 }
-export async function renderPrompt(root, name) {
+export async function renderPrompt(root, name, options = {}) {
   if (!promptName.test(name) || name === "README") return null;
   const path = join(root, "prompts", `${name}.md`);
   if (!(await isFile(path))) return null;
@@ -308,7 +407,20 @@ export async function renderPrompt(root, name) {
       note: `<code>prompts/_template.md</code> の本文です（<a href="_template.html">単独のページ</a>）。`,
     });
   }
-  return promptPage(title, sections);
+  if (name === "_template") return promptPage(title, sections);
+  const catalog = options.catalog ?? (await loadCatalog(root, options));
+  const template = options.template ?? (await readFile(options.templatePath ?? defaults.templatePath, "utf8"));
+  const source = `prompts/${name}.md`;
+  const works = {
+    label: title,
+    sites: orderSites(catalog.sites.filter((site) => site.promptPath === source)),
+  };
+  return promptPage(title, sections, works, styleOf(template).replace(/\s*<!--catalog:limit-->/, ""));
+}
+export async function renderGenrePage(root, id, options = {}) {
+  if (!promptName.test(id)) return null;
+  const template = await readFile(options.templatePath ?? defaults.templatePath, "utf8");
+  return renderGenre(await loadCatalog(root, options), template, id);
 }
 export async function renderHub(root, options = {}) {
   const template = await readFile(options.templatePath ?? defaults.templatePath, "utf8");
@@ -319,17 +431,28 @@ export async function renderRequest(root, pathname, options = {}) {
     return { type: html, body: await renderHub(root, options) };
   const prompt = pathname.match(/^\/prompts\/([^/]+)\.html$/);
   if (prompt) {
-    const body = await renderPrompt(root, prompt[1]);
+    const body = await renderPrompt(root, prompt[1], options);
+    return body === null ? null : { type: html, body };
+  }
+  const genre = pathname.match(/^\/genre\/([^/]+)\/(?:index\.html)?$/);
+  if (genre) {
+    const body = await renderGenrePage(root, genre[1], options);
     return body === null ? null : { type: html, body };
   }
   return null;
 }
 export async function writeGallery(root, out, options = {}) {
-  await writeFile(join(out, "index.html"), await renderHub(root, options));
+  const catalog = await loadCatalog(root, options);
+  const template = await readFile(options.templatePath ?? defaults.templatePath, "utf8");
+  await writeFile(join(out, "index.html"), renderIndex(catalog, template));
   const names = await listPrompts(root);
   if (names.length) await mkdir(join(out, "prompts"), { recursive: true });
   for (const name of names)
-    await writeFile(join(out, "prompts", `${name}.html`), await renderPrompt(root, name));
+    await writeFile(join(out, "prompts", `${name}.html`), await renderPrompt(root, name, { ...options, catalog, template }));
+  for (const genre of catalog.genres) {
+    await mkdir(join(out, "genre", genre.id), { recursive: true });
+    await writeFile(join(out, "genre", genre.id, "index.html"), renderGenre(catalog, template, genre.id));
+  }
   return names;
 }
 export async function buildDist(root, out, options = {}) {
@@ -338,5 +461,6 @@ export async function buildDist(root, out, options = {}) {
   await mkdir(out, { recursive: true });
   for (const site of sites) await cp(join(root, site), join(out, site), { recursive: true });
   const prompts = await writeGallery(root, out, options);
-  return { sites, prompts };
+  const genres = (await readdir(join(out, "genre")).catch(() => [])).sort(compare);
+  return { sites, prompts, genres };
 }

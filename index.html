@@ -165,7 +165,6 @@
       }
       .card {
         display: flex;
-        flex: 0 0 max(150px, calc((100% - 6 * 14px) / 6.5));
         flex-direction: column;
         min-width: 0;
         background: var(--card);
@@ -173,8 +172,20 @@
         border-radius: 8px;
         position: relative;
         overflow: hidden;
+      }
+      .row > .card {
+        flex: 0 0 max(150px, calc((100% - 6 * 14px) / 6.5));
         scroll-snap-align: start;
       }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+        gap: 14px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      <!--catalog:limit-->
       .card:focus-within,
       .card:hover {
         border-color: var(--ink);
@@ -274,7 +285,7 @@
         margin: 0 0 4px;
       }
       @media (max-width: 640px) {
-        .card {
+        .row > .card {
           flex: 0 0 78%;
         }
       }
@@ -285,7 +296,7 @@
       <header>
         <h1>webpage-arena</h1>
         <p class="lead">
-          同じお題を、いろいろな AI・ツールで作った LP のギャラリー。お題ごとに1行に並べます。プロンプトが残っていない作品は種別ごとにまとめています。
+          同じお題を、いろいろな AI・ツールで作った LP のギャラリー。ジャンルごとに1行に、新しい作品から並べます。ジャンルのすべての作品は「すべて見る」から見られます。
         </p>
         <p class="total"><!--catalog:total--></p>
       </header>
@@ -311,6 +322,7 @@
           const chosen = names
             .map((name) => [name, form.elements[name].value])
             .filter(([, value]) => value);
+          document.body.toggleAttribute("data-filtering", chosen.length > 0);
           let shown = 0;
           for (const card of cards) {
             const match = chosen.every(([name, value]) => card.dataset[name] === value);
