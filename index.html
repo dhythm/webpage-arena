@@ -171,6 +171,7 @@
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 8px;
+        position: relative;
         overflow: hidden;
         scroll-snap-align: start;
       }
@@ -250,6 +251,17 @@
       }
       .siblings {
         color: var(--muted);
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
       }
       footer {
         margin-top: 48px;

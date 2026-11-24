@@ -141,7 +141,7 @@ function renderCard(site) {
     : `<div class="thumb thumb-none" aria-hidden="true">サムネイルなし</div>`;
   const prompt = site.promptHref
     ? `<a href="${e(site.promptHref)}">プロンプトを読む</a>`
-    : `<span>プロンプト未収録</span>`;
+    : `<span><span aria-hidden="true">プロンプト未収録</span><span class="sr-only">プロンプト未収録（元のプロンプトは残っていません）</span></span>`;
   const tool = present(site.model) ? "" : `
                 <div><dt>ツール</dt><dd>${e(recorded(site.tool))}</dd></div>`;
   const kind = site.promptHref ? "お題" : "種別";

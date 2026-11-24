@@ -41,6 +41,8 @@ function tally(list, key) {
 }
 const missingPrompt = "プロンプト未収録";
 const longMissing = "（元のプロンプトは残っていません）";
+const fullMissing = `${missingPrompt}${longMissing}`;
+const withoutCards = (html) => html.replace(/<li\b[^>]*\bdata-card\b[^>]*>[\s\S]*?<\/li>/g, "");
 const typeIdParen = /（[a-z][a-z0-9-]*）/;
 const optionLabelsOf = (html, name) => {
   const select = html.match(new RegExp(`<select\\b[^>]*\\bname="${name}"[^>]*>([\\s\\S]*?)</select>`));
@@ -255,7 +257,8 @@ test("filters: the form is hidden until JS runs and the no-match message exists 
   for (const card of cardsOf(html)) assert.doesNotMatch(card.match(/<li[^>]*>/)[0], /\bhidden\b/);
 });
 
-test("prompt: each card without a prompt says only the short プロンプト未収録 once in .card-foot, without （元のプロンプトは残っていません）; cards with a prompt link to prompts/<name>.html instead", async () => {
+test("prompt: each card without a prompt shows only the short プロンプト未収録 once (aria-hidden) in .card-foot and keeps the full プロンプト未収録（元のプロンプトは残っていません） once in .sr-only; cards with a prompt link to prompts/<name>.html instead", async () => {
+  assert.match(await template(), /\.sr-only\s*\{[^}]*position:\s*absolute[^}]*clip:\s*rect\(0,? 0,? 0,? 0\)[^}]*\}/);
   for (const root of [fixture("catalog-basic"), repo]) {
     const list = await metas(root);
     const cards = cardsOf(await hub(root));
@@ -264,9 +267,14 @@ test("prompt: each card without a prompt says only the short プロンプト未�
       assert.ok(card, meta.id);
       const foot = card.match(/<p class="card-foot">([\s\S]*?)<\/p>/)[1];
       if (meta.promptPath === null) {
-        assert.equal(card.split(missingPrompt).length - 1, 1, `${root} ${meta.id}`);
-        assert.ok(foot.startsWith(`<span>${missingPrompt}</span>`), `${root} ${meta.id} foot: ${foot}`);
-        assert.ok(!card.includes(longMissing), `${root} ${meta.id} has no long note`);
+        assert.ok(
+          foot.startsWith(`<span><span aria-hidden="true">${missingPrompt}</span><span class="sr-only">${fullMissing}</span></span>`),
+          `${root} ${meta.id} foot: ${foot}`,
+        );
+        assert.equal(card.split(`>${missingPrompt}<`).length - 1, 1, `${root} ${meta.id} visible once`);
+        assert.equal(card.split(fullMissing).length - 1, 1, `${root} ${meta.id} full once`);
+        assert.equal(card.split(missingPrompt).length - 1, 2, `${root} ${meta.id} no other mention`);
+        assert.doesNotMatch(card, /\btitle="[^"]*未収録/, meta.id);
         assert.doesNotMatch(foot, new RegExp(`<a\\b[^>]*>[^<]*${missingPrompt}`), meta.id);
         assert.doesNotMatch(card, /href="prompts\//, meta.id);
         assert.doesNotMatch(card, /プロンプトを読む/, meta.id);
@@ -452,7 +460,7 @@ test("prompt filter: type groups are labelled 商品LP / 企業HP without （プ
   }
 });
 
-test("repository: headings, row aria-labels and filter options carry no type id like （saas-lp） and no （プロンプト未収録）", async () => {
+test("repository: headings, row aria-labels and filter options carry no type id like （saas-lp） and no （プロンプト未収録）, and （元のプロンプトは残っていません） appears only inside cards", async () => {
   const html = await hub(repo);
   const groups = groupsOf(html);
   const saas = groups.find((g) => g.key === "prompts/saas-lp.md");
@@ -470,16 +478,18 @@ test("repository: headings, row aria-labels and filter options carry no type id 
     assert.ok(!label.includes("（プロンプト未収録）"), label);
   }
   assert.doesNotMatch(html, /（saas-lp）|（プロンプト未収録）/);
-  assert.ok(!html.includes(longMissing));
+  assert.ok(!withoutCards(html).includes(longMissing));
+  for (const group of groups) assert.ok(!group.html.match(/<div class="group-head">[\s\S]*?<\/div>/)[0].includes(longMissing), group.key);
+  assert.ok(!html.match(/<select\b[^>]*\bname="prompt"[^>]*>[\s\S]*?<\/select>/)[0].includes(longMissing));
 });
 
-test("prompt pages: every page baked by writeGallery has <title>, <h1> and the first # line in <pre> without a type id, and no （元のプロンプトは残っていません）", async (t) => {
+test("prompt pages: every page baked by writeGallery has <title>, <h1> and the first # line in <pre> without a type id, and no （元のプロンプトは残っていません）; the hub has it only inside cards", async (t) => {
   for (const root of [fixture("catalog-basic"), repo]) {
     const out = await mkdtemp(join(tmpdir(), "catalog-prompt-pages-"));
     t.after(() => rm(out, { recursive: true, force: true }));
     const names = await writeGallery(root, out);
     const index = await readFile(join(out, "index.html"), "utf8");
-    assert.ok(!index.includes(longMissing), `${root} index`);
+    assert.ok(!withoutCards(index).includes(longMissing), `${root} index outside cards`);
     for (const name of names) {
       const page = await readFile(join(out, "prompts", `${name}.html`), "utf8");
       const title = page.match(/<title>([^<]*)<\/title>/)[1];
