@@ -187,7 +187,7 @@ export function renderCard(site, base = "", { siblings: showSiblings = true } = 
   };
   const making = site.making
     ? `
-                <div><dt>作り方</dt><dd>${e(site.making.label)}</dd></div>`
+                <div><dt>作り方</dt><dd>${site.making.label.replace(/^(.*?)(（[^（）]*）)?$/, (_, word, paren) => e(word) + (paren ? `<span class="making-n">${e(paren)}</span>` : ""))}</dd></div>`
     : "";
   const thumb = site.thumb
     ? `<a class="thumb" href="${e(site.href)}" tabindex="-1" aria-hidden="true"><img src="${e(site.thumb)}" alt="" loading="lazy" decoding="async" width="640" height="400" /></a>`
@@ -397,8 +397,23 @@ function promptPage(title, sections, works, style) {
         overflow-wrap: anywhere;
       }
       a {
-        color: #173cda;
+        color: inherit;
         text-underline-offset: 4px;
+      }
+      a:hover {
+        color: #173cda;
+      }
+      .work-thumb {
+        display: block;
+        width: min(320px, 100%);
+        margin: 0 0 12px;
+      }
+      .work-thumb img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid #d6d4cc;
+        border-radius: 6px;
       }
       a:focus-visible {
         outline: 3px solid #173cda;
@@ -412,7 +427,8 @@ function promptPage(title, sections, works, style) {
       <p><a href="../">ギャラリーに戻る</a></p>
       ${sections
         .map(
-          (section, index) => `${index === 0 ? `<h1>${e(section.title)}</h1>` : `<h2 id="common">${e(section.title)}</h2>`}
+          (section, index) => `${index === 0 ? `<h1>${e(section.title)}</h1>` : `<h2 id="common">${e(section.title)}</h2>`}${section.lead ? `
+      ${section.lead}` : ""}
       <p>${section.note}</p>
       ${section.html ?? `<pre>${e(section.text)}</pre>`}`,
         )
@@ -486,7 +502,14 @@ export async function renderMaking(root, id, options = {}) {
   if (!site?.making) return null;
   const title = `作り方 — ${site.title}`;
   const steps = stepsOf(await readFile(join(root, id, "making.md"), "utf8"));
-  return promptPage(title, [{ title, note: escapeHtml(disclaimer), html: renderSteps(steps) }]);
+  const e = escapeHtml;
+  const href = e(`../${site.href}`);
+  const thumb = site.thumb
+    ? `
+      <a class="work-thumb" href="${href}" tabindex="-1" aria-hidden="true"><img src="${e(`../${site.thumb}`)}" alt="" decoding="async" width="640" height="400" /></a>`
+    : "";
+  const lead = `<p><a href="${href}">${e(site.title)}を見る</a></p>${thumb}`;
+  return promptPage(title, [{ title, lead, note: e(disclaimer), html: renderSteps(steps) }]);
 }
 export async function renderGenrePage(root, id, options = {}) {
   if (!promptName.test(id)) return null;

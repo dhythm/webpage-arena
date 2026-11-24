@@ -981,7 +981,8 @@ test("subpath: serving the built dist under /webpage-arena/ and crawling every p
 });
 
 const disclaimer = "作ったときの指示の流れを、読みやすく整えて記録したものです。再現手順ではなく、同じ指示を渡しても同じページになるとは限りません。";
-const makingRow = (html) => html.match(/<div><dt>作り方<\/dt><dd>([^<]*)<\/dd><\/div>/)?.[1] ?? null;
+const makingDd = (html) => html.match(/<div><dt>作り方<\/dt><dd>([\s\S]*?)<\/dd><\/div>/)?.[1] ?? null;
+const makingRow = (html) => makingDd(html)?.replace(/<[^>]+>/g, "") ?? null;
 const footOf = (html) => html.match(/<p class="card-foot">([\s\S]*?)<\/p>/)[1];
 const cardIn = (html, id) => cardsOf(html).find((card) => card.includes(`data-id="${id}"`));
 const makingFixture = {
@@ -1169,4 +1170,91 @@ test("links: the built making pages are crawled under /webpage-arena/ with 0 bro
   const repoRefs = await missingRefs(repoOut, "/webpage-arena/");
   assert.deepEqual(repoRefs.missing, []);
   for (const id of Object.keys(madeWorks)) assert.ok(repoRefs.pages.includes(`making/${id}.html`), id);
+});
+
+const styleRules = (html) =>
+  [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].flatMap((m) => [...m[1].matchAll(/([^{}]+)\{([^}]*)\}/g)].map((r) => ({ selector: r[1].trim(), body: r[2] })));
+const nowrapClasses = (html) =>
+  styleRules(html)
+    .filter((rule) => /white-space:\s*nowrap/.test(rule.body))
+    .flatMap((rule) => [...rule.selector.matchAll(/\.([\w-]+)\s*(?:,|$)/g)].map((m) => m[1]));
+async function makingWorks(root) {
+  const works = {};
+  for (const meta of await metas(root)) if (meta.making === "oneshot" || meta.making === "refined") works[meta.id] = meta;
+  return works;
+}
+
+test("making pages: work link — under the heading, <title>を見る links to ../<id>/ (plus the thumb when there is one), and the target exists in the built dist, for the five works and the fixture", async (t) => {
+  for (const [root, ids] of [[fixture("catalog-making"), Object.keys(makingFixture)], [repo, Object.keys(madeWorks)]]) {
+    const out = await built(t, root, "catalog-making-worklink-");
+    const works = await makingWorks(root);
+    assert.deepEqual(Object.keys(works).sort(), [...ids].sort());
+    for (const [id, meta] of Object.entries(works)) {
+      const page = await readFile(join(out, "making", `${id}.html`), "utf8");
+      const afterHeading = page.split(/<h1>[^<]*<\/h1>/)[1];
+      assert.ok(afterHeading, id);
+      const beforeSteps = afterHeading.split('<ol class="steps">')[0];
+      assert.ok(beforeSteps.includes(`<a href="../${id}/">${meta.title}を見る</a>`), `${id}: ${beforeSteps}`);
+      const thumb = beforeSteps.match(/<a\b[^>]*href="([^"]*)"[^>]*>\s*<img\b[^>]*src="([^"]*)"/);
+      if (meta.thumbnail) {
+        assert.ok(thumb, id);
+        assert.deepEqual([thumb[1], thumb[2]], [`../${id}/`, `../${id}/${meta.thumbnail}`], id);
+        await readFile(join(out, id, meta.thumbnail));
+      } else assert.equal(thumb, null, id);
+      assert.ok((await readdir(join(out, id))).includes("index.html"), id);
+    }
+    const { missing } = await missingRefs(out, "/webpage-arena/");
+    assert.deepEqual(missing, []);
+    const server = fileServer(out, "/webpage-arena/", false);
+    const origin = await listen(server);
+    t.after(() => close(server));
+    const crawled = await crawl(origin, "/webpage-arena/", Object.keys(works).map((id) => `making/${id}.html`));
+    assert.deepEqual(crawled.broken, []);
+    for (const id of Object.keys(works)) assert.ok(crawled.pages.includes(`${origin}/webpage-arena/${id}/`), id);
+  }
+});
+
+test("making cards: nowrap — the （追加の指示N回） part sits in a white-space: nowrap span from index.html, the visible text stays ブラッシュアップ（追加の指示N回）, and ワンショット has no span", async (t) => {
+  const css = nowrapClasses(await template());
+  const out = await built(t, fixture("catalog-making"), "catalog-making-nowrap-");
+  const repoOut = await mkdtemp(join(tmpdir(), "catalog-making-nowrap-repo-"));
+  t.after(() => rm(repoOut, { recursive: true, force: true }));
+  await writeGallery(repo, repoOut);
+  const cases = [
+    ...Object.entries(makingFixture).map(([id, badge]) => [out, id, badge]),
+    ...Object.entries(madeWorks).map(([id, [, , n]]) => [repoOut, id, `ブラッシュアップ（追加の指示${n}回）`]),
+  ];
+  for (const [dir, id, badge] of cases) {
+    const top = await readFile(join(dir, "index.html"), "utf8");
+    assert.deepEqual(nowrapClasses(top), css);
+    const dd = makingDd(cardIn(top, id));
+    assert.equal(makingRow(cardIn(top, id)), badge, id);
+    const n = badge.match(/（追加の指示(\d+)回）/);
+    if (!n) {
+      assert.equal(dd, badge, id);
+      continue;
+    }
+    const span = dd.match(/^ブラッシュアップ<span class="([^"]+)">([^<]*)<\/span>$/);
+    assert.ok(span, `${id}: ${dd}`);
+    assert.equal(span[2], n[0], id);
+    assert.ok(css.includes(span[1]), `${span[1]} not in ${css}`);
+  }
+});
+
+test("making pages: link style — links use color: inherit with text-underline-offset like the gallery, never #173cda as the link color, on making and お題 pages", async (t) => {
+  const out = await built(t, fixture("catalog-making"), "catalog-making-linkstyle-");
+  const gallery = styleRules(await template()).find((rule) => rule.selector === "a");
+  assert.match(gallery.body, /color:\s*inherit/);
+  const pages = [...Object.keys(makingFixture).map((id) => `making/${id}.html`), "prompts/saas-lp.html", "prompts/_template.html"];
+  for (const path of pages) {
+    const html = await readFile(join(out, path), "utf8");
+    const rules = styleRules(html).filter((rule) => rule.selector === "a");
+    assert.ok(rules.length, path);
+    const last = rules.at(-1).body;
+    assert.match(last, /color:\s*inherit/, path);
+    assert.match(last, /text-underline-offset:\s*4px/, path);
+    for (const rule of rules) assert.doesNotMatch(rule.body, /#173cda/i, path);
+    const hover = styleRules(html).filter((rule) => rule.selector === "a:hover");
+    assert.ok(hover.length, path);
+  }
 });
