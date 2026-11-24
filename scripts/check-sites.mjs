@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { extname, join, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { readMeta, siteCoverage } from "./sites.mjs";
+import { readMeta, siteCoverage, stepsOf } from "./sites.mjs";
 const repo = resolve(import.meta.dirname, "..");
 const required = [
   "id",
@@ -18,7 +18,8 @@ const required = [
   "legacy",
   "externalOrigins",
 ];
-const optional = ["modelVersion", "thumbWait"];
+const optional = ["modelVersion", "thumbWait", "making"];
+const makings = ["oneshot", "refined", "unknown"];
 const nonEmpty = ["id", "title", "tagline", "type", "model", "tool"];
 const sizeLimit = 2 * 1024 * 1024;
 const codeExtensions = new Set([".html", ".htm", ".js", ".mjs", ".css"]);
@@ -94,7 +95,7 @@ async function checkMeta(root, site, meta, types) {
     if (key in meta && !(isString(meta[key]) && meta[key].trim()))
       errors.push(`${key} must be a non-empty string`);
   for (const key of optional)
-    if (key in meta && !(isString(meta[key]) && meta[key].trim()))
+    if (key !== "making" && key in meta && !(isString(meta[key]) && meta[key].trim()))
       errors.push(`${key} must be a non-empty string`);
   if ("promptNotes" in meta && !isString(meta.promptNotes))
     errors.push("promptNotes must be a string");
@@ -132,6 +133,30 @@ async function checkMeta(root, site, meta, types) {
   }
   if (meta.legacy === false && Array.isArray(meta.externalOrigins) && meta.externalOrigins.length)
     errors.push("externalOrigins must be empty for a new site (legacy: false)");
+  return [...errors, ...(await checkMaking(root, site, meta))];
+}
+async function checkMaking(root, site, meta) {
+  const errors = [];
+  if (meta.legacy === false && !("making" in meta)) errors.push('missing required field "making" (legacy: false)');
+  if ("making" in meta && !makings.includes(meta.making))
+    return [...errors, 'making must be "oneshot", "refined" or "unknown"'];
+  const making = meta.making ?? "unknown";
+  const record = await readFile(join(root, site, "making.md"), "utf8").catch(() => null);
+  if (meta.promptPath === null && making !== "unknown") errors.push('promptPath null allows only making "unknown"');
+  if (record === null) {
+    if (making !== "unknown") errors.push(`making "${making}" needs making.md`);
+    return errors;
+  }
+  if (making === "unknown") return [...errors, 'making.md exists but making is "unknown"'];
+  const steps = stepsOf(record);
+  if (making === "oneshot" && steps.length !== 1)
+    errors.push(`making "oneshot" needs exactly 1 step in making.md, found ${steps.length}`);
+  if (making === "refined" && steps.length < 2)
+    errors.push(`making "refined" needs 2 or more steps in making.md, found ${steps.length}`);
+  if (isString(meta.promptPath)) {
+    const href = `../prompts/${meta.promptPath.slice("prompts/".length, -".md".length)}.html`;
+    if (!steps[0]?.includes(`](${href})`)) errors.push(`first step of making.md must link to ${href}`);
+  }
   return errors;
 }
 export async function checkSites(root, options = {}) {

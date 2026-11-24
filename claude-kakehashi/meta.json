@@ -12,5 +12,6 @@
   "thumbnail": "thumb.webp",
   "thumbWait": "#hero-ledger[data-settled]",
   "legacy": false,
-  "externalOrigins": []
+  "externalOrigins": [],
+  "making": "refined"
 }

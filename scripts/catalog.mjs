@@ -1,6 +1,6 @@
 import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { readMeta, siteCoverage } from "./sites.mjs";
+import { readMeta, siteCoverage, stepsOf } from "./sites.mjs";
 const repo = resolve(import.meta.dirname, "..");
 const defaults = {
   templatePath: join(repo, "index.html"),
@@ -23,6 +23,7 @@ export function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+const disclaimer = "作ったときの指示の流れを、読みやすく整えて記録したものです。再現手順ではなく、同じ指示を渡しても同じページになるとは限りません。";
 const recorded = (value) => (value === "unknown" ? "記録なし" : value);
 const present = (value) => typeof value === "string" && value.trim() !== "" && value !== "unknown";
 const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
@@ -69,6 +70,14 @@ export async function listPrompts(root) {
 }
 const promptHref = (promptPath) =>
   `prompts/${promptPath.slice("prompts/".length, -".md".length)}.html`;
+async function readMaking(root, id, meta) {
+  if (typeof meta.promptPath !== "string" || !["oneshot", "refined"].includes(meta.making)) return null;
+  const text = await readFile(join(root, id, "making.md"), "utf8").catch(() => null);
+  const steps = text === null ? [] : stepsOf(text);
+  if (!steps.length) return null;
+  const label = meta.making === "oneshot" ? "ワンショット" : `ブラッシュアップ（追加の指示${steps.length - 1}回）`;
+  return { label, href: `making/${id}.html` };
+}
 export async function loadCatalog(root, options = {}) {
   const typesPath = options.typesPath ?? defaults.typesPath;
   const types = JSON.parse(await readFile(typesPath, "utf8"));
@@ -99,6 +108,7 @@ export async function loadCatalog(root, options = {}) {
       href: `${id}/`,
       thumb: typeof meta.thumbnail === "string" ? `${id}/${meta.thumbnail}` : null,
       group: promptPath ?? `type:${meta.type}`,
+      making: await readMaking(root, id, meta),
     });
   }
   const groups = new Map();
@@ -175,10 +185,16 @@ export function renderCard(site, base = "", { siblings: showSiblings = true } = 
     thumb: site.thumb && base + site.thumb,
     promptHref: site.promptHref && base + site.promptHref,
   };
+  const making = site.making
+    ? `
+                <div><dt>作り方</dt><dd>${site.making.label.replace(/^(.*?)(（[^（）]*）)?$/, (_, word, paren) => e(word) + (paren ? `<span class="making-n">${e(paren)}</span>` : ""))}</dd></div>`
+    : "";
   const thumb = site.thumb
     ? `<a class="thumb" href="${e(site.href)}" tabindex="-1" aria-hidden="true"><img src="${e(site.thumb)}" alt="" loading="lazy" decoding="async" width="640" height="400" /></a>`
     : `<div class="thumb thumb-none" aria-hidden="true">サムネイルなし</div>`;
-  const prompt = site.promptHref
+  const prompt = site.making
+    ? `<a href="${e(base + site.making.href)}">作り方を読む</a>`
+    : site.promptHref
     ? `<a href="${e(site.promptHref)}">プロンプトを読む</a>`
     : `<span><span aria-hidden="true">プロンプト未収録</span><span class="sr-only">プロンプト未収録（元のプロンプトは残っていません）</span></span>`;
   const tool = present(site.model) ? "" : `
@@ -193,7 +209,7 @@ export function renderCard(site, base = "", { siblings: showSiblings = true } = 
               <dl class="facts">
                 <div><dt>制作</dt><dd>${e(recorded(site.model))}</dd></div>${tool}
                 <div><dt>${kind}</dt><dd>${e(site.typeLabel)}</dd></div>
-                <div><dt>作成日</dt><dd>${present(site.created) ? `<time datetime="${e(site.created)}">${e(site.created)}</time>` : "記録なし"}</dd></div>
+                <div><dt>作成日</dt><dd>${present(site.created) ? `<time datetime="${e(site.created)}">${e(site.created)}</time>` : "記録なし"}</dd></div>${making}
               </dl>
               <p class="card-foot">${prompt}${siblings}</p>
             </div>
@@ -354,6 +370,22 @@ function promptPage(title, sections, works, style) {
         color: #55544e;
         font-size: 14px;
       }
+      .steps {
+        margin: 0;
+        padding-left: 1.6em;
+      }
+      .steps > li {
+        margin: 0 0 16px;
+      }
+      .steps ul {
+        margin: 4px 0 0;
+        padding-left: 1.2em;
+        color: #55544e;
+        font-size: 14px;
+      }
+      code {
+        font: 0.9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
       pre {
         margin: 0;
         padding: 16px;
@@ -365,8 +397,23 @@ function promptPage(title, sections, works, style) {
         overflow-wrap: anywhere;
       }
       a {
-        color: #173cda;
+        color: inherit;
         text-underline-offset: 4px;
+      }
+      a:hover {
+        color: #173cda;
+      }
+      .work-thumb {
+        display: block;
+        width: min(320px, 100%);
+        margin: 0 0 12px;
+      }
+      .work-thumb img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid #d6d4cc;
+        border-radius: 6px;
       }
       a:focus-visible {
         outline: 3px solid #173cda;
@@ -380,9 +427,10 @@ function promptPage(title, sections, works, style) {
       <p><a href="../">ギャラリーに戻る</a></p>
       ${sections
         .map(
-          (section, index) => `${index === 0 ? `<h1>${e(section.title)}</h1>` : `<h2 id="common">${e(section.title)}</h2>`}
+          (section, index) => `${index === 0 ? `<h1>${e(section.title)}</h1>` : `<h2 id="common">${e(section.title)}</h2>`}${section.lead ? `
+      ${section.lead}` : ""}
       <p>${section.note}</p>
-      <pre>${e(section.text)}</pre>`,
+      ${section.html ?? `<pre>${e(section.text)}</pre>`}`,
         )
         .join("\n      ")}${list}
     </main>
@@ -417,6 +465,52 @@ export async function renderPrompt(root, name, options = {}) {
   };
   return promptPage(title, sections, works, styleOf(template).replace(/\s*<!--catalog:limit-->/, ""));
 }
+function inline(text) {
+  const e = escapeHtml;
+  let output = "";
+  let last = 0;
+  for (const match of text.matchAll(/`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)/g)) {
+    output += e(text.slice(last, match.index));
+    if (match[1] !== undefined) output += `<code>${e(match[1])}</code>`;
+    else if (/^[a-z][a-z0-9+.-]*:/i.test(match[3]) && !/^https?:/i.test(match[3])) output += e(match[2]);
+    else output += `<a href="${e(match[3])}">${e(match[2])}</a>`;
+    last = match.index + match[0].length;
+  }
+  return output + e(text.slice(last));
+}
+function renderSteps(steps) {
+  const items = steps.map((step) => {
+    const [head, ...rest] = step.split("\n").map((line) => line.trim());
+    let main = head.replace(/^\d+\.\s+/, "");
+    const notes = [];
+    for (const line of rest) {
+      if (/^[-*]\s+/.test(line)) notes.push(line.replace(/^[-*]\s+/, ""));
+      else if (notes.length) notes[notes.length - 1] += line;
+      else main += line;
+    }
+    const list = notes.length ? `<ul>${notes.map((note) => `<li>${inline(note)}</li>`).join("")}</ul>` : "";
+    return `        <li>${inline(main)}${list}</li>`;
+  });
+  return `<ol class="steps">
+${items.join("\n")}
+      </ol>`;
+}
+export async function renderMaking(root, id, options = {}) {
+  if (!promptName.test(id)) return null;
+  const catalog = options.catalog ?? (await loadCatalog(root, options));
+  const site = catalog.sites.find((item) => item.id === id);
+  if (!site?.making) return null;
+  const title = `作り方 — ${site.title}`;
+  const steps = stepsOf(await readFile(join(root, id, "making.md"), "utf8"));
+  const e = escapeHtml;
+  const href = e(`../${site.href}`);
+  const thumb = site.thumb
+    ? `
+      <a class="work-thumb" href="${href}" tabindex="-1" aria-hidden="true"><img src="${e(`../${site.thumb}`)}" alt="" decoding="async" width="640" height="400" /></a>`
+    : "";
+  const lead = `<p><a href="${href}">${e(site.title)}を見る</a></p>${thumb}`;
+  return promptPage(title, [{ title, lead, note: e(disclaimer), html: renderSteps(steps) }]);
+}
 export async function renderGenrePage(root, id, options = {}) {
   if (!promptName.test(id)) return null;
   const template = await readFile(options.templatePath ?? defaults.templatePath, "utf8");
@@ -432,6 +526,11 @@ export async function renderRequest(root, pathname, options = {}) {
   const prompt = pathname.match(/^\/prompts\/([^/]+)\.html$/);
   if (prompt) {
     const body = await renderPrompt(root, prompt[1], options);
+    return body === null ? null : { type: html, body };
+  }
+  const making = pathname.match(/^\/making\/([^/]+)\.html$/);
+  if (making) {
+    const body = await renderMaking(root, making[1], options);
     return body === null ? null : { type: html, body };
   }
   const genre = pathname.match(/^\/genre\/([^/]+)\/(?:index\.html)?$/);
@@ -453,14 +552,20 @@ export async function writeGallery(root, out, options = {}) {
     await mkdir(join(out, "genre", genre.id), { recursive: true });
     await writeFile(join(out, "genre", genre.id, "index.html"), renderGenre(catalog, template, genre.id));
   }
+  for (const site of catalog.sites.filter((item) => item.making)) {
+    await mkdir(join(out, "making"), { recursive: true });
+    await writeFile(join(out, "making", `${site.id}.html`), await renderMaking(root, site.id, { ...options, catalog }));
+  }
   return names;
 }
 export async function buildDist(root, out, options = {}) {
   const { sites } = await siteCoverage(root);
   await rm(out, { recursive: true, force: true });
   await mkdir(out, { recursive: true });
-  for (const site of sites) await cp(join(root, site), join(out, site), { recursive: true });
+  for (const site of sites)
+    await cp(join(root, site), join(out, site), { recursive: true, filter: (path) => path !== join(root, site, "making.md") });
   const prompts = await writeGallery(root, out, options);
   const genres = (await readdir(join(out, "genre")).catch(() => [])).sort(compare);
-  return { sites, prompts, genres };
+  const making = (await readdir(join(out, "making")).catch(() => [])).sort(compare);
+  return { sites, prompts, genres, making };
 }

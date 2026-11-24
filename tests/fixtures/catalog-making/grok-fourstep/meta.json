@@ -1,0 +1,15 @@
+{
+  "id": "grok-fourstep",
+  "title": "四段",
+  "tagline": "区分の表示を確かめる作品。",
+  "type": "saas-lp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": "prompts/saas-lp.md",
+  "promptNotes": "フィクスチャ",
+  "created": "2026-12-03",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": [],
+  "making": "refined"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "grok-norecord",
+  "title": "記録なし",
+  "tagline": "区分の表示を確かめる作品。",
+  "type": "saas-lp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": "prompts/saas-lp.md",
+  "promptNotes": "フィクスチャ",
+  "created": "2026-12-02",
+  "thumbnail": null,
+  "legacy": false,
+  "externalOrigins": [],
+  "making": "unknown"
+}

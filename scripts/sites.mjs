@@ -45,3 +45,11 @@ export function coverageSummary(label, coverage) {
 export async function readMeta(root, site) {
   return JSON.parse(await readFile(join(root, site, "meta.json"), "utf8"));
 }
+export function stepsOf(text) {
+  const steps = [];
+  for (const line of text.replace(/<!--[\s\S]*?-->/g, "").split(/\r?\n/)) {
+    if (/^\d+\.\s/.test(line)) steps.push(line);
+    else if (steps.length && line.trim() && !line.startsWith("#")) steps[steps.length - 1] += `\n${line}`;
+  }
+  return steps;
+}
