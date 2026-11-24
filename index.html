@@ -6,7 +6,7 @@
     <title>webpage-arena</title>
     <meta
       name="description"
-      content="同じお題を、いろいろなモデル・ツールで作った LP を並べて見比べるギャラリー。"
+      content="同じお題を、いろいろな AI・ツールで作った LP を並べて見比べるギャラリー。"
     />
     <style>
       :root {
@@ -171,6 +171,7 @@
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 8px;
+        position: relative;
         overflow: hidden;
         scroll-snap-align: start;
       }
@@ -251,6 +252,17 @@
       .siblings {
         color: var(--muted);
       }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+      }
       footer {
         margin-top: 48px;
         padding-top: 16px;
@@ -273,7 +285,7 @@
       <header>
         <h1>webpage-arena</h1>
         <p class="lead">
-          同じお題を、いろいろなモデル・ツールで作った LP のギャラリー。お題ごとに1行に並べます。プロンプトが残っていない作品は種別ごとにまとめています。
+          同じお題を、いろいろな AI・ツールで作った LP のギャラリー。お題ごとに1行に並べます。プロンプトが残っていない作品は種別ごとにまとめています。
         </p>
         <p class="total"><!--catalog:total--></p>
       </header>

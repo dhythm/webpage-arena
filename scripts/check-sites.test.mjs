@@ -171,6 +171,33 @@ test("id: the id must start with the lowercase model name", async (t) => {
   );
 });
 
+test("model: DeepSeek, GLM and Claude Code (folder claude-code-…) pass in the catalog-new-models fixture", async () => {
+  const { sites, errors } = await checkSites(fixture("catalog-new-models"), { tracked: [] });
+  assert.deepEqual(errors, []);
+  assert.deepEqual(sites, ["claude-code-lamp", "deepseek-lamp", "glm-lamp"]);
+});
+
+test("model: the prefix lowercases the value and turns each run of non-alphanumerics into one hyphen", async (t) => {
+  const sample = (folder, model) =>
+    makeRoot(t, {
+      [`${folder}/index.html`]: page,
+      [`${folder}/meta.json`]: { ...baseMeta, id: folder, model },
+    }).then(async (root) => (await checkSites(root, { tracked: [] })).errors);
+  assert.deepEqual(await sample("claude-code-lamp", "Claude Code"), []);
+  assert.deepEqual(await sample("gpt-5-1-lamp", "GPT-5.1"), []);
+  assert.deepEqual(await sample("deepseek-lamp", "DeepSeek"), []);
+  assert.deepEqual(await sample("glm-lamp", "GLM"), []);
+  assert.deepEqual(await sample("cursor-lamp", "  Cursor!  "), []);
+  assertError(await sample("claude-lamp", "Claude Code"), "claude-lamp", /id must start with "claude-code-"/);
+  assertError(await sample("gpt-lamp", "GPT-5.1"), "gpt-lamp", /id must start with "gpt-5-1-"/);
+});
+
+test("model: a value with no letters or digits (Japanese only) skips the prefix check but stays required and non-empty", async (t) => {
+  assert.deepEqual(await checkSample(t, { model: "社内チーム" }), []);
+  assertError(await checkSample(t, { model: "" }), "grok-sample", /model must be a non-empty string/);
+  assertError(await checkSample(t, { model: "   " }), "grok-sample", /model must be a non-empty string/);
+});
+
 test("created: a date that is not YYYY-MM-DD fails", async (t) => {
   assertError(
     await checkSample(t, { created: "2026/11/24" }),

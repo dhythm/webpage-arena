@@ -1,0 +1,14 @@
+{
+  "id": "glm-lamp",
+  "title": "Fixture glm-lamp",
+  "tagline": "検査用の作品。",
+  "type": "product-lp",
+  "model": "GLM",
+  "tool": "Z.ai",
+  "promptPath": null,
+  "promptNotes": "検査用",
+  "created": "2026-11-24",
+  "thumbnail": null,
+  "legacy": false,
+  "externalOrigins": []
+}

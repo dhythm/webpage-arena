@@ -1,0 +1,14 @@
+{
+  "id": "nomodel-unknown",
+  "title": "Fixture nomodel-unknown",
+  "tagline": "検査用の作品。",
+  "type": "product-lp",
+  "model": "unknown",
+  "tool": "Claude Code",
+  "promptPath": null,
+  "promptNotes": "検査用",
+  "created": "2026-11-24",
+  "thumbnail": null,
+  "legacy": false,
+  "externalOrigins": []
+}

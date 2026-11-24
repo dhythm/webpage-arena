@@ -112,8 +112,9 @@ async function checkMeta(root, site, meta, types) {
   if (isString(meta.type) && !types.has(meta.type))
     errors.push(`type "${meta.type}" is not in site-types.json`);
   if (isString(meta.model) && meta.model.trim()) {
-    const prefix = `${meta.model.toLowerCase()}-`;
-    if (!site.startsWith(prefix)) errors.push(`id must start with "${prefix}"`);
+    const slug = meta.model.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const prefix = `${slug}-`;
+    if (slug && !site.startsWith(prefix)) errors.push(`id must start with "${prefix}"`);
   }
   if ("created" in meta && !(isString(meta.created) && validDate(meta.created)))
     errors.push("created must be YYYY-MM-DD");

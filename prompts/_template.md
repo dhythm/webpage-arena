@@ -1,6 +1,6 @@
 # 全お題に共通の制約
 
-この内容は `prompts/<type>.md` のお題と一緒に、作る側のモデル・ツールへそのまま渡します。お題ごとの指定とこの制約がぶつかるときは、この制約を優先します。
+この内容は `prompts/<type>.md` のお題と一緒に、作る側の AI・ツールへそのまま渡します。お題ごとの指定とこの制約がぶつかるときは、この制約を優先します。
 
 ## 動き方
 
@@ -30,7 +30,7 @@
 
 ## フォルダとファイル
 
-- フォルダ名は `<model の小文字>-<slug>` にする（例：`claude-kakehashi`）。同じお題を別のモデルで作るときは prefix だけ変える（例：`grok-kakehashi`）。
+- フォルダ名は `<制作（meta.json の model）の小文字>-<slug>` にする（例：`claude-kakehashi`）。同じお題を別の制作で作るときは prefix だけ変える（例：`grok-kakehashi`）。
 - Grok で作った作品は必ず `grok-` で始まるフォルダに置く。
 - フォルダには `index.html`・`meta.json`・`thumb.webp` を置く。
 - `meta.json` の `promptPath` には、使ったお題のパス（例：`prompts/saas-lp.md`）を書く。`legacy` は `false`、`externalOrigins` は `[]` にする。

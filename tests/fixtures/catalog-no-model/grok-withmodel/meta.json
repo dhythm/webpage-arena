@@ -1,0 +1,14 @@
+{
+  "id": "grok-withmodel",
+  "title": "Fixture grok-withmodel",
+  "tagline": "検査用の作品。",
+  "type": "product-lp",
+  "model": "Grok",
+  "tool": "Cursor",
+  "promptPath": null,
+  "promptNotes": "検査用",
+  "created": "2026-11-24",
+  "thumbnail": null,
+  "legacy": false,
+  "externalOrigins": []
+}
