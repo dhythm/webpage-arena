@@ -1,0 +1,16 @@
+{
+  "id": "gpt-minatoprint",
+  "title": "港の版画市",
+  "tagline": "潮風と、インクの匂い。",
+  "type": "event",
+  "model": "GPT",
+  "tool": "Codex",
+  "modelVersion": "gpt-6.2-astra",
+  "promptPath": "briefs/local-event.md",
+  "promptNotes": "ジャンルのお題と共通の制約をそのまま使用",
+  "created": "2026-11-26",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": [],
+  "making": "oneshot"
+}
