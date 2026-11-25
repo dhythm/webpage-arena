@@ -1,0 +1,270 @@
+:root {
+  --sea-deep: #17434b;
+  --sea-mid: #3d7a80;
+  --sea-pale: #dcebe8;
+  --paper: #f2f4f1;
+  --ink: #1d2b2c;
+  --ink-soft: #47605f;
+  --tide-mark: #c2502e;
+  --line: #c3d2cc;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans CJK JP", "Yu Gothic", sans-serif;
+  line-height: 1.85;
+  font-size: 16px;
+}
+
+h1, h2, .hero-tagline, .footer-mark, .wordmark {
+  font-family: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", "YuMincho", "Noto Serif CJK JP", serif;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem clamp(1rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--sea-deep);
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.14em;
+}
+.wordmark-wave { width: 30px; height: 15px; }
+
+.site-nav { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
+.site-nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+.site-nav a:hover, .site-nav a:focus-visible { color: var(--sea-deep); text-decoration: underline; }
+
+/* ヒーロー */
+.hero {
+  position: relative;
+  background: var(--sea-pale);
+  overflow: hidden;
+  padding: clamp(2.5rem, 7vw, 5rem) clamp(1rem, 5vw, 3rem) 0;
+}
+.hero-inner { max-width: 44rem; position: relative; z-index: 2; }
+.hero-place {
+  margin: 0 0 0.6rem;
+  color: var(--sea-mid);
+  font-size: 0.95rem;
+  letter-spacing: 0.22em;
+}
+.hero h1 {
+  margin: 0;
+  font-size: clamp(3.4rem, 11vw, 6rem);
+  line-height: 1.1;
+  letter-spacing: 0.12em;
+  color: var(--sea-deep);
+}
+.hero-tagline {
+  margin: 1.1rem 0 0;
+  font-size: clamp(1.25rem, 3.4vw, 1.7rem);
+  line-height: 1.7;
+  color: var(--sea-deep);
+}
+.hero-lead { margin: 1.4rem 0 0; max-width: 38rem; }
+.hero-note { margin: 1rem 0 2.2rem; font-size: 0.85rem; color: var(--ink-soft); }
+
+.hero-tide { display: block; width: 100%; height: clamp(90px, 16vw, 170px); }
+.tide-fill { fill: var(--sea-deep); }
+.tide-line { stroke: var(--sea-mid); stroke-width: 2.5; }
+.tide-dot-high { fill: var(--tide-mark); }
+.tide-dot-low { fill: var(--paper); stroke: var(--tide-mark); stroke-width: 3; }
+
+.hero-tide-labels { position: absolute; inset: auto 0 0 0; height: 0; }
+.hero-tide-labels span {
+  position: absolute;
+  font-size: 0.8rem;
+  color: var(--paper);
+  background: var(--tide-mark);
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+}
+.tide-label-high { left: 24%; bottom: clamp(96px, 17.5vw, 178px); }
+.tide-label-low { left: 56%; bottom: 12px; background: var(--sea-deep); }
+
+/* セクション共通 */
+.section {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: clamp(2.6rem, 6vw, 4.5rem) clamp(1rem, 5vw, 3rem);
+}
+.section-sea {
+  max-width: none;
+  background: var(--sea-deep);
+  color: #eef4f1;
+}
+.section-sea > * { max-width: 68rem; margin-left: auto; margin-right: auto; }
+.section h2 {
+  margin: 0 0 1.4rem;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  letter-spacing: 0.08em;
+  color: var(--sea-deep);
+}
+.section-sea h2 { color: #fff; }
+.section-lead { max-width: 42rem; margin-top: 0; }
+
+/* 宿について */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
+}
+.about-grid p { margin-top: 0; }
+.fact-list { margin: 0; border-top: 1px solid var(--line); }
+.fact-list > div {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.fact-list dt { color: var(--sea-mid); font-weight: 700; font-size: 0.92rem; }
+.fact-list dd { margin: 0; }
+
+/* 過ごし方 */
+.stay-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-top: 1.8rem;
+}
+.stay-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  padding: 1.3rem 1.2rem;
+}
+.stay-card h3 { margin: 0 0 0.2rem; font-size: 1.15rem; }
+.stay-time { margin: 0 0 0.8rem; color: var(--sea-pale); font-size: 0.88rem; letter-spacing: 0.08em; }
+.stay-card p:last-child { margin-bottom: 0; }
+
+/* 潮位ツール */
+.tide-tool {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.4rem;
+  background: #fff;
+  max-width: 42rem;
+}
+.tide-date-label { display: inline-flex; align-items: center; gap: 0.7rem; font-weight: 700; color: var(--sea-deep); }
+.tide-date-label input {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.tide-result { margin-top: 1.1rem; }
+.tide-result table { width: 100%; border-collapse: collapse; }
+.tide-result th, .tide-result td {
+  text-align: left;
+  padding: 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.tide-result .mark-high { color: var(--tide-mark); font-weight: 700; }
+.tide-result .mark-low { color: var(--sea-mid); font-weight: 700; }
+.tide-ferry { margin: 0.9rem 0 0; color: var(--ink-soft); font-size: 0.94rem; }
+
+/* 料金と予約デモ */
+.price-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
+}
+.price-table { width: 100%; border-collapse: collapse; }
+.price-table caption { text-align: left; font-size: 0.88rem; color: var(--sea-pale); padding-bottom: 0.5rem; }
+.price-table th, .price-table td {
+  padding: 0.65rem 0.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  text-align: left;
+  font-weight: 400;
+}
+.price-table td { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.booking-demo {
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 1.4rem;
+  display: grid;
+  gap: 0.9rem;
+}
+.field { display: grid; gap: 0.3rem; }
+.field label { font-weight: 700; font-size: 0.92rem; color: var(--sea-deep); }
+.field select {
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.field-check { gap: 0.4rem; }
+.field-check label { font-weight: 400; color: var(--ink); display: flex; gap: 0.5rem; align-items: center; }
+.booking-total { margin: 0; font-size: 1.05rem; }
+.booking-total strong { font-size: 1.5rem; color: var(--sea-deep); font-variant-numeric: tabular-nums; }
+.booking-button {
+  font: inherit;
+  font-weight: 700;
+  background: var(--sea-deep);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  min-height: 48px;
+}
+.booking-button:hover, .booking-button:focus-visible { background: var(--sea-mid); }
+.booking-output { margin: 0; font-size: 0.94rem; color: var(--ink-soft); white-space: pre-line; }
+
+/* 行き方・FAQ */
+.access-steps { margin: 0; padding-left: 1.4rem; display: grid; gap: 0.7rem; max-width: 44rem; }
+.faq { margin-top: 2.6rem; max-width: 44rem; }
+.faq h3 { color: var(--sea-deep); }
+.faq details { border-top: 1px solid var(--line); padding: 0.8rem 0; }
+.faq details:last-child { border-bottom: 1px solid var(--line); }
+.faq summary { cursor: pointer; font-weight: 700; }
+.faq details p { margin: 0.6rem 0 0.2rem; }
+
+.site-footer {
+  background: var(--ink);
+  color: #cfd8d4;
+  padding: 2.4rem clamp(1rem, 5vw, 3rem) 2.8rem;
+}
+.site-footer > * { max-width: 68rem; margin-left: auto; margin-right: auto; }
+.footer-mark { font-size: 1.6rem; letter-spacing: 0.14em; color: #fff; margin-top: 0; margin-bottom: 0.6rem; }
+.site-footer p { font-size: 0.9rem; }
+
+@media (max-width: 760px) {
+  .about-grid, .price-grid { grid-template-columns: 1fr; }
+  .stay-cards { grid-template-columns: 1fr; }
+  .site-header { position: static; }
+}

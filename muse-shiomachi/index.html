@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>潮待ち｜漣島の一棟貸し（架空の宿）</title>
+<meta name="description" content="潮の満ち引きで滞在の時間が決まる、架空の離島・漣島の一棟貸し「潮待ち」の案内ページです。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="wordmark" href="#top" aria-label="潮待ち トップへ">
+    <svg class="wordmark-wave" viewBox="0 0 32 16" aria-hidden="true"><path d="M1 11 Q 6 4, 11 11 T 21 11 T 31 11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    潮待ち
+  </a>
+  <nav class="site-nav" aria-label="ページ内案内">
+    <a href="#about">宿について</a>
+    <a href="#stay">過ごし方</a>
+    <a href="#tide">潮位と船</a>
+    <a href="#price">料金・予約デモ</a>
+    <a href="#access">行き方</a>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- ヒーロー：潮の曲線が画面を横切る -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <p class="hero-place">架空の離島・漣島（さざなみじま）</p>
+      <h1 id="hero-title">潮待ち</h1>
+      <p class="hero-tagline">潮の満ち引きで、<br>滞在の時間が決まる島の一棟貸し。</p>
+      <p class="hero-lead">漣島へ渡る船は、満潮の前後しか港に入れません。だからこの宿のチェックインは「何時」ではなく「次の満潮」。干潮のあいだは干潟を歩き、満ちてきたら船で沖へ。時計ではなく、潮で一日を組み立てる宿です。</p>
+      <p class="hero-note">※「潮待ち」「漣島」は架空の宿・島です。実在の宿泊施設ではありません。</p>
+    </div>
+    <svg class="hero-tide" viewBox="0 0 1200 180" preserveAspectRatio="none" aria-hidden="true">
+      <path class="tide-fill" d="M0,120 C150,40 300,30 450,80 C600,130 750,170 900,140 C1050,110 1150,60 1200,50 L1200,180 L0,180 Z"/>
+      <path class="tide-line" d="M0,120 C150,40 300,30 450,80 C600,130 750,170 900,140 C1050,110 1150,60 1200,50" fill="none"/>
+      <circle class="tide-dot tide-dot-high" cx="330" cy="38" r="7"/>
+      <circle class="tide-dot tide-dot-low" cx="735" cy="168" r="7"/>
+    </svg>
+    <div class="hero-tide-labels" aria-hidden="true">
+      <span class="tide-label-high">満潮</span>
+      <span class="tide-label-low">干潮</span>
+    </div>
+  </section>
+
+  <section id="about" class="section" aria-labelledby="about-title">
+    <h2 id="about-title">宿について</h2>
+    <div class="about-grid">
+      <div>
+        <p>潮待ちは、漣島の港から坂をひとつ上ったところにある、築90年の網元の家を直した一棟貸しです。泊まれるのは一晩に一組だけ。客室は和室が二間と、板の間の土間。庭の先はすぐ干潟で、朝は鳥の声、夜は波の音だけが聞こえます。</p>
+        <p>テレビはありません。冷蔵庫と小さな台所、薪で沸かす風呂があります。島に店は一軒だけで、夕方には閉まります。到着前に必要なものは、港の売店か、船に乗る前の町で揃えてください。それも含めて、この島の滞在です。</p>
+      </div>
+      <dl class="fact-list">
+        <div><dt>定員</dt><dd>6名まで（一棟貸し・一組限定）</dd></div>
+        <div><dt>建物</dt><dd>築90年の網元の家（和室2間・土間・庭）</dd></div>
+        <div><dt>風呂</dt><dd>薪風呂（夕方に宿主が沸かします）</dd></div>
+        <div><dt>設備</dt><dd>台所・冷蔵庫・洗濯機・自転車2台</dd></div>
+        <div><dt>ないもの</dt><dd>テレビ・電子レンジ・コンビニまでの近道</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="stay" class="section section-sea" aria-labelledby="stay-title">
+    <h2 id="stay-title">潮で決まる過ごし方</h2>
+    <p class="section-lead">同じ一日でも、潮の状態でできることが変わります。宿に着いたら、まず玄関の黒板で今日の潮を確認してください。</p>
+    <div class="stay-cards">
+      <article class="stay-card">
+        <h3>干潮のあいだ</h3>
+        <p class="stay-time">干潟が広がる時間</p>
+        <p>庭の先の干潟を長靴で歩けます。カニとシオマネキ、渡り鳥の群れ。宿で貸す双眼鏡と図鑑で、泥の上の生きものを探すのがこの時間の過ごし方です。干潟の奥の岩場では、小さな磯プールに魚が残ります。</p>
+      </article>
+      <article class="stay-card">
+        <h3>満ちてくる時間</h3>
+        <p class="stay-time">水が戻ってくる時間</p>
+        <p>干潟が少しずつ水に沈み、港に船が戻ってきます。宿主の漁船に乗せてもらう島一周（約40分）はこの時間だけ。夕方の満潮なら、沈む日と昇る月を同時に見ることがあります。</p>
+      </article>
+      <article class="stay-card">
+        <h3>満潮のあいだ</h3>
+        <p class="stay-time">島が一番静かな時間</p>
+        <p>船が出入りし、水面が庭のすぐ下まで来ます。土間で本を読む、薪風呂に浸かる、夜なら縁側で星を見る。何もしないことが予定になる時間です。島の灯台の光が、約10秒に一度、部屋の壁を横切ります。</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="tide" class="section" aria-labelledby="tide-title">
+    <h2 id="tide-title">潮位と船の目安</h2>
+    <p class="section-lead">日付を選ぶと、その日の満潮・干潮の目安と、船の出入りの見通しを表示します。潮位は架空の計算による目安で、実際の航行判断は船会社の案内に従ってください（この島も船会社も架空です）。</p>
+    <div class="tide-tool">
+      <label class="tide-date-label" for="tide-date">日付
+        <input type="date" id="tide-date" value="2026-12-05">
+      </label>
+      <div class="tide-result" id="tide-result" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="price" class="section section-sea" aria-labelledby="price-title">
+    <h2 id="price-title">料金と予約デモ</h2>
+    <p class="section-lead">料金は一棟まるごとの金額です。ここでは予約の流れを試せます。送信や決済は行わず、画面の中で合計と「予約メモ」を表示して終わります。</p>
+    <div class="price-grid">
+      <table class="price-table">
+        <caption>基本料金（架空の料金です）</caption>
+        <tbody>
+          <tr><th scope="row">一棟貸し（4名まで）</th><td>¥38,000／泊</td></tr>
+          <tr><th scope="row">5名目から追加</th><td>¥6,000／名・泊</td></tr>
+          <tr><th scope="row">夕食（島の魚と野菜）</th><td>¥4,500／名</td></tr>
+          <tr><th scope="row">朝食（干物と味噌汁）</th><td>¥1,800／名</td></tr>
+          <tr><th scope="row">島一周の船（満潮時）</th><td>滞在中1回無料</td></tr>
+        </tbody>
+      </table>
+      <form class="booking-demo" id="booking-demo">
+        <div class="field">
+          <label for="bk-nights">泊数</label>
+          <select id="bk-nights">
+            <option value="1">1泊</option>
+            <option value="2" selected>2泊</option>
+            <option value="3">3泊</option>
+            <option value="4">4泊</option>
+            <option value="5">5泊</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="bk-guests">人数</label>
+          <select id="bk-guests">
+            <option value="1">1名</option>
+            <option value="2" selected>2名</option>
+            <option value="3">3名</option>
+            <option value="4">4名</option>
+            <option value="5">5名</option>
+            <option value="6">6名</option>
+          </select>
+        </div>
+        <div class="field field-check">
+          <label><input type="checkbox" id="bk-dinner" checked> 夕食をつける</label>
+          <label><input type="checkbox" id="bk-breakfast" checked> 朝食をつける</label>
+        </div>
+        <p class="booking-total">合計 <strong id="bk-total">¥0</strong></p>
+        <button type="submit" class="booking-button">予約メモを作る（デモ）</button>
+        <p class="booking-output" id="bk-output" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <section id="access" class="section" aria-labelledby="access-title">
+    <h2 id="access-title">行き方</h2>
+    <ol class="access-steps">
+      <li><strong>港町「深浦」まで。</strong>最寄り駅からバスで約25分、深浦港へ（すべて架空の地名です）。</li>
+      <li><strong>船は満潮の前後だけ。</strong>漣島行きの船は、満潮のおおむね1時間前から1時間後までしか港に入れません。一日に出入りできるのは2回だけです。</li>
+      <li><strong>乗り遅れたら。</strong>次の満潮まで約6時間。深浦の待合所で待つか、その日は諦めて町に泊まってください。宿に電話すれば、翌日の潮に合わせて予定を組み直します。</li>
+      <li><strong>島に着いたら。</strong>港から宿まで徒歩7分。荷物は宿の軽トラが運びます。</li>
+    </ol>
+    <div class="faq">
+      <h3>よくある質問</h3>
+      <details>
+        <summary>チェックインの時刻はどう決まりますか</summary>
+        <p>到着する船が港に入れる満潮の時刻が、そのままチェックインの目安です。予約のときに、到着日の潮位と合わせてご案内します（このページの「潮位と船の目安」でも計算できます）。</p>
+      </details>
+      <details>
+        <summary>子ども連れでも泊まれますか</summary>
+        <p>泊まれます。干潟歩きは長靴の貸し出しがあります。ただし島に病院はなく、夜間は船が出ません。小さなお子さん連れの場合は、到着前に体調と相談してください。</p>
+      </details>
+      <details>
+        <summary>雨の日は何をして過ごしますか</summary>
+        <p>土間で網の修理体験（宿主の仕事の手伝い）、蔵書の島の記録を読む、薪風呂。雨の日は潮の音が近くなり、それもこの宿の過ごし方です。</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p class="footer-mark">潮待ち</p>
+  <p>「潮待ち」「漣島」「深浦」は架空の宿・島・町です。料金・潮位・時刻はすべて架空の目安で、実在の施設・航路とは関係ありません。このページは予約を受け付けておらず、フォームはブラウザの中で完結するデモです。</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
