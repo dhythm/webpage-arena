@@ -1,0 +1,16 @@
+{
+  "id": "gpt-saiyodesk",
+  "title": "採用デスク",
+  "tagline": "採用のいまを、ひとつの机に。",
+  "type": "saas-lp",
+  "model": "GPT",
+  "tool": "Codex",
+  "modelVersion": "gpt-6.2-astra",
+  "promptPath": "briefs/recruiting-saas.md",
+  "promptNotes": "ジャンルのお題と共通の制約をそのまま使用",
+  "created": "2026-11-26",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": [],
+  "making": "oneshot"
+}
