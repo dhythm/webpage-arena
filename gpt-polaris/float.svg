@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 480" fill="none">
+<defs>
+ <linearGradient id="water" x2=".85" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#62d3ee"/><stop offset=".28" stop-color="#167caf"/><stop offset=".62" stop-color="#145489"/><stop offset="1" stop-color="#47b7d3"/></linearGradient>
+ <radialGradient id="scoop" cx=".32" cy=".24" r=".88"><stop stop-color="#fff5cf"/><stop offset=".64" stop-color="#e9dab0"/><stop offset="1" stop-color="#aa9677"/></radialGradient>
+ <radialGradient id="fruit" cx=".3" cy=".2" r=".86"><stop stop-color="#fb806a"/><stop offset=".45" stop-color="#d74943"/><stop offset="1" stop-color="#822d3e"/></radialGradient>
+ <pattern id="etch" width="7" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)"><path d="m0 1 2-.5m1 3 2-1" stroke="#756e5d" opacity=".4" stroke-width=".7"/></pattern>
+ <pattern id="fizz" width="41" height="37" patternUnits="userSpaceOnUse" patternTransform="rotate(13)"><g stroke="#d0f7f4"><circle cx="9" cy="8" r="2"/><circle cx="32" cy="20" r="1"/><path d="m17 27 1-2m1-9 1-1"/></g></pattern>
+ <path id="cup" d="M167 203Q164 255 198 307Q221 344 251 354Q277 367 301 354Q352 331 377 260Q383 235 383 203Q305 233 167 203Z"/>
+ <path id="ice" d="M205 196Q197 188 204 178Q201 168 209 158Q211 143 223 134Q229 121 244 117Q260 103 279 108Q300 104 312 115Q332 116 338 132Q353 144 350 156Q362 169 355 180Q364 194 353 200Q341 207 328 201Q315 212 301 205Q288 218 270 208Q255 216 245 205Q228 213 220 202Q208 208 205 196Z"/>
+ <path id="star" d="M0-11Q1-1 8 0Q1 1 0 11Q-1 1-8 0Q-1-1 0-11Z" fill="#dbc78e"/>
+</defs>
+<g stroke="#c2af83" opacity=".5" stroke-width=".8"><ellipse cx="281" cy="236" rx="149" ry="201" transform="rotate(46 281 236)" stroke-dasharray="2 5"/><path d="M72 321C29 292 80 225 196 164S434 78 471 104C511 135 422 216 320 264S106 346 72 321Z"/><path d="m391 51 50 25 44-14"/></g>
+<g fill="#c3b899"><circle cx="391" cy="51" r="2"/><circle cx="441" cy="76" r="2"/><circle cx="485" cy="62" r="2"/></g><use href="#star" transform="translate(95 158) scale(.85)"/><use href="#star" transform="translate(429 276)"/><use href="#star" transform="translate(446 260) scale(.4)"/><use href="#star" transform="translate(161 369) scale(.5)"/>
+<g stroke-linejoin="round" stroke-linecap="round"><ellipse cx="275" cy="424" rx="91" ry="12" fill="#071528" opacity=".55"/><path d="M249 351Q271 369 261 390Q256 401 224 405Q204 410 216 416Q272 434 332 417Q348 409 325 405Q286 400 285 386Q281 368 301 352" fill="#4e7790" stroke="#c6d3d2" stroke-width="2"/><ellipse cx="275" cy="410" rx="57" ry="9" stroke="#d1ded9"/><path d="M268 365Q276 395 252 403M281 367Q276 390 285 394M227 412Q246 420 280 417" stroke="#fff4d5" stroke-width="2"/>
+<use href="#cup" fill="url(#water)" stroke="#dae5dd" stroke-width="2.6"/><use href="#cup" fill="url(#fizz)" opacity=".8"/>
+<g stroke="#d7f1e9" opacity=".82"><path d="M174 211Q175 264 212 309T261 350Q207 319 187 218ZM199 218Q206 288 242 328Q212 285 207 220ZM233 221Q238 274 250 301M367 213Q362 279 324 320Q352 277 359 216ZM339 222Q336 271 315 308M278 229L279 298" fill="#c1e4e3" fill-opacity=".4"/><path d="M202 306Q271 342 346 300M214 322Q274 350 332 317" opacity=".5"/></g>
+<g fill="#b8ebf0" fill-opacity=".22" stroke="#b5e9e7"><path d="m185 202 25-11 21 14-8 23-25 3-14-13Zm1 3 21 8 23-7m-23 7-9 18M323 205l22-13 20 12-6 23-24 5-13-12Zm1 1 16 10 25-11m-25 11-5 16"/></g>
+<ellipse cx="275" cy="201" rx="109" ry="21" fill="#61bfd5" fill-opacity=".35" stroke="#d9e9de" stroke-width="2"/><ellipse cx="275" cy="202" rx="103" ry="16" stroke="#c9f0e7"/>
+<use href="#ice" fill="url(#scoop)" stroke="#e2d5ae" stroke-width="2"/><use href="#ice" fill="url(#etch)"/>
+<g stroke="#85785e" opacity=".62"><path d="M210 180q1-21 20-30m-12 22q3-18 18-24m-5-10q14-17 35-18m-28 13q11-11 25-11m25-6q24 2 38 18m-26-13q13 2 23 12m17 12q8 9 7 17m-16 1q12 8 8 18m-123 11q9 5 15 0m1-8q7 10 17 4m5 9q9 6 16-2m4-11q8 11 22 3m12 8q12-1 15-8m-64-34q6-7 13-7m-26 22q5-6 10-5"/></g>
+<path d="M261 112C246 101 252 78 267 77Q274 73 282 78C302 67 311 88 301 102Q286 123 271 116Z" fill="url(#fruit)" stroke="#f28b72"/><path d="M278 81Q279 54 301 32Q307 27 310 20" stroke="#c2aa77" stroke-width="2.8"/><path d="M261 89q1-6 6-7" stroke="#ffceac" stroke-width="3.5"/><path d="M273 82q7 4 13-2" stroke="#912f31"/>
+</g></svg>
