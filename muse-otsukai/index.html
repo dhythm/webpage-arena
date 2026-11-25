@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>おつかい｜家族の買い物メモ（架空のアプリ）</title>
+<meta name="description" content="「あれ買ってきて」をひとつのメモに。家族で共有する買い物メモアプリ「おつかい」（架空）の紹介ページです。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="wordmark" href="#top" aria-label="おつかい トップへ">
+    <svg class="wordmark-basket" viewBox="0 0 34 26" aria-hidden="true"><path d="M5 9 L10 3 M29 9 L24 3 M3 9 H31 L28.5 23.5 H5.5 Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M12 13 V19 M22 13 V19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    おつかい
+  </a>
+  <nav class="site-nav" aria-label="ページ内案内">
+    <a href="#demo">ためす</a>
+    <a href="#features">できること</a>
+    <a href="#privacy">個人情報</a>
+    <a href="#get">入手案内</a>
+    <a href="#faq">質問</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">「あれ買ってきて」を、<br>ひとつのメモに。</h1>
+      <p class="hero-lead">おつかいは、家族で共有する買い物メモです。たのむ人がメモに書いて、いく人が店でチェックする。メッセージの流れに埋もれず、買い忘れと二重買いをなくすための、ただそれだけのアプリです。</p>
+      <p class="hero-note">※「おつかい」は架空のアプリです。実在のストアでは配布していません。</p>
+      <p class="hero-cta"><a class="cta-button" href="#demo">右の画面でためせます</a></p>
+    </div>
+
+    <!-- 体験デモ：実際に触れる買い物メモ -->
+    <div class="phone" id="demo" aria-label="おつかいの体験デモ">
+      <div class="phone-bar"><span class="phone-app">おつかい</span><span class="phone-list-name">今日の買い物</span></div>
+      <div class="role-switch" role="group" aria-label="役割の切り替え">
+        <button type="button" id="role-ask" class="role-btn is-active" aria-pressed="true">たのむ人</button>
+        <button type="button" id="role-go" class="role-btn" aria-pressed="false">いく人</button>
+      </div>
+      <p class="demo-hint" id="demo-hint">たのむ人：買ってほしいものを足せます。</p>
+      <ul class="memo-list" id="memo-list"></ul>
+      <form class="memo-add" id="memo-add">
+        <label class="sr-only" for="memo-input">買うものを追加</label>
+        <input type="text" id="memo-input" placeholder="例：牛乳 1本" autocomplete="off">
+        <button type="submit">追加</button>
+      </form>
+      <p class="memo-progress" id="memo-progress" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="section problems" aria-labelledby="problems-title">
+    <h2 id="problems-title">買い物の頼みごと、こんなふうに困っていませんか</h2>
+    <div class="problem-grid">
+      <article>
+        <h3>メッセージに埋もれる</h3>
+        <p>「ついでに卵も」が家族の会話の流れに消えて、店に着いた頃には思い出せない。頼んだ側も、伝わったかどうか分からないままです。</p>
+      </article>
+      <article>
+        <h3>同じものを二人が買う</h3>
+        <p>牛乳が切れていることに二人が気づいて、二人が買ってくる。冷蔵庫に牛乳が3本、という笑い話のような無駄が起きます。</p>
+      </article>
+      <article>
+        <h3>「買った？」の確認が手間</h3>
+        <p>買い終わったかどうかを聞くために、またメッセージを送る。答える側もレシートを見ながら打つ。地味に面倒なやり取りです。</p>
+      </article>
+    </div>
+    <p class="problems-answer">おつかいは、この3つだけを解決します。メモは家族でひとつ。チェックがついたら、たのんだ人の画面にもすぐ反映されます。</p>
+  </section>
+
+  <section class="section" id="features" aria-labelledby="features-title">
+    <h2 id="features-title">できること</h2>
+    <div class="feature-list">
+      <article class="feature">
+        <h3>たのむ</h3>
+        <p>買ってほしいものを書くだけ。個数や銘柄は文字で添えられます。「いつもの醤油」のような曖昧な指定も、そのまま書いて大丈夫です。写真を貼る機能はありません。言葉で足りる範囲に絞っています。</p>
+      </article>
+      <article class="feature">
+        <h3>買う</h3>
+        <p>店では大きいチェックボックスを押すだけ。買えたものから消えていくので、残りが一目で分かります。売り場で見つからなかったものは「なかった」と印をつけられます。理由を書く欄はありません。</p>
+      </article>
+      <article class="feature">
+        <h3>分け合う</h3>
+        <p>買い終わったら、合計金額を入れるだけの精算メモが残ります。誰がいくら立て替えたかを家族の中で見返せます。送金や決済の機能はありません。あくまでメモです。</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="privacy" aria-labelledby="privacy-title">
+    <h2 id="privacy-title">個人情報の扱い</h2>
+    <p class="narrow">おつかいにアカウント登録はありません。家族のメモは、招待した家族の端末同士だけで共有されます。買い物の中身を広告に使うことはありませんし、位置情報を集めることもありません。店にいるかどうかは、本人が「買い物中」と押したときだけ家族に伝わります。</p>
+    <p class="narrow">※これは架空のアプリの説明文です。実際のデータの扱いを示すものではありません。</p>
+  </section>
+
+  <section class="section" id="get" aria-labelledby="get-title">
+    <h2 id="get-title">入手案内</h2>
+    <p class="narrow">おつかいは架空のアプリのため、実際のアプリストアでは配布していません。下のボタンはデモで、押すと案内が表示されるだけです。</p>
+    <p class="get-buttons">
+      <button type="button" class="store-btn" data-store="iPhone">iPhone で入手（デモ）</button>
+      <button type="button" class="store-btn" data-store="Android">Android で入手（デモ）</button>
+    </p>
+    <p class="get-output" id="get-output" aria-live="polite"></p>
+  </section>
+
+  <section class="section" id="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">よくある質問</h2>
+    <div class="faq">
+      <details>
+        <summary>家族以外の人とも共有できますか</summary>
+        <p>想定は家族だけです。近所の人や友人との共同購入には向いていません。共有の範囲を狭く保つことが、このアプリの設計です。</p>
+      </details>
+      <details>
+        <summary>レシピや献立の機能はありますか</summary>
+        <p>ありません。買い物メモだけです。献立を考えるアプリは他に良いものがあるので、おつかいは「頼んで、買って、チェックする」に絞っています。</p>
+      </details>
+      <details>
+        <summary>スマートフォンに慣れていない家族でも使えますか</summary>
+        <p>チェックを押す操作だけに絞り、文字は大きめにしています。最初の設定は、慣れている家族が一緒に済ませる想定です。</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p class="footer-mark">おつかい</p>
+  <p>「おつかい」は架空のアプリです。実在のサービス・ストアとは関係ありません。このページのデモはブラウザの中で完結し、入力したメモが外部に送信されることはありません。</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
