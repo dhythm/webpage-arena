@@ -355,6 +355,13 @@ test("prompt: each card without a prompt shows only the short プロンプト未
         assert.doesNotMatch(foot, new RegExp(`<a\\b[^>]*>[^<]*${missingPrompt}`), meta.id);
         assert.doesNotMatch(card, /href="prompts\//, meta.id);
         assert.doesNotMatch(card, /プロンプトを読む|旧お題/, meta.id);
+      } else if (meta.promptPath.startsWith("briefs/")) {
+        const name = meta.promptPath.slice("briefs/".length, -".md".length);
+        const link = `<a href="briefs/${name}.html">お題を読む</a>`;
+        if (meta.making === "oneshot" || meta.making === "refined")
+          assert.equal(foot, `<a href="making/${meta.id}.html">作り方を読む</a>${link}`, meta.id);
+        else assert.ok(foot.startsWith(link), `${meta.id}: ${foot}`);
+        assert.doesNotMatch(card, /プロンプト未収録/, meta.id);
       } else {
         const name = meta.promptPath.slice("prompts/".length, -".md".length);
         const old = `<a href="prompts/${name}.html">旧お題（固定）</a>`;
@@ -1000,22 +1007,31 @@ const makingFixture = {
   "grok-twostep": "ブラッシュアップ（追加の指示1回）",
   "grok-fourstep": "ブラッシュアップ（追加の指示3回）",
 };
-const madeWorks = {
-  "claude-kakehashi": ["カケハシ", "saas-lp", 2],
-  "claude-aodoki": ["青時", "restaurant", 2],
-  "claude-nomamichi": ["のまみち", "app-lp", 1],
-  "claude-minato-fes": ["港暮らしフェス 2027", "event", 1],
-  "claude-kishine": ["岸ねの宿", "inn", 1],
-};
-function assertMakingCard(card, id, badge, prefix) {
+function assertMakingCard(card, id, badge, prefix, anchor) {
   assert.ok(card, id);
   assert.equal(makingRow(card), badge, id);
   const foot = footOf(card);
   assert.equal(foot.match(/<a\b[^>]*>作り方を読む<\/a>/g)?.length ?? 0, 1, `${id}: ${foot}`);
   assert.ok(foot.includes(`<a href="${prefix}making/${id}.html">作り方を読む</a>`), `${id}: ${foot}`);
   assert.doesNotMatch(foot, /プロンプトを読む|プロンプト未収録/, id);
-  assert.match(foot, /<a href="[^"]*prompts\/[a-z-]+\.html">旧お題（固定）<\/a>/, id);
+  if (anchor !== undefined) assert.ok(foot.includes(anchor), `${id}: ${foot}`);
+  else assert.match(foot, /<a href="[^"]*prompts\/[a-z-]+\.html">旧お題（固定）<\/a>/, id);
 }
+// 記録のある作品について、meta と making.md から期待するバッジとお題リンクを導く
+async function makingSteps(root, id) {
+  const text = await readFile(join(root, id, "making.md"), "utf8");
+  return [...text.matchAll(/^\d+\.\s/gm)].length;
+}
+const makingBadge = (meta, steps) =>
+  meta.making === "oneshot" ? "ワンショット" : `ブラッシュアップ（追加の指示${steps - 1}回）`;
+const promptAnchor = (meta, prefix) =>
+  meta.promptPath.startsWith("briefs/")
+    ? `<a href="${prefix}briefs/${meta.promptPath.slice("briefs/".length, -".md".length)}.html">お題を読む</a>`
+    : `<a href="${prefix}prompts/${meta.type}.html">旧お題（固定）</a>`;
+const docPageOf = (out, meta) =>
+  meta.promptPath.startsWith("briefs/")
+    ? briefPage(out, meta.promptPath.slice("briefs/".length, -".md".length))
+    : promptPage(out, meta.type);
 function assertPlainCard(card, id, prompt) {
   assert.ok(card, id);
   assert.equal(makingRow(card), null, id);
@@ -1053,24 +1069,24 @@ test("making cards: unknown with a prompt shows no 作り方 row and keeps プ�
     assertPlainCard(cardIn(await hub(fixture("catalog-basic")), id), id, id.includes("kakehashi"));
 });
 
-test("making cards: the five recorded works show ブラッシュアップ with N 2, 2, 1, 1, 1 and 作り方を読む on top, genre and prompt pages, and the twelve unrecorded works keep 未収録 with no 作り方 row", async (t) => {
+test("making cards: every recorded work shows its badge (ワンショット or ブラッシュアップ with N = steps − 1) and 作り方を読む on top, genre and prompt/brief pages, and the unrecorded works keep 未収録 with no 作り方 row", async (t) => {
   const out = await mkdtemp(join(tmpdir(), "catalog-making-repo-"));
   t.after(() => rm(out, { recursive: true, force: true }));
   await writeGallery(repo, out);
   const top = await readFile(join(out, "index.html"), "utf8");
-  for (const [id, [, type, extra]] of Object.entries(madeWorks)) {
-    const badge = `ブラッシュアップ（追加の指示${extra}回）`;
-    assertMakingCard(cardIn(top, id), id, badge, "");
-    assertMakingCard(cardIn(await genrePage(out, type), id), id, badge, "../../");
-    assertMakingCard(cardIn(await promptPage(out, type), id), id, badge, "../");
+  const recorded = Object.values(await makingWorks(repo));
+  for (const meta of recorded) {
+    const badge = makingBadge(meta, await makingSteps(repo, meta.id));
+    assertMakingCard(cardIn(top, meta.id), meta.id, badge, "", promptAnchor(meta, ""));
+    assertMakingCard(cardIn(await genrePage(out, meta.type), meta.id), meta.id, badge, "../../", promptAnchor(meta, "../../"));
+    assertMakingCard(cardIn(await docPageOf(out, meta), meta.id), meta.id, badge, "../", promptAnchor(meta, "../"));
   }
   const unrecorded = (await metas(repo)).filter((meta) => meta.promptPath === null);
-  assert.equal(unrecorded.length, 12);
   for (const meta of unrecorded) {
     assertPlainCard(cardIn(top, meta.id), meta.id, false);
     assertPlainCard(cardIn(await genrePage(out, meta.type), meta.id), meta.id, false);
   }
-  assert.equal(top.split("作り方を読む").length - 1, 5);
+  assert.equal(top.split("作り方を読む").length - 1, recorded.length);
 });
 
 test("making pages: build writes dist/making/<id>.html only for works with a record, with the 作り方 heading, the disclaimer once, the first step linking to the prompt page, and no HTML comment or folder id", async (t) => {
@@ -1108,21 +1124,25 @@ test("making pages: build writes dist/making/<id>.html only for works with a rec
   await assert.rejects(readdir(join(basic, "making")));
 });
 
-test("making pages: the five recorded works get 作り方 — <title> pages whose first step links to their お題 page", async (t) => {
+test("making pages: every recorded work gets a 作り方 — <title> page whose first step links to its お題 page", async (t) => {
   const out = await mkdtemp(join(tmpdir(), "catalog-making-repo-pages-"));
   t.after(() => rm(out, { recursive: true, force: true }));
   await writeGallery(repo, out);
-  assert.deepEqual((await readdir(join(out, "making"))).sort(), Object.keys(madeWorks).map((id) => `${id}.html`).sort());
-  for (const [id, [title, type, extra]] of Object.entries(madeWorks)) {
-    const page = await readFile(join(out, "making", `${id}.html`), "utf8");
-    assert.equal(page.match(/<h1>([^<]*)<\/h1>/)[1], `作り方 — ${title}`, id);
-    assert.equal(page.split(disclaimer).length - 1, 1, id);
-    assert.doesNotMatch(page, /<!--|根拠/, id);
-    assert.ok(!page.includes(`（${id}）`), id);
+  const recorded = Object.values(await makingWorks(repo));
+  assert.deepEqual((await readdir(join(out, "making"))).sort(), recorded.map((meta) => `${meta.id}.html`).sort());
+  for (const meta of recorded) {
+    const page = await readFile(join(out, "making", `${meta.id}.html`), "utf8");
+    assert.equal(page.match(/<h1>([^<]*)<\/h1>/)[1], `作り方 — ${meta.title}`, meta.id);
+    assert.equal(page.split(disclaimer).length - 1, 1, meta.id);
+    assert.doesNotMatch(page, /<!--|根拠/, meta.id);
+    assert.ok(!page.includes(`（${meta.id}）`), meta.id);
     const list = page.match(/<ol class="steps">([\s\S]*?)<\/ol>/)[1];
-    assert.equal([...list.matchAll(/^\s*<li>/gm)].length, extra + 1, id);
+    assert.equal([...list.matchAll(/^\s*<li>/gm)].length, await makingSteps(repo, meta.id), meta.id);
     const first = list.split(/^\s*<li>/m)[1];
-    assert.match(first, new RegExp(`<a href="\\.\\./prompts/${type}\\.html">お題「[^」]+」</a>を渡した`), id);
+    const href = meta.promptPath.startsWith("briefs/")
+      ? `\\.\\./briefs/${meta.promptPath.slice("briefs/".length, -".md".length)}\\.html`
+      : `\\.\\./prompts/${meta.type}\\.html`;
+    assert.match(first, new RegExp(`<a href="${href}">お題「[^」]+」</a>を渡した`), meta.id);
   }
 });
 
@@ -1180,7 +1200,7 @@ test("links: the built making pages are crawled under /webpage-arena/ with 0 bro
   const repoOut = await built(t, repo, "catalog-making-repo-links-");
   const repoRefs = await missingRefs(repoOut, "/webpage-arena/");
   assert.deepEqual(repoRefs.missing, []);
-  for (const id of Object.keys(madeWorks)) assert.ok(repoRefs.pages.includes(`making/${id}.html`), id);
+  for (const id of Object.keys(await makingWorks(repo))) assert.ok(repoRefs.pages.includes(`making/${id}.html`), id);
 });
 
 const styleRules = (html) =>
@@ -1195,8 +1215,8 @@ async function makingWorks(root) {
   return works;
 }
 
-test("making pages: work link — under the heading, <title>を見る links to ../<id>/ (plus the thumb when there is one), and the target exists in the built dist, for the five works and the fixture", async (t) => {
-  for (const [root, ids] of [[fixture("catalog-making"), Object.keys(makingFixture)], [repo, Object.keys(madeWorks)]]) {
+test("making pages: work link — under the heading, <title>を見る links to ../<id>/ (plus the thumb when there is one), and the target exists in the built dist, for every recorded work and the fixture", async (t) => {
+  for (const [root, ids] of [[fixture("catalog-making"), Object.keys(makingFixture)], [repo, Object.keys(await makingWorks(repo))]]) {
     const out = await built(t, root, "catalog-making-worklink-");
     const works = await makingWorks(root);
     assert.deepEqual(Object.keys(works).sort(), [...ids].sort());
@@ -1231,9 +1251,12 @@ test("making cards: nowrap — the （追加の指示N回） part sits in a whit
   const repoOut = await mkdtemp(join(tmpdir(), "catalog-making-nowrap-repo-"));
   t.after(() => rm(repoOut, { recursive: true, force: true }));
   await writeGallery(repo, repoOut);
+  const repoCases = [];
+  for (const meta of Object.values(await makingWorks(repo)))
+    repoCases.push([repoOut, meta.id, makingBadge(meta, await makingSteps(repo, meta.id))]);
   const cases = [
     ...Object.entries(makingFixture).map(([id, badge]) => [out, id, badge]),
-    ...Object.entries(madeWorks).map(([id, [, , n]]) => [repoOut, id, `ブラッシュアップ（追加の指示${n}回）`]),
+    ...repoCases,
   ];
   for (const [dir, id, badge] of cases) {
     const top = await readFile(join(dir, "index.html"), "utf8");
