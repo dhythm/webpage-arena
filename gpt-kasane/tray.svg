@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 610 460" fill="none">
+ <defs>
+  <pattern id="mesh" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M0 9 9 0" stroke="#adb8e6" stroke-width="1"/></pattern>
+  <linearGradient id="front"><stop stop-color="#b7bafa"/><stop offset="1" stop-color="#dedaff"/></linearGradient>
+ </defs>
+ <g stroke="#2f477a" stroke-width="1.7" stroke-linejoin="round">
+  <path d="m89 311 288 119 178-115-294-117z" fill="url(#mesh)" stroke="none" transform="translate(0 14)"/>
+  <path d="m89 293 168-109 292 118-169 110z" fill="#93b6ee"/>
+  <path d="m89 293 291 119 169-110v20L380 433 89 314z" fill="url(#front)"/><path d="m380 412 0 21 169-111v-20z" fill="#919eea"/>
+  <path d="m90 283 169-108 289 117-169 110z" fill="#edf4ff"/><path d="m90 283 289 119 169-110v10L379 412 90 293z" fill="#ccd9ff"/>
+  <path d="m89 281 0-29 170-110 290 118v32L379 403z" fill="#c8ddff"/>
+  <path d="m89 252 170-110 290 118-171 111z" fill="#aecef7"/>
+  <path d="m106 251 154-98 273 109-156 100z" fill="#e5efff"/><path d="m106 251 154-98 0 11-142 91z" fill="#789cd6"/><path d="m260 153 273 109-11 7-262-105z" fill="#92b2df"/>
+  <path d="m89 252 99 41 5 12 57 23 13-5 116 48v32L89 281z" fill="#b9d7ff"/><path d="m379 371 170-111v32L379 403z" fill="#91aee5"/>
+  <path d="m311 357 45 18v10l-45-18z" fill="#fff"/>
+ </g>
+ <g stroke="#8191b3" stroke-width="1.3" stroke-dasharray="4 6"><path d="M151 137v112M445 102v119M393 204v137M251 48v119"/></g>
+ <g transform="matrix(.99 .4 -.8 .52 254 130)" stroke="#394c77" stroke-linejoin="round">
+  <rect x="0" y="6" width="253" height="174" rx="3" fill="#c5baf3" stroke-width="2"/><rect width="253" height="174" rx="3" fill="#e6ddff" stroke-width="2"/>
+  <text x="18" y="29" fill="#354674" stroke="none" font-family="Arial,sans-serif" font-weight="bold" font-size="15" letter-spacing="2">LEDGER</text>
+  <path d="M17 41h217v111H17zM17 63h217M17 85h217M17 107h217M17 129h217M65 41v111M161 41v111" stroke="#8892bf"/>
+  <path d="M28 75h21m30 0h52m42 0h45M28 97h21m30 0h40m43 22h55" stroke="#7582af" stroke-width="3"/>
+ </g>
+ <g transform="matrix(.99 .4 -.8 .52 251 29)" stroke="#344974" stroke-linejoin="round">
+  <path d="M0 0h231v182l-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4-7 4-7-4z" fill="white" stroke-width="2"/>
+  <text x="16" y="34" fill="#344974" stroke="none" font-family="Arial,sans-serif" font-size="21" font-weight="700" letter-spacing="2">RECEIPT</text><text x="17" y="55" fill="#63708b" stroke="none" font-family="Arial,sans-serif" font-size="10" letter-spacing="1.4">NO. 00128</text>
+  <path d="M17 67h196M17 130h196" stroke="#7b8aa5" stroke-dasharray="4 3"/><path d="M17 82h79m-79 14h99m-99 14h61m100-28h32m-39 14h39m-29 14h29" stroke="#a7b2c5" stroke-width="3.5"/>
+  <text x="17" y="153" fill="#465872" stroke="none" font-family="Arial,sans-serif" font-size="10">TOTAL</text><text x="210" y="157" text-anchor="end" fill="#293e60" stroke="none" font-family="Arial,sans-serif" font-size="23" font-weight="bold">¥12,800</text>
+  <g transform="translate(181 34) rotate(-12)" stroke="#6c5eac"><circle r="22" fill="#f4eeff" stroke-width="2"/><circle r="18"/><path d="m-9 0 7 7L10-8" stroke-width="3"/></g>
+ </g>
+ <g stroke="#677b9e" stroke-width="1.2"><path d="M405 83h55l27-24h83M465 221h46l18-15h58M163 316h-44l-27 26H29"/><g fill="#52688c"><circle cx="405" cy="83" r="2.4"/><circle cx="465" cy="221" r="2.4"/><circle cx="163" cy="316" r="2.4"/></g></g>
+ <g font-family="Arial,sans-serif" font-size="13" fill="#405878"><text x="488" y="51">領収書</text><text x="531" y="198">帳簿</text><text x="30" y="333">照合トレー</text></g>
+</svg>
