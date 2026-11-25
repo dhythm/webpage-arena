@@ -1,0 +1,16 @@
+{
+  "id": "gpt-kasane",
+  "title": "Kasane",
+  "tagline": "領収書と帳簿を、ぴたりと重ねる。",
+  "type": "saas-lp",
+  "model": "GPT",
+  "tool": "Codex",
+  "modelVersion": "gpt-6.2-astra",
+  "promptPath": "briefs/accounting-saas.md",
+  "promptNotes": "ジャンルのお題と共通の制約をそのまま使用",
+  "created": "2026-11-25",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": [],
+  "making": "oneshot"
+}
