@@ -1296,6 +1296,7 @@ test("making pages: link style — links use color: inherit with text-underline-
 const briefSlugs = {
   "accounting-saas": ["経理系SaaS", "saas-lp"],
   "recruiting-saas": ["採用系SaaS", "saas-lp"],
+  campground: ["キャンプ場", "inn"],
   restaurant: ["飲食店", "restaurant"],
   "lifestyle-app": ["生活・移動アプリ", "app-lp"],
   "local-event": ["地域イベント", "event"],
@@ -1336,14 +1337,16 @@ test("briefs: お題を読む on every top row and genre page of the repository 
   }
   assert.equal(groupsOf(top).length, types.size);
   assert.doesNotMatch(withoutCards(top), /href="prompts\/[a-z-]+\.html"/);
+  const briefCountByType = {};
+  for (const [, [, type]] of Object.entries(briefSlugs)) briefCountByType[type] = (briefCountByType[type] ?? 0) + 1;
   for (const [slug, [, type]] of Object.entries(briefSlugs)) {
     const href = odaiHref(groupsOf(top).find((group) => group.key === type).html);
-    if (type === "saas-lp") assert.match(href, /^briefs\/index\.html#type-saas-lp$/);
+    if (briefCountByType[type] > 1) assert.equal(href, `briefs/index.html#type-${type}`, type);
     else assert.equal(href, `briefs/${slug}.html`, type);
   }
 });
 
-test("briefs: the saas-lp destination lists both 経理系SaaS and 採用系SaaS, and the index lists all eight briefs with relative links", async (t) => {
+test("briefs: the saas-lp destination lists both 経理系SaaS and 採用系SaaS, and the index lists all briefs with relative links", async (t) => {
   const out = await mkdtemp(join(tmpdir(), "catalog-briefs-index-"));
   t.after(() => rm(out, { recursive: true, force: true }));
   await writeGallery(repo, out);

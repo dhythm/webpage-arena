@@ -1,0 +1,16 @@
+{
+  "id": "gpt-dune-camp",
+  "title": "砂丘の野営地",
+  "tagline": "海と、砂丘と、ひとつのテント。",
+  "type": "inn",
+  "model": "GPT",
+  "tool": "Codex",
+  "modelVersion": "gpt-6.2-astra",
+  "promptPath": "briefs/campground.md",
+  "promptNotes": "ジャンルのお題と共通の制約をそのまま使用",
+  "created": "2026-11-27",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": [],
+  "making": "oneshot"
+}
