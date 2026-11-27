@@ -1,0 +1,16 @@
+{
+  "id": "gpt-relay",
+  "title": "Relay｜配送ダッシュボード",
+  "tagline": "配送ネットワークの稼働状況を、ひと目で。",
+  "type": "saas-lp",
+  "model": "GPT",
+  "tool": "Codex",
+  "modelVersion": "gpt-6.2-astra",
+  "promptPath": "briefs/dashboard.md",
+  "promptNotes": "ジャンルのお題と共通の制約をそのまま使用",
+  "created": "2026-11-28",
+  "thumbnail": "thumb.webp",
+  "legacy": false,
+  "externalOrigins": [],
+  "making": "oneshot"
+}

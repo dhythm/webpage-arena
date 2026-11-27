@@ -1297,6 +1297,7 @@ const briefSlugs = {
   "accounting-saas": ["経理系SaaS", "saas-lp"],
   "recruiting-saas": ["採用系SaaS", "saas-lp"],
   campground: ["キャンプ場", "inn"],
+  dashboard: ["KPIダッシュボード", "saas-lp"],
   restaurant: ["飲食店", "restaurant"],
   "lifestyle-app": ["生活・移動アプリ", "app-lp"],
   "local-event": ["地域イベント", "event"],
